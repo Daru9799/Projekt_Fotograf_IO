@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QAction, QListWidget, QHBoxLayout, QWidget, QLabel, QVBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QAction, QListWidget, QGridLayout, QWidget, QLabel, QFrame, QVBoxLayout
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 
@@ -8,31 +8,48 @@ class MainView(QMainWindow):
         self.presenter = presenter
 
 ###Na razie lista z plikami, potem będzie tutaj dodawane wszystko co znajduje się w oknie
-        # Główne widgety
-        self.central_widget = QWidget(self)
-        self.setCentralWidget(self.central_widget)
-
         # Layout główny
-        self.layout = QHBoxLayout(self.central_widget)
+        main_layout = QGridLayout()
 
-        # Widget boczny
-        self.sidebar_widget = QWidget(self)
-        self.sidebar_layout = QVBoxLayout(self.sidebar_widget)
+        #Lewy panel (lista plikow, dodatkowe informacje EXIF)
+        left_panel_layout = QVBoxLayout()
+        main_layout.addLayout(left_panel_layout,0,2)
 
-        #Napis lista plików
+        # Napis lista plików
         self.label = QLabel("", self)
-        self.layout.addWidget(self.label)
         self.label.setAlignment(Qt.AlignLeft)
-        self.sidebar_layout.addWidget(self.label)
+        left_panel_layout.addWidget(self.label)
 
         # Lista plików (wymiary na razie na sztywno)
         self.file_list_widget = QListWidget(self)
-        self.file_list_widget.setFixedWidth(200)  # Szerokość listy
-        self.file_list_widget.setFixedHeight(300)  # Wysokość listy
-        self.sidebar_layout.addWidget(self.file_list_widget)
+        left_panel_layout.addWidget(self.file_list_widget)
 
-        #Umieszczenie widgetu bocznego na glownym layoucie i dopasowanie go do prawego górnego rogu
-        self.layout.addWidget(self.sidebar_widget, alignment=Qt.AlignTop | Qt.AlignRight)
+        #Panel srodkowy
+        central_panel_layout = QVBoxLayout()
+        main_layout.addLayout(central_panel_layout,0,1)
+
+        green_frame = QFrame()
+        green_frame.setStyleSheet("background-color: green;")
+        main_layout.addWidget(green_frame)
+
+        #Panel prawy
+        right_panel_layout = QVBoxLayout()
+        main_layout.addLayout(right_panel_layout, 0, 0)
+
+        red_frame = QFrame()
+        red_frame.setStyleSheet("background-color: red;")
+        right_panel_layout.addWidget(red_frame)
+
+        #Rozciaganie paneli
+        main_layout.setColumnStretch(0, 1)  # Lewy panel
+        main_layout.setColumnStretch(1, 4)  # Panel środkowy
+        main_layout.setColumnStretch(2, 1)  # Prawy panel
+
+        #Podpięcie do widgetu
+        widget = QWidget()
+        widget.setLayout(main_layout)
+        self.setCentralWidget(widget)
+
 
 ###Menu górne
         #Tworzenie paska menu
@@ -50,7 +67,7 @@ class MainView(QMainWindow):
 ###Customizacja okna głównego
         self.setWindowTitle('Fotograf')
         self.setWindowIcon(QIcon('img\cameraIcon.png'))  #ikonka w lewym górnym
-        self.setGeometry(100, 100, 800, 600)
+        self.showMaximized()
 
     #metoda do updatowania sobie tekstu z ścieżką folderu po prawej stronie widgetu
     def update_folder_path(self, folderPath):
