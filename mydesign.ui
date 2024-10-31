@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1054</width>
+    <height>713</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Fotograf</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,1,0,1,0,0,0,1,0" columnstretch="1,1,1,1,1">
+    <item row="2" column="1" rowspan="6" colspan="3">
+     <widget class="QGraphicsView" name="graphics_view"/>
+    </item>
+    <item row="3" column="0">
+     <widget class="QPushButton" name="add_class_button">
+      <property name="text">
+       <string>Dodaj klasę</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0">
+     <widget class="QPushButton" name="delete_annotation_button">
+      <property name="text">
+       <string>Usuń adnotację</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4">
+     <widget class="QLabel" name="label_file_list">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Dostępne pliki graficzne:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QPushButton" name="delete_class_button">
+      <property name="text">
+       <string>Usuń klasę</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QListWidget" name="class_list_widget">
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="label_annotation_list">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Lista dodanych adnotacji:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QListWidget" name="annotation_list_widget">
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="4" rowspan="4">
+     <widget class="QListWidget" name="file_list_widget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="2">
+     <widget class="QSlider" name="zoom_image_slider">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_class_list">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Klasy:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QPushButton" name="draw_polygon_button">
+      <property name="text">
+       <string>Rysuj Poligon</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QPushButton" name="draw_rectangle_button">
+      <property name="text">
+       <string>Rysuj Prostokąt</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1054</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="file_menu">
+    <property name="title">
+     <string>Plik</string>
+    </property>
+    <addaction name="new_project_action"/>
+    <addaction name="show_statistics_action"/>
+   </widget>
+   <widget class="QMenu" name="export_menu">
+    <property name="title">
+     <string>Eksportuj</string>
+    </property>
+    <addaction name="export_COCO_action"/>
+    <addaction name="export_YOLO_action"/>
+   </widget>
+   <widget class="QMenu" name="import_menu">
+    <property name="title">
+     <string>Importuj</string>
+    </property>
+    <addaction name="import_COCO_action_2"/>
+    <addaction name="import_YOLO_action_2"/>
+   </widget>
+   <addaction name="file_menu"/>
+   <addaction name="export_menu"/>
+   <addaction name="import_menu"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="new_project_action">
+   <property name="text">
+    <string>Załaduj folder ze zdjęciami</string>
+   </property>
+  </action>
+  <action name="import_COCO_action">
+   <property name="text">
+    <string>Importuj COCO</string>
+   </property>
+  </action>
+  <action name="import_YOLO_action">
+   <property name="text">
+    <string>Importuj YOLO</string>
+   </property>
+  </action>
+  <action name="show_statistics_action">
+   <property name="text">
+    <string>Statystyki</string>
+   </property>
+  </action>
+  <action name="export_COCO_action">
+   <property name="text">
+    <string>Eksportuj do COCO</string>
+   </property>
+  </action>
+  <action name="export_YOLO_action">
+   <property name="text">
+    <string>Eksportuj do YOLO</string>
+   </property>
+  </action>
+  <action name="import_COCO_action_2">
+   <property name="text">
+    <string>Importuj COCO</string>
+   </property>
+  </action>
+  <action name="import_YOLO_action_2">
+   <property name="text">
+    <string>Importuj YOLO</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

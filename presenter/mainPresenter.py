@@ -9,7 +9,7 @@ class Presenter:
 
     #Tworzenie nowego projektu (załadowanie folderu ze zdjęciami)
     def create_new_project(self):
-        folder_path = QFileDialog.getExistingDirectory(self.view, "Wybierz folder ze zdjęciami")
+        folder_path = QFileDialog.getExistingDirectory(self.view.centralwidget.parent(), "Wybierz folder ze zdjęciami")
         if folder_path:
             self.new_project.folderPath = folder_path
             print(f'Wybrano: {self.new_project.folderPath}') #W ramach testów zeby podejrzeć jaką ściezke przesyła
@@ -21,6 +21,7 @@ class Presenter:
         else:
             print("Nie wybrano folderu.")
 
+    #Załadowanie plików do listy
     def load_files(self, folder_path):
         #Czyszczenie poprzedniej listy
         self.view.file_list_widget.clear()
@@ -30,8 +31,7 @@ class Presenter:
             if filename.lower().endswith(('.png', '.jpg', '.jpeg')):  # Tutaj mozna dodac potem wiecej rozszerzen
                 self.view.file_list_widget.addItem(filename)
 
-
-    # Po kliknieciu na prawy panel z plikami uzyskujemy nazwe i wywolujemy odpowiednia funkcje
+    #Zdarzenie po naciśnięciu obrazka na liście
     def folder_list_on_click(self, item):
         file_name = item.text()
         image_path = os.path.join(self.new_project.folderPath, file_name)
