@@ -1,4 +1,6 @@
 import os
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QGraphicsPixmapItem
 
 #Prezenter zarządzający listą plików i interakcjami z nią
 class FileListPresenter:
@@ -22,4 +24,13 @@ class FileListPresenter:
         file_name = item.text()
         image_path = os.path.join(self.project.folder_path, file_name)
         print(image_path)
-        self.view.display_image(image_path)
+        self.display_image(image_path)
+
+    # metoda do wyswietlania obrazka
+    def display_image(self, image_path):
+        pixmap = QPixmap(image_path)
+        if pixmap.isNull():
+            print("Nie udało się załadować obrazu.")
+            return
+        self.view.scene.clear()
+        self.view.scene.addItem(QGraphicsPixmapItem(pixmap))

@@ -161,11 +161,3 @@ class MainView(object):
         self.file_list_widget.itemClicked.connect(lambda item: self.presenter.folder_list_on_click(item)) #klikniecia w liscie z obrazkami
 
 ###Metody
-    #metoda do wyswietlania obrazka
-    def display_image(self, image_path):
-        pixmap = QPixmap(image_path)
-        if pixmap.isNull():
-            print("Nie udało się załadować obrazu.")
-            return
-        self.scene.clear()
-        self.scene.addItem(QGraphicsPixmapItem(pixmap))

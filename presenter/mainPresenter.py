@@ -38,4 +38,3 @@ class Presenter:
     def folder_list_on_click(self, item):
         self.file_list_presenter.show_image(item)
 
-
