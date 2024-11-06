@@ -160,12 +160,7 @@ class MainView(object):
         self.new_project_action.triggered.connect(self.presenter.create_new_project) #załadowanie folderu ze zdjęciami
         self.file_list_widget.itemClicked.connect(lambda item: self.presenter.folder_list_on_click(item)) #klikniecia w liscie z obrazkami
 
-
-
 ###Metody
-    #metoda do updatowania sobie tekstu z ścieżką folderu po prawej stronie widgetu
-    def update_folder_path(self, folderPath):
-        self.label_file_list.setText(f"Obrazy z {folderPath}:")
     #metoda do wyswietlania obrazka
     def display_image(self, image_path):
         pixmap = QPixmap(image_path)
