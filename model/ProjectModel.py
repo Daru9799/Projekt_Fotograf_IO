@@ -9,6 +9,7 @@ class ProjectModel:
 
     #Wczytanie zdjec z folderu, utworzenie obiektow i zapisanie ich na liscie
     def load_images(self):
+        self.list_of_images_model = []
         image_id = 1
         for filename in os.listdir(self.folder_path):
             if filename.endswith(('.png', '.jpg', '.jpeg')):

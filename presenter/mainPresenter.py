@@ -1,15 +1,24 @@
-import os
 from PyQt5.QtWidgets import QFileDialog
-
 #Modele
 from model.ProjectModel import ProjectModel
 from model.ImageModel import ImageModel
 from model.ClassModel import ClassModel
+#Podprezentery
+from presenter.FileListPresenter import FileListPresenter
 
+#Głowny prezenter który jest przekazywany widokowi
 class Presenter:
     def __init__(self, view):
         self.view = view
         self.new_project = ProjectModel(None)
+        # Podprezentery?
+        self.file_list_presenter = FileListPresenter(None)
+
+    #Poniewaz najpierw tworzy sie pusty prezenter aby go przekaza do widoku to po aktualizacji widoku trzeba zakatualizowac podprezentery
+    def update_view(self, view):
+        self.view = view
+        #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
+        self.file_list_presenter.view = view
 
     #Utworzenie nowego projektu, wczytanie danych do modelu
     def create_new_project(self):
@@ -18,23 +27,15 @@ class Presenter:
             self.new_project.folder_path = folder_path
             print(f'Wybrano: {self.new_project.folder_path}') #W ramach testów zeby podejrzeć jaką ściezke przesyła
             self.new_project.load_images() #Zaladowanie zdjec do modelu
-            self.load_files_to_widget() #Wczytanie pliku ze zdjęciami do listy w widoku
+
+            #Lista plików aktualizacja w podprezenterze
+            self.file_list_presenter.update_project(self.new_project)
+            self.file_list_presenter.load_files_to_widget()
         else:
             print("Nie wybrano folderu.")
 
-    #Załadowanie plików do listy po prawej stronie
-    def load_files_to_widget(self):
-        #Czyszczenie poprzedniej listy
-        self.view.file_list_widget.clear()
-        # Załadowanie plików z modelu do listy
-        for img_obj in self.new_project.list_of_images_model:
-            self.view.file_list_widget.addItem(img_obj.filename)
-
-    #Zdarzenie po naciśnięciu obrazka na liście po prawej stronie
+    #Wysylam do podprezentera prosbe o aktualizacje
     def folder_list_on_click(self, item):
-        file_name = item.text()
-        image_path = os.path.join(self.new_project.folder_path, file_name)
-        print(image_path)
-        self.view.display_image(image_path)
+        self.file_list_presenter.show_image(item)
 
 

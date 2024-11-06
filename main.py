@@ -13,6 +13,6 @@ if __name__ == '__main__':
     MainWindow = QtWidgets.QMainWindow()
     ui = MainView()
     ui.setupUi(MainWindow, presenter)
-    presenter.view = ui  # Wstrzyknięcie widoku do prezentera
+    presenter.update_view(ui) #Wstrzyknięcie widoku do prezentera (wlasciwie to jego aktualizacja)
     MainWindow.show()
     sys.exit(app.exec_())
