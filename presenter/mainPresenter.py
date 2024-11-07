@@ -5,6 +5,7 @@ from model.ImageModel import ImageModel
 from model.ClassModel import ClassModel
 #Podprezentery
 from presenter.FileListPresenter import FileListPresenter
+from presenter.ClassManagerPresenter import ClassManagerPresenter
 
 #Głowny prezenter który jest przekazywany widokowi
 class Presenter:
@@ -13,12 +14,14 @@ class Presenter:
         self.new_project = ProjectModel(None)
         # Podprezentery?
         self.file_list_presenter = FileListPresenter(None)
+        self.classManagerPresenter = ClassManagerPresenter(None,self.new_project)
 
     #Poniewaz najpierw tworzy sie pusty prezenter aby go przekaza do widoku to po aktualizacji widoku trzeba zakatualizowac podprezentery
     def update_view(self, view):
         self.view = view
         #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
         self.file_list_presenter.view = view
+        self.classManagerPresenter.view = view
 
     #Utworzenie nowego projektu, wczytanie danych do modelu
     def create_new_project(self):

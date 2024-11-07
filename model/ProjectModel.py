@@ -1,5 +1,10 @@
 import os
+
+from numpy.ma.extras import unique
+
 from model.ImageModel import ImageModel
+from random import randrange
+from model.ClassModel import ClassModel
 
 class ProjectModel:
     def __init__(self, folder_path):
@@ -23,3 +28,19 @@ class ProjectModel:
 
     # def load_classes(self): -> klasa do zaladowania listy klas podczas importu
     #     return 0
+
+    # Obsługa dodawania nowej klasy do listy klas
+    def addNewClass(self, clName):
+        uniqueId = randrange(1000000,9999999)
+        isUnique = False
+        #Generowanie unikatowego id
+        while not isUnique: # <-------------- do testów ta pentla
+            isUnique = True
+            for c in self.list_of_classes_model:
+                if c.class_id == uniqueId:
+                    uniqueId = randrange(1000000,9999999)
+                    isUnique = False
+        newClass = ClassModel(class_id=uniqueId, name=clName) # tworzenie obiektu ClassModel
+        self.list_of_classes_model.append(newClass)
+
+
