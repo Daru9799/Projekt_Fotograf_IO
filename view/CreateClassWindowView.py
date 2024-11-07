@@ -8,7 +8,7 @@ class CreateClassWindowView(object):
         self.presenter = presenter
 
         Add_new_class_window.setObjectName("Add_new_class_window")
-        Add_new_class_window.resize(481, 175)
+        Add_new_class_window.setFixedSize(480, 175)
         font = QtGui.QFont()
         font.setPointSize(9)
         Add_new_class_window.setFont(font)

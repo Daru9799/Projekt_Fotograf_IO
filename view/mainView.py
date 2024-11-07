@@ -11,7 +11,7 @@ class MainView(object):
         ### Wszystko ponizej jest wygenerowane przez QT Designer (w razie potrzeby zmiany designu wystarczy zamienic ten kod)
         MainWindow.setObjectName("MainWindow")
         MainWindow.setEnabled(True)
-        MainWindow.resize(1054, 713)
+        MainWindow.setMinimumSize(1000, 750)
         MainWindow.setAutoFillBackground(False)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
