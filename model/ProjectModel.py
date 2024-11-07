@@ -1,4 +1,5 @@
 import os
+from operator import indexOf
 
 from numpy.ma.extras import unique
 
@@ -34,7 +35,7 @@ class ProjectModel:
         uniqueId = randrange(1000000,9999999)
         isUnique = False
         #Generowanie unikatowego id
-        while not isUnique: # <-------------- do testów ta pentla
+        while not isUnique:
             isUnique = True
             for c in self.list_of_classes_model:
                 if c.class_id == uniqueId:
@@ -43,4 +44,10 @@ class ProjectModel:
         newClass = ClassModel(class_id=uniqueId, name=clName) # tworzenie obiektu ClassModel
         self.list_of_classes_model.append(newClass)
 
-
+    def deleteClass(self, clId): # niedokończone
+        # !!! Trzeba uwzględnić potem usuwanie adnotacji powiązanych z usuniętą klasą
+        classIndex = -1
+        for cl in self.list_of_classes_model:
+            if cl.class_id == clId:
+                classIndex = indexOf(self.list_of_classes_model,cl)
+        self.list_of_classes_model.pop(classIndex)

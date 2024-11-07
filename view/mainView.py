@@ -1,7 +1,10 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QGraphicsPixmapItem, QGraphicsScene
+from PyQt5.QtWidgets import QGraphicsPixmapItem, QGraphicsScene, QListWidgetItem
 import os
+
+from view.CustomClassListItemView import CustomClassListItemView
+
 
 class MainView(object):
     def setupUi(self, MainWindow, presenter):
@@ -126,6 +129,13 @@ class MainView(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        #TESTY -------------------------------------------------------------
+        # item = QListWidgetItem(self.class_list_widget)
+        # self.class_list_widget.addItem(item)
+        # row = CustomClassListItemView("aha")
+        # item.setSizeHint(row.minimumSizeHint())
+        # self.class_list_widget.setItemWidget(item, row)
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Fotograf"))
@@ -158,3 +168,4 @@ class MainView(object):
         self.new_project_action.triggered.connect(self.presenter.create_new_project) #załadowanie folderu ze zdjęciami
         self.file_list_widget.itemClicked.connect(lambda item: self.presenter.folder_list_on_click(item)) #klikniecia w liscie z obrazkami
         self.add_class_button.clicked.connect(self.presenter.classManagerPresenter.openCreateWindow) # Kliknięcie przycisku "Dodaj klasę"
+        self.delete_class_button.clicked.connect(self.presenter.classManagerPresenter.deleteClass)
