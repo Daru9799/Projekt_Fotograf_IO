@@ -1,12 +1,11 @@
 import os
 from operator import indexOf
 
-from numpy.ma.extras import unique
-
 from model.ImageModel import ImageModel
 from random import randrange
 from model.ClassModel import ClassModel
 
+#Model projektu (przechowuje informacji o aktualnie wczytanych obrazkach i klasach)
 class ProjectModel:
     def __init__(self, folder_path):
         self.folder_path = folder_path
@@ -23,8 +22,8 @@ class ProjectModel:
                 img_obj = ImageModel(image_id, filename, 0, 0, None, None)
                 self.list_of_images_model.append(img_obj)
                 image_id+=1
-
-        for img in self.list_of_images_model: #Test
+        #Test w konsoli
+        for img in self.list_of_images_model:
             print(img.filename)
 
     # def load_classes(self): -> klasa do zaladowania listy klas podczas importu
