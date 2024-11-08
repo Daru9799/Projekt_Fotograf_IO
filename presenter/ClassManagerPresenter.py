@@ -9,7 +9,8 @@ class ClassManagerPresenter:
         self.project = project
 
         #Tworzenie widoku
-        self.window = QtWidgets.QMainWindow()
+        self.window = QtWidgets.QDialog(self.view) # Użycie QDialog zamiast QMainWindow() pozwala na zlockowanie głównego widoku
+        self.window.setModal(True)
         self.windowUi = CreateClassWindowView()
         self.windowUi.setupUi(self.window,self)
 
