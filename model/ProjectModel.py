@@ -50,3 +50,11 @@ class ProjectModel:
             if cl.class_id == clId:
                 classIndex = indexOf(self.list_of_classes_model,cl)
         self.list_of_classes_model.pop(classIndex)
+
+    # Podmienia starą klasę na nową
+    def updateClass(self, classObj):
+        for cl in self.list_of_classes_model:
+            if cl.class_id == classObj.class_id:
+                classIndex = indexOf(self.list_of_classes_model,cl)
+                self.list_of_classes_model[classIndex] = classObj
+

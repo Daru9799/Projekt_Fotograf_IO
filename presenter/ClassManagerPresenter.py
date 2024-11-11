@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QFileDialog, QListWidgetItem
+from PyQt5.QtWidgets import QFileDialog, QListWidgetItem, QColorDialog
 from PyQt5 import QtWidgets
 from view.CreateClassWindowView import CreateClassWindowView
 from view.CustomClassListItemView import CustomClassListItemView
@@ -55,3 +55,11 @@ class ClassManagerPresenter:
             row = CustomClassListItemView(cl) # tworzy nowy widok CustomClassListItemView
             item.setSizeHint(row.minimumSizeHint()) # ustawia rozmiar elementu item, aby pasował do minimalnego rozmiaru widoku row
             self.view.class_list_widget.setItemWidget(item, row) # ustawia widok row jako widok wewnętrzny dla item, co pozwala na dostosowany wygląd każdego elementu
+
+    # def updateColorClass(self):
+    #     rgb = QColorDialog.getColor().getRgb()
+    #     # Jeśli nie wybierzemy koloru to rgb będzie miało wartość: (0,0,0,255)
+    #     if rgb == (0, 0, 0, 255):
+    #         return
+    #     self.colorBox.setStyleSheet(
+    #         f"background-color: rgb({rgb[0]},{rgb[1]},{rgb[2]});")
