@@ -52,14 +52,12 @@ class ClassManagerPresenter:
             #Kod służy do stworzenia customowego list itemu
             item = QListWidgetItem(self.view.class_list_widget) # dla każdej klasy cl tworzy nowy obiekt QListWidgetItem i przypisuje go do self.view.class_list_widget
             self.view.class_list_widget.addItem(item) # dodaje element item do widżetu listy
-            row = CustomClassListItemView(cl) # tworzy nowy widok CustomClassListItemView
+            row = CustomClassListItemView(cl,self) # tworzy nowy widok CustomClassListItemView
             item.setSizeHint(row.minimumSizeHint()) # ustawia rozmiar elementu item, aby pasował do minimalnego rozmiaru widoku row
             self.view.class_list_widget.setItemWidget(item, row) # ustawia widok row jako widok wewnętrzny dla item, co pozwala na dostosowany wygląd każdego elementu
 
-    # def updateColorClass(self):
-    #     rgb = QColorDialog.getColor().getRgb()
-    #     # Jeśli nie wybierzemy koloru to rgb będzie miało wartość: (0,0,0,255)
-    #     if rgb == (0, 0, 0, 255):
-    #         return
-    #     self.colorBox.setStyleSheet(
-    #         f"background-color: rgb({rgb[0]},{rgb[1]},{rgb[2]});")
+    # Updejtuje obiekt klasy w ProjectModel
+    def updateColorClass(self, Class, rgba):
+        updatedClass = Class
+        updatedClass.color = (rgba[0],rgba[1],rgba[2])
+        self.project.updateClass(updatedClass)

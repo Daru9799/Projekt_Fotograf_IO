@@ -6,10 +6,11 @@ from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QCheckBox, QColorDialo
 
 
 class CustomClassListItemView(QWidget):
-    def __init__(self, Class, parent=None):
+    def __init__(self, Class,classManagerPresenter ,parent=None):
         super(CustomClassListItemView, self).__init__(parent)
 
         self.Class = Class
+        self.presenter = classManagerPresenter
 
         # Inicjalizacja układu:
         self.row = QHBoxLayout()
@@ -36,16 +37,14 @@ class CustomClassListItemView(QWidget):
 
     def setColor(self):
         rgb = QColorDialog.getColor().getRgb()
+
         # Jeśli nie wybierzemy koloru to rgb będzie miało wartość: (0,0,0,255)
+        # Minusem tego rozwiązanie jest to że nie można zrobić klasy o kolorze czarnym
         if rgb == (0,0,0,255):
             return
         self.colorBox.setStyleSheet(
             f"background-color: rgb({rgb[0]},{rgb[1]},{rgb[2]});")
 
-    def getColor(self):
-        current_style = self.colorBox.styleSheet()
-        match = re.search(r"background-color: rgb\((\d+), (\d+), (\d+)\);", current_style)
-        if match:
-            r, g, b = match.groups()
-            return (r,g,b)
-        return (0,0,0)
+        #Informuje prezentera że trzeba zaktualizwować klasę
+        self.presenter.updateColorClass(self.Class, rgb)
+
