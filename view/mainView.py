@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QGraphicsScene
-
+from PyQt5.QtGui import QMouseEvent
 
 class MainView(object):
     def setupUi(self, MainWindow, presenter):
@@ -287,6 +287,9 @@ class MainView(object):
         self.scene = QGraphicsScene()
         self.graphics_view.setScene(self.scene)
 
+        #Przypisanie sledzenia klikniecia do funkcji
+        self.graphics_view.mousePressEvent = self.mouse_press_event
+
 ###Podpięcia pod akcje (odwolujemy sie do nazw przyciskow, list itd.) wywoluja one odpowiednie funkcje w presenterze
         self.new_project_action.triggered.connect(self.presenter.create_new_project) #załadowanie folderu ze zdjęciami
         self.file_list_widget.itemClicked.connect(lambda item: self.presenter.folder_list_on_click(item)) #klikniecia w liscie z obrazkami
@@ -301,3 +304,7 @@ class MainView(object):
 
     def set_notification_label(self, text):
         self.label_notification.setText(text)
+
+    def mouse_press_event(self, event: QMouseEvent):
+        x, y = event.x(), event.y()
+        self.presenter.handle_mouse_click(x, y) #wywolanie funkcji w prezenterze

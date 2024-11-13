@@ -14,6 +14,7 @@ class Presenter:
         self.view = view
         self.new_project = ProjectModel(None)
         self.drawing_tool = None  # Aktywne narzędzie rysowania (w przypadku braku ustawiamy na None) Dostępne opcje: "rectangle"
+        self.last_click_position = (None, None) #Ostatnie wspolrzedne klikniecia w scenie z obrazkiem
         # Podprezentery?
         self.file_list_presenter = FileListPresenter(None)
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project)
@@ -63,3 +64,18 @@ class Presenter:
         else:
             self.drawing_tool = None
             self.view.set_notification_label("Brak aktywnego narzędzia")
+
+    #Obsluga klikniecia myszy w obszar obrazka
+    def handle_mouse_click(self, x, y):
+        if not self.new_project.list_of_images_model:
+            self.view.set_notification_label("Brak załadowanych obrazów.")
+            self.drawing_tool = None
+            return
+        # Zapisanie współrzędnych kliknięcia
+        self.last_click_position = (x, y)
+        print(f"Współrzędne kliknięcia: x={x}, y={y}")
+        #Tutaj mozna obsłużyć logike jesli chodzi o rysowanie i moze przekazywac to do rectangle presenter?
+        if self.drawing_tool == "rectangle":
+            self.view.set_notification_label(f"Rysowanie prostokąta: {self.last_click_position}")
+        if self.drawing_tool == "polygon":
+            self.view.set_notification_label(f"Rysowanie poligona: {self.last_click_position}")
