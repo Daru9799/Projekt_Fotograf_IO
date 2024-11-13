@@ -267,19 +267,6 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1" colspan="3">
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>220</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
     <item row="17" column="2">
      <widget class="QSlider" name="zoom_image_slider">
       <property name="orientation">
@@ -330,6 +317,18 @@
       </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLabel" name="label_notification">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Brak aktywnego narzędzia</string>
       </property>
      </widget>
     </item>

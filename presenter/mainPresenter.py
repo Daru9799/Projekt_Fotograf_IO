@@ -6,22 +6,26 @@ from model.ClassModel import ClassModel
 #Podprezentery
 from presenter.FileListPresenter import FileListPresenter
 from presenter.ClassManagerPresenter import ClassManagerPresenter
+from presenter.RectanglePresenter import RectanglePresenter
 
 #Głowny prezenter który jest przekazywany widokowi
 class Presenter:
     def __init__(self, view):
         self.view = view
         self.new_project = ProjectModel(None)
+        self.drawing_tool = None  # Aktywne narzędzie rysowania (w przypadku braku ustawiamy na None) Dostępne opcje: "rectangle"
         # Podprezentery?
         self.file_list_presenter = FileListPresenter(None)
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project)
+        self.rectangle_presenter = RectanglePresenter(None)
 
-    #Poniewaz najpierw tworzy sie pusty prezenter aby go przekaza do widoku to po aktualizacji widoku trzeba zakatualizowac podprezentery
+        #Poniewaz najpierw tworzy sie pusty prezenter aby go przekaza do widoku to po aktualizacji widoku trzeba zakatualizowac podprezentery
     def update_view(self, view):
         self.view = view
         #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
         self.file_list_presenter.view = view
         self.classManagerPresenter.view = view
+        self.rectangle_presenter.view = view
 
     #Utworzenie nowego projektu, wczytanie danych do modelu
     def create_new_project(self):
@@ -42,3 +46,20 @@ class Presenter:
     def folder_list_on_click(self, item):
         self.file_list_presenter.show_image(item)
 
+    #Aktywacja bądź dezaktywacja narzędzia rectangle
+    def activate_rectangle_tool(self):
+        if self.drawing_tool != "rectangle":
+            self.drawing_tool = "rectangle"
+            self.view.set_notification_label("Tryb rysowania prostokąta aktywny")
+        else:
+            self.drawing_tool = None
+            self.view.set_notification_label("Brak aktywnego narzędzia")
+
+    # Aktywacja bądź dezaktywacja narzędzia polygon
+    def activate_polygon_tool(self):
+        if self.drawing_tool != "polygon":
+            self.drawing_tool = "polygon"
+            self.view.set_notification_label("Tryb rysowania poligona aktywny")
+        else:
+            self.drawing_tool = None
+            self.view.set_notification_label("Brak aktywnego narzędzia")

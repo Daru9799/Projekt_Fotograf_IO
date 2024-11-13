@@ -11,7 +11,7 @@ class MainView(object):
         ### Wszystko ponizej jest wygenerowane przez QT Designer (w razie potrzeby zmiany designu wystarczy zamienic ten kod)
         MainWindow.setObjectName("MainWindow")
         MainWindow.setEnabled(True)
-        MainWindow.resize(1080, 720)
+        MainWindow.resize(1054, 713)
         MainWindow.setAutoFillBackground(False)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -152,8 +152,6 @@ class MainView(object):
         self.graphics_view.setMinimumSize(QtCore.QSize(0, 0))
         self.graphics_view.setObjectName("graphics_view")
         self.gridLayout_2.addWidget(self.graphics_view, 2, 1, 15, 3)
-        spacerItem2 = QtWidgets.QSpacerItem(220, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridLayout_2.addItem(spacerItem2, 1, 1, 1, 3)
         self.zoom_image_slider = QtWidgets.QSlider(self.centralwidget)
         self.zoom_image_slider.setOrientation(QtCore.Qt.Horizontal)
         self.zoom_image_slider.setObjectName("zoom_image_slider")
@@ -187,6 +185,12 @@ class MainView(object):
         self.class_list_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.class_list_widget.setObjectName("class_list_widget")
         self.gridLayout_2.addWidget(self.class_list_widget, 2, 0, 7, 1)
+        self.label_notification = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.label_notification.setFont(font)
+        self.label_notification.setObjectName("label_notification")
+        self.gridLayout_2.addWidget(self.label_notification, 1, 1, 1, 1)
         self.gridLayout_2.setColumnStretch(0, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -260,6 +264,7 @@ class MainView(object):
         self.draw_polygon_button.setText(_translate("MainWindow", "Rysuj Poligon"))
         self.add_class_button.setText(_translate("MainWindow", "Dodaj klasę"))
         self.delete_class_button.setText(_translate("MainWindow", "Usuń klasę"))
+        self.label_notification.setText(_translate("MainWindow", "Brak aktywnego narzędzia"))
         self.file_menu.setTitle(_translate("MainWindow", "Plik"))
         self.export_menu.setTitle(_translate("MainWindow", "Eksportuj"))
         self.import_menu.setTitle(_translate("MainWindow", "Importuj"))
@@ -286,8 +291,13 @@ class MainView(object):
         self.new_project_action.triggered.connect(self.presenter.create_new_project) #załadowanie folderu ze zdjęciami
         self.file_list_widget.itemClicked.connect(lambda item: self.presenter.folder_list_on_click(item)) #klikniecia w liscie z obrazkami
         self.add_class_button.clicked.connect(self.presenter.classManagerPresenter.openCreateWindow) # Kliknięcie przycisku "Dodaj klasę"
-        self.delete_class_button.clicked.connect(self.presenter.classManagerPresenter.deleteClass)
+        self.delete_class_button.clicked.connect(self.presenter.classManagerPresenter.deleteClass) #Klikniecie przycisku "usun klasę"
+        self.draw_rectangle_button.clicked.connect(self.presenter.activate_rectangle_tool) #Kliknięcie przycisku rysuj prostokąt
+        self.draw_polygon_button.clicked.connect(self.presenter.activate_polygon_tool)  # Kliknięcie przycisku rysuj poligon
 
 ###Funkcje pomocnicze (np. Settery zeby nie grzebac bezposrednio w zmiennych)
     def set_image_size_label(self, text):
         self.label_image_size.setText(text)
+
+    def set_notification_label(self, text):
+        self.label_notification.setText(text)
