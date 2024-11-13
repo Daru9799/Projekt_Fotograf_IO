@@ -1,5 +1,6 @@
 import os
 from operator import indexOf
+from PIL import Image
 
 from model.ImageModel import ImageModel
 from random import randrange
@@ -18,13 +19,18 @@ class ProjectModel:
         image_id = 1
         for filename in os.listdir(self.folder_path):
             if filename.endswith(('.png', '.jpg', '.jpeg')):
-                #Na razie bez ustalenia innych danych poza path i id
-                img_obj = ImageModel(image_id, filename, 0, 0, None, None)
+                # Pelna sciezka
+                file_path = os.path.join(self.folder_path, filename)
+                # wczytanie informacji o rozmiarze zdjecia (wykorzystanie PILLOW)
+                with Image.open(file_path) as img:
+                    img_width, img_height = img.size
+                #Utworzenie obiektu i zapisanie na liscie
+                img_obj = ImageModel(image_id, filename, img_width, img_height, None, None)
                 self.list_of_images_model.append(img_obj)
                 image_id+=1
         #Test w konsoli
         for img in self.list_of_images_model:
-            print(img.filename)
+            print(str(img.image_id) + "; " + img.filename +  "; " + str(img.width) +  "; " + str(img.height))
 
     # def load_classes(self): -> klasa do zaladowania listy klas podczas importu
     #     return 0
@@ -57,4 +63,12 @@ class ProjectModel:
             if cl.class_id == classObj.class_id:
                 classIndex = indexOf(self.list_of_classes_model,cl)
                 self.list_of_classes_model[classIndex] = classObj
+
+    ### Gettery do list
+    # Zwrócenie obrazu na podstawie nazwy pliku
+    def get_img_by_filename(self, filename):
+        for img_obj in self.list_of_images_model:
+            if img_obj.filename == filename:
+                return img_obj
+        return None  # Jeśli nie znaleziono obrazu o podanej nazwie zwroci None
 

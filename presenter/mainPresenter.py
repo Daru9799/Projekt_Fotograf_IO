@@ -35,6 +35,7 @@ class Presenter:
             self.file_list_presenter.update_project(self.new_project)
             self.file_list_presenter.load_files_to_widget()
         else:
+            #Mozna to potem jakos obsluzyc i gdzies wyswietlac (moze tam gdzie info o rozmiarze?)
             print("Nie wybrano folderu.")
 
     #Wysylam do podprezentera prosbe o aktualizacje

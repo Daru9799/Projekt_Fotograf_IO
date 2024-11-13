@@ -1,9 +1,6 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QGraphicsPixmapItem, QGraphicsScene, QListWidgetItem
-import os
-
-from view.CustomClassListItemView import CustomClassListItemView
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QGraphicsScene
 
 
 class MainView(object):
@@ -14,7 +11,7 @@ class MainView(object):
         ### Wszystko ponizej jest wygenerowane przez QT Designer (w razie potrzeby zmiany designu wystarczy zamienic ten kod)
         MainWindow.setObjectName("MainWindow")
         MainWindow.setEnabled(True)
-        MainWindow.setMinimumSize(1000, 750)
+        MainWindow.resize(1054, 713)
         MainWindow.setAutoFillBackground(False)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -78,6 +75,12 @@ class MainView(object):
         self.draw_rectangle_button = QtWidgets.QPushButton(self.centralwidget)
         self.draw_rectangle_button.setObjectName("draw_rectangle_button")
         self.gridLayout_2.addWidget(self.draw_rectangle_button, 1, 2, 1, 1)
+        self.label_image_size = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(11)
+        self.label_image_size.setFont(font)
+        self.label_image_size.setObjectName("label_image_size")
+        self.gridLayout_2.addWidget(self.label_image_size, 8, 1, 1, 1)
         self.gridLayout_2.setColumnStretch(0, 1)
         self.gridLayout_2.setColumnStretch(1, 1)
         self.gridLayout_2.setColumnStretch(2, 1)
@@ -88,7 +91,7 @@ class MainView(object):
         self.gridLayout_2.setRowStretch(7, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1054, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1054, 26))
         self.menubar.setObjectName("menubar")
         self.file_menu = QtWidgets.QMenu(self.menubar)
         self.file_menu.setObjectName("file_menu")
@@ -116,8 +119,14 @@ class MainView(object):
         self.import_COCO_action_2.setObjectName("import_COCO_action_2")
         self.import_YOLO_action_2 = QtWidgets.QAction(MainWindow)
         self.import_YOLO_action_2.setObjectName("import_YOLO_action_2")
+        self.save_project_action = QtWidgets.QAction(MainWindow)
+        self.save_project_action.setObjectName("save_project_action")
+        self.save_as_new_project_action = QtWidgets.QAction(MainWindow)
+        self.save_as_new_project_action.setObjectName("save_as_new_project_action")
         self.file_menu.addAction(self.new_project_action)
         self.file_menu.addAction(self.show_statistics_action)
+        self.file_menu.addAction(self.save_project_action)
+        self.file_menu.addAction(self.save_as_new_project_action)
         self.export_menu.addAction(self.export_COCO_action)
         self.export_menu.addAction(self.export_YOLO_action)
         self.import_menu.addAction(self.import_COCO_action_2)
@@ -147,6 +156,7 @@ class MainView(object):
         self.label_class_list.setText(_translate("MainWindow", "Klasy:"))
         self.draw_polygon_button.setText(_translate("MainWindow", "Rysuj Poligon"))
         self.draw_rectangle_button.setText(_translate("MainWindow", "Rysuj Prostokąt"))
+        self.label_image_size.setText(_translate("MainWindow", "Brak aktywnego obrazu"))
         self.file_menu.setTitle(_translate("MainWindow", "Plik"))
         self.export_menu.setTitle(_translate("MainWindow", "Eksportuj"))
         self.import_menu.setTitle(_translate("MainWindow", "Importuj"))
@@ -158,8 +168,13 @@ class MainView(object):
         self.export_YOLO_action.setText(_translate("MainWindow", "Eksportuj do YOLO"))
         self.import_COCO_action_2.setText(_translate("MainWindow", "Importuj COCO"))
         self.import_YOLO_action_2.setText(_translate("MainWindow", "Importuj YOLO"))
+        self.save_project_action.setText(_translate("MainWindow", "Zapisz"))
+        self.save_as_new_project_action.setText(_translate("MainWindow", "Zapisz jako plik projektowy"))
 
 ################################### Koniec generowania
+        #Ustawienie ikonek
+        MainWindow.setWindowIcon(QIcon("img/cameraIcon.png"))
+
         # Tworzenie sceny (pod obrazek zeby mozna bylo go wstawic)
         self.scene = QGraphicsScene()
         self.graphics_view.setScene(self.scene)
@@ -169,3 +184,7 @@ class MainView(object):
         self.file_list_widget.itemClicked.connect(lambda item: self.presenter.folder_list_on_click(item)) #klikniecia w liscie z obrazkami
         self.add_class_button.clicked.connect(self.presenter.classManagerPresenter.openCreateWindow) # Kliknięcie przycisku "Dodaj klasę"
         self.delete_class_button.clicked.connect(self.presenter.classManagerPresenter.deleteClass)
+
+###Funkcje pomocnicze (np. Settery zeby nie grzebac bezposrednio w zmiennych)
+    def set_image_size_label(self, text):
+        self.label_image_size.setText(text)

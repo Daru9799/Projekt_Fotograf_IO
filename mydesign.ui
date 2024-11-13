@@ -132,6 +132,18 @@
       </property>
      </widget>
     </item>
+    <item row="8" column="1">
+     <widget class="QLabel" name="label_image_size">
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Brak aktywnego obrazu</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -140,7 +152,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu">
@@ -149,6 +161,8 @@
     </property>
     <addaction name="new_project_action"/>
     <addaction name="show_statistics_action"/>
+    <addaction name="save_project_action"/>
+    <addaction name="save_as_new_project_action"/>
    </widget>
    <widget class="QMenu" name="export_menu">
     <property name="title">
@@ -207,6 +221,16 @@
   <action name="import_YOLO_action_2">
    <property name="text">
     <string>Importuj YOLO</string>
+   </property>
+  </action>
+  <action name="save_project_action">
+   <property name="text">
+    <string>Zapisz</string>
+   </property>
+  </action>
+  <action name="save_as_new_project_action">
+   <property name="text">
+    <string>Zapisz jako plik projektowy</string>
    </property>
   </action>
  </widget>

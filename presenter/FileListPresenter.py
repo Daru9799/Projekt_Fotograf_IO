@@ -2,6 +2,8 @@ import os
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtCore import QRectF
+from spyder.plugins.help.utils.conf import project
+
 
 #Prezenter zarządzający listą plików i interakcjami z nią
 class FileListPresenter:
@@ -19,6 +21,16 @@ class FileListPresenter:
         # Załadowanie plików z modelu do listy
         for img_obj in self.project.list_of_images_model:
             self.view.file_list_widget.addItem(img_obj.filename)
+        # Zaznaczenie pierwszego pliku, jeśli lista nie jest pusta
+        if self.view.file_list_widget.count() > 0:
+            first_item = self.view.file_list_widget.item(0)
+            self.view.file_list_widget.setCurrentItem(first_item)
+            # Wywołanie metody do wyświetlenia pierwszego obrazu
+            self.show_image(first_item)
+        else:
+            self.view.set_image_size_label("Brak aktywnego obrazu") #Aktualizacja label z informacjami o wielkosci na Brak aktywnego obrazu
+            self.view.scene.clear()
+
 
     # Zdarzenie po naciśnięciu obrazka na liście po prawej stronie
     def show_image(self, item):
@@ -27,6 +39,12 @@ class FileListPresenter:
         print(image_path)
         self.display_image(image_path)
         self.apply_zooming(0.7) # minimalna wielkosc obrazka (70% orginału)
+        #Aktualizacja label z informacjami o wielkosci
+        active_image = self.project.get_img_by_filename(file_name)
+        if active_image is not None:
+            self.view.set_image_size_label(str(active_image.width) + "x" + str(active_image.height))
+        else:
+            self.view.set_image_size_label("Wystapily problemy")
     #
     # # metoda do wyswietlania obrazka
     # def display_image(self, image_path):
