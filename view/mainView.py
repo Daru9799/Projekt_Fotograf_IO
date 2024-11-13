@@ -7,6 +7,7 @@ class MainView(object):
     def setupUi(self, MainWindow, presenter):
         super().__init__()
         self.presenter = presenter
+        self.pixmap_item = None
 
         ### Wszystko ponizej jest wygenerowane przez QT Designer (w razie potrzeby zmiany designu wystarczy zamienic ten kod)
         MainWindow.setObjectName("MainWindow")
@@ -310,8 +311,13 @@ class MainView(object):
         self.label_notification.setText(text)
 
     def mouse_press_event(self, event: QMouseEvent):
-        x, y = event.x(), event.y()
-        self.presenter.handle_mouse_click(x, y) #wywolanie funkcji w prezenterze
+        scene_pos = self.graphics_view.mapToScene(event.pos())
+        if self.pixmap_item:
+            image_pos = self.pixmap_item.mapFromScene(scene_pos)
+            x, y = image_pos.x(), image_pos.y()
+            self.presenter.handle_mouse_click(x, y)  # Wywołanie funkcji w prezenterze z współrzędnymi obrazka
+        else:
+            print("No image loaded.")
 
     #Zmiana kursora gdy jesteśmy w obszarze obrazka
     def enter_event(self, event: QtCore.QEvent):

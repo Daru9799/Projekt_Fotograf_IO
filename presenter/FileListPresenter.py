@@ -67,12 +67,9 @@ class FileListPresenter:
             print("Image loaded successfully!")
 
             self.view.scene.clear()
-            self.view.scene.addItem(QGraphicsPixmapItem(pixmap))
 
-
-
-            pixmap_item = QGraphicsPixmapItem(pixmap)
-            self.view.scene.addItem(pixmap_item)
+            self.view.pixmap_item = QGraphicsPixmapItem(pixmap)
+            self.view.scene.addItem(self.view.pixmap_item)
 
             # Ustawienie sceny na rozmiar obrazka
             scene_rect = QRectF(pixmap.rect())  # Konwertowanie QRect na QRectF

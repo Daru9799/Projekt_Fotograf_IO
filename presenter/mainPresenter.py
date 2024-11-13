@@ -67,10 +67,6 @@ class Presenter:
 
     #Obsluga klikniecia myszy w obszar obrazka
     def handle_mouse_click(self, x, y):
-        if not self.new_project.list_of_images_model:
-            self.view.set_notification_label("Brak załadowanych obrazów.")
-            self.drawing_tool = None
-            return
         # Zapisanie współrzędnych kliknięcia
         self.last_click_position = (x, y)
         print(f"Współrzędne kliknięcia: x={x}, y={y}")
