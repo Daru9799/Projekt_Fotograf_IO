@@ -80,6 +80,7 @@ class Presenter:
             if self.start_point == (None, None):
                 self.start_point = (x, y)
                 self.view.set_notification_label(f"Rysowanie prostokąta. Wybrano punkt początkowy {int(x)}, {int(y)}. Proszę wybrać punkt końcowy")
+                self.rectangle_presenter.draw_first_point(x, y)
             else:
                 self.view.set_notification_label(f"Pomyślnie narysowano prostokąt!")
                 self.rectangle_presenter.draw_rectangle(self.start_point[0], self.start_point[1], x, y)
