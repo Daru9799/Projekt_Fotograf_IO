@@ -30,7 +30,7 @@ class Presenter:
 
     def update_view(self, view):
         self.view = view
-        self.file_list_presenter.view=view
+       # self.file_list_presenter.view=view
         self.file_list_presenter.update_view(view)
         self.classManagerPresenter.view = view
         self.rectangle_presenter.view = view

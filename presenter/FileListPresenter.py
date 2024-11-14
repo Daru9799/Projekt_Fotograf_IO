@@ -2,55 +2,42 @@ import os
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtCore import QRectF
-# from spyder.plugins.help.utils.conf import project
 
-
-#Prezenter zarządzający listą plików i interakcjami z nią
+# Prezenter zarządzający listą plików i interakcjami z nią
 class FileListPresenter:
     def __init__(self, view):
         self.view = view
         self.project = None
 
+    # Metoda aktualizująca widok
     def update_view(self, view):
         self.view = view
-        # Dodanie połączenia po tym, jak widok został zaktualizowany
         if self.view and self.view.zoom_image_slider:
+            # Ustawienie zakresu wartości suwaka zoomu (od 10% do 300%)
+            self.view.zoom_image_slider.setRange(10, 300)
+            # Ustawienie początkowej wartości suwaka na 70%
+            self.view.zoom_image_slider.setValue(70)
+            # Połączenie suwaka z metodą obsługi zmiany wartości
             self.view.zoom_image_slider.valueChanged.connect(self.on_zoom_slider_changed)
 
     def update_project(self, project):
         self.project = project
 
-    # Załadowanie plików do listy po prawej stronie
     def load_files_to_widget(self):
-        # Czyszczenie poprzedniej listy
+        # Czyszczenie poprzedniej listy plików
         self.view.file_list_widget.clear()
         # Załadowanie plików z modelu do listy
         for img_obj in self.project.list_of_images_model:
             self.view.file_list_widget.addItem(img_obj.filename)
-        # Zaznaczenie pierwszego pliku, jeśli lista nie jest pusta
+        # Zaznaczenie pierwszego pliku na liście, jeśli lista nie jest pusta
         if self.view.file_list_widget.count() > 0:
             first_item = self.view.file_list_widget.item(0)
             self.view.file_list_widget.setCurrentItem(first_item)
-            # Wywołanie metody do wyświetlenia pierwszego obrazu
             self.show_image(first_item)
         else:
-            self.view.set_image_size_label("Brak aktywnego obrazu") #Aktualizacja label z informacjami o wielkosci na Brak aktywnego obrazu
+            # Aktualizacja etykiety informacyjnej na brak aktywnego obrazu
+            self.view.set_image_size_label("Brak aktywnego obrazu")
             self.view.scene.clear()
-
-
-    # Zdarzenie po naciśnięciu obrazka na liście po prawej stronie
-    # def show_image(self, item):
-    #     file_name = item.text()
-    #     image_path = os.path.join(self.project.folder_path, file_name)
-    #     print(image_path)
-    #     self.display_image(image_path)
-    #     self.apply_zooming(0.7) # minimalna wielkosc obrazka (70% orginału)
-    #     #Aktualizacja label z informacjami o wielkosci
-    #     active_image = self.project.get_img_by_filename(file_name)
-    #     if active_image is not None:
-    #         self.view.set_image_size_label(str(active_image.width) + "x" + str(active_image.height))
-    #     else:
-    #         self.view.set_image_size_label("Wystapily problemy")
 
     def show_image(self, item):
         file_name = item.text()
@@ -58,22 +45,29 @@ class FileListPresenter:
         print(image_path)
         self.display_image(image_path)
 
-        # Znajdź obraz w projekcie i ustaw zoom
+        # Wyszukiwanie obrazu w projekcie
         active_image = self.project.get_img_by_filename(file_name)
         if active_image is not None:
+            # Aktualizacja etykiety z informacjami o rozmiarze obrazu
             self.view.set_image_size_label(f"{active_image.width}x{active_image.height}")
-            initial_zoom_value = active_image.zoom  # Użyj atrybutu zoom z modelu obrazu
+
+            # Sprawdzenie, czy zoom został już ustawiony; jeśli nie, ustaw na 70%
+            if not hasattr(active_image, 'zoom') or active_image.zoom is None:
+                active_image.zoom = 0.7
+
+            # Użycie aktualnej wartości zoomu (czy to nowej, czy już istniejącej)
+            initial_zoom_value = active_image.zoom
         else:
+            # W przypadku problemów z obrazem ustawienie wartości domyślnej zoomu
             self.view.set_image_size_label("Wystąpiły problemy")
-            initial_zoom_value = 0.7  # Jeśli nie udało się znaleźć obrazu, ustaw zoom na 100%
+            initial_zoom_value = 0.7
 
-        # Zaktualizowanie wartości suwaka
-        self.view.zoom_image_slider.setValue(initial_zoom_value * 300)  # Przekształć na procenty (0-100)
+        # Aktualizacja wartości suwaka, aby odzwierciedlić aktualny poziom zoomu w procentach
+        self.view.zoom_image_slider.setValue(int(initial_zoom_value * 100))
 
-        # Wywołanie zoomowania z początkową wartością
-        self.apply_zooming(initial_zoom_value)  # Używamy zoomu z modelu obrazu
+        self.apply_zooming(initial_zoom_value)
 
-    def display_image(self, image_path): # niedokonczona
+    def display_image(self, image_path):
         try:
             print(f"Loading image from path: {image_path}")
             pixmap = QPixmap(image_path)
@@ -84,55 +78,40 @@ class FileListPresenter:
 
             print("Image loaded successfully!")
 
+            # Czyszczenie sceny przed dodaniem nowego obrazu
             self.view.scene.clear()
 
+            # Utworzenie elementu graficznego obrazu
             self.view.pixmap_item = QGraphicsPixmapItem(pixmap)
             self.view.scene.addItem(self.view.pixmap_item)
 
-            # Ustawienie sceny na rozmiar obrazka
-            scene_rect = QRectF(pixmap.rect())  # Konwertowanie QRect na QRectF
+            # Ustawienie rozmiaru sceny na rozmiar obrazka
+            scene_rect = QRectF(pixmap.rect())
             print(f"Setting scene rect: {scene_rect}")
             self.view.graphics_view.setSceneRect(scene_rect)
 
-
-            # Resetowanie poprzednich transformacji
             self.view.graphics_view.resetTransform()
 
         except Exception as e:
             print(f"Error while displaying image: {e}")
 
-    # def apply_zooming(self,value): # niedokonczona
-    #     scale_factor = max(self.view.zoom_image_slider.value() / 30, value)  #im wieksza liczba tym mniej skaluje się obrazek
-    #     print(f"Applying zoom: {scale_factor}")  # Logowanie poziomu zoomu
-    #     self.view.graphics_view.scale(scale_factor, scale_factor)
-
     def apply_zooming(self, zoom_value):
         try:
-            # Resetowanie transformacji przed zastosowaniem nowego współczynnika skalowania
             self.view.graphics_view.resetTransform()
 
             # Zastosowanie nowego skalowania
             self.view.graphics_view.scale(zoom_value, zoom_value)
 
-            print(f"Applied zoom: scale_factor={zoom_value}")  # Logowanie dla celów diagnostycznych
+            print(f"Applied zoom: scale_factor={zoom_value}")
         except Exception as e:
             print(f"Error in apply_zooming: {e}")
 
-    # def on_zoom_slider_changed(self):
-    #     zoom_value = self.view.zoom_image_slider.value() / 30  # Dopasowanie wartości zoomu
-    #     self.apply_zooming(zoom_value)
-
     def on_zoom_slider_changed(self):
-        # Pobierz wartość suwaka (zakładając, że suwak ma zakres od 0 do 100)
-        zoom_value = self.view.zoom_image_slider.value() / 30.0  # Zamiana na wartość między 0 a 1
+        zoom_value = self.view.zoom_image_slider.value() / 100.0  # Przekształcenie wartości na zakres od 0.1 do 3.0
 
-        # Zaktualizowanie zoomu w modelu
+        # Aktualizacja zoomu w modelu obrazu
         active_image = self.project.get_img_by_filename(self.view.file_list_widget.currentItem().text())
         if active_image is not None:
             active_image.zoom_change(zoom_value)
 
-        # Zastosowanie nowego zoomu
         self.apply_zooming(zoom_value)
-
-
-
