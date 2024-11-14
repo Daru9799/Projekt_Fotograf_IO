@@ -14,7 +14,7 @@ class Presenter:
         self.view = view
         self.new_project = ProjectModel(None)
         self.drawing_tool = None  # Aktywne narzędzie rysowania (w przypadku braku ustawiamy na None) Dostępne opcje: "rectangle"
-        self.last_click_position = (None, None) #Ostatnie wspolrzedne klikniecia w scenie z obrazkiem
+        self.start_point = (None, None) #Punkt początkowy (potrzebne do rectangle)
         # Podprezentery?
         self.file_list_presenter = FileListPresenter(None)
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project)
@@ -72,13 +72,18 @@ class Presenter:
             self.drawing_tool = None
             self.view.set_notification_label("Brak aktywnego narzędzia")
 
-    #Obsluga klikniecia myszy w obszar obrazka
+    #Obsluga klikniecia myszy w obszar obrazka (dostaje współrzędne kliknięcia x i y)
     def handle_mouse_click(self, x, y):
-        # Zapisanie współrzędnych kliknięcia
-        self.last_click_position = (x, y)
         print(f"Współrzędne kliknięcia: x={x}, y={y}")
         #Tutaj mozna obsłużyć logike jesli chodzi o rysowanie i moze przekazywac to do rectangle presenter?
         if self.drawing_tool == "rectangle":
-            self.view.set_notification_label(f"Rysowanie prostokąta: {self.last_click_position}")
+            if self.start_point == (None, None):
+                self.start_point = (x, y)
+                self.view.set_notification_label(f"Rysowanie prostokąta. Wybrano punkt początkowy {int(x)}, {int(y)}. Proszę wybrać punkt końcowy")
+            else:
+                self.view.set_notification_label(f"Pomyślnie narysowano prostokąt!")
+                self.rectangle_presenter.draw_rectangle(self.start_point[0], self.start_point[1], x, y)
+                self.start_point = (None, None)
         if self.drawing_tool == "polygon":
-            self.view.set_notification_label(f"Rysowanie poligona: {self.last_click_position}")
+            self.view.set_notification_label(f"Rysowanie poligona: ")
+
