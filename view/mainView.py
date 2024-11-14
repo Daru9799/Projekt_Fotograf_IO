@@ -10,7 +10,6 @@ class MainView(object):
         super().__init__()
         self.presenter = presenter
         self.pixmap_item = None #zmienna przechowująca referencje do aktualnego zdjęcia
-        self.temp_rectangle_item = None #referencja to rysowanego rectangle
 
         ### Wszystko ponizej jest wygenerowane przez QT Designer (w razie potrzeby zmiany designu wystarczy zamienic ten kod)
         MainWindow.setObjectName("MainWindow")
