@@ -21,10 +21,17 @@ class Presenter:
         self.rectangle_presenter = RectanglePresenter(None)
 
         #Poniewaz najpierw tworzy sie pusty prezenter aby go przekaza do widoku to po aktualizacji widoku trzeba zakatualizowac podprezentery
+    # def update_view(self, view):
+    #     self.view = view
+    #     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
+    #     self.file_list_presenter.view = view
+    #     self.classManagerPresenter.view = view
+    #     self.rectangle_presenter.view = view
+
     def update_view(self, view):
         self.view = view
-        #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
-        self.file_list_presenter.view = view
+        self.file_list_presenter.view=view
+        self.file_list_presenter.update_view(view)
         self.classManagerPresenter.view = view
         self.rectangle_presenter.view = view
 
