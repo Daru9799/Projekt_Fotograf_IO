@@ -297,6 +297,13 @@ class MainView(object):
         self.graphics_view.enterEvent = self.enter_event
         self.graphics_view.leaveEvent = self.leave_event
 
+        #ZOOM
+        # Ustawienie zakresu wartości suwaka zoomu (od 10% do 300%)
+        self.zoom_image_slider.setRange(10, 300)
+        # Ustawienie początkowej wartości suwaka na 70%
+        self.zoom_image_slider.setValue(70)
+
+
 ###Podpięcia pod akcje (odwolujemy sie do nazw przyciskow, list itd.) wywoluja one odpowiednie funkcje w presenterze
         self.new_project_action.triggered.connect(self.presenter.create_new_project) #załadowanie folderu ze zdjęciami
         self.file_list_widget.itemClicked.connect(lambda item: self.presenter.folder_list_on_click(item)) #klikniecia w liscie z obrazkami
@@ -304,6 +311,7 @@ class MainView(object):
         self.delete_class_button.clicked.connect(self.presenter.classManagerPresenter.deleteClass) #Klikniecie przycisku "usun klasę"
         self.draw_rectangle_button.clicked.connect(self.presenter.activate_rectangle_tool) #Kliknięcie przycisku rysuj prostokąt
         self.draw_polygon_button.clicked.connect(self.presenter.activate_polygon_tool)  # Kliknięcie przycisku rysuj poligon
+        self.zoom_image_slider.valueChanged.connect(self.presenter.zoom_slider) #Kliknięcie w zooma
 
 ###Funkcje pomocnicze (np. Settery zeby nie grzebac bezposrednio w zmiennych)
     def set_image_size_label(self, text):
@@ -328,3 +336,13 @@ class MainView(object):
     #Przywrócenie domyślneog kursora
     def leave_event(self, event: QtCore.QEvent):
         self.graphics_view.setCursor(QtCore.Qt.ArrowCursor)
+
+    #Aktualizacja zooma
+    def apply_zooming(self, zoom_value):
+        try:
+            self.graphics_view.resetTransform()
+            # Zastosowanie nowego skalowania
+            self.graphics_view.scale(zoom_value, zoom_value)
+            print(f"Applied zoom: scale_factor={zoom_value}")
+        except Exception as e:
+            print(f"Error in apply_zooming: {e}")

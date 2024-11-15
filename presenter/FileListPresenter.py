@@ -9,17 +9,6 @@ class FileListPresenter:
         self.view = view
         self.project = None
 
-    # Metoda aktualizująca widok
-    def update_view(self, view):
-        self.view = view
-        if self.view and self.view.zoom_image_slider:
-            # Ustawienie zakresu wartości suwaka zoomu (od 10% do 300%)
-            self.view.zoom_image_slider.setRange(10, 300)
-            # Ustawienie początkowej wartości suwaka na 70%
-            self.view.zoom_image_slider.setValue(70)
-            # Połączenie suwaka z metodą obsługi zmiany wartości
-            self.view.zoom_image_slider.valueChanged.connect(self.on_zoom_slider_changed)
-
     def update_project(self, project):
         self.project = project
 
@@ -65,7 +54,7 @@ class FileListPresenter:
         # Aktualizacja wartości suwaka, aby odzwierciedlić aktualny poziom zoomu w procentach
         self.view.zoom_image_slider.setValue(int(initial_zoom_value * 100))
 
-        self.apply_zooming(initial_zoom_value)
+        self.view.apply_zooming(initial_zoom_value)
 
     def display_image(self, image_path):
         try:
@@ -89,29 +78,15 @@ class FileListPresenter:
             scene_rect = QRectF(pixmap.rect())
             print(f"Setting scene rect: {scene_rect}")
             self.view.graphics_view.setSceneRect(scene_rect)
-
             self.view.graphics_view.resetTransform()
-
         except Exception as e:
             print(f"Error while displaying image: {e}")
 
-    def apply_zooming(self, zoom_value):
-        try:
-            self.view.graphics_view.resetTransform()
-
-            # Zastosowanie nowego skalowania
-            self.view.graphics_view.scale(zoom_value, zoom_value)
-
-            print(f"Applied zoom: scale_factor={zoom_value}")
-        except Exception as e:
-            print(f"Error in apply_zooming: {e}")
-
     def on_zoom_slider_changed(self):
         zoom_value = self.view.zoom_image_slider.value() / 100.0  # Przekształcenie wartości na zakres od 0.1 do 3.0
-
         # Aktualizacja zoomu w modelu obrazu
         active_image = self.project.get_img_by_filename(self.view.file_list_widget.currentItem().text())
         if active_image is not None:
             active_image.zoom_change(zoom_value)
 
-        self.apply_zooming(zoom_value)
+        self.view.apply_zooming(zoom_value)
