@@ -298,8 +298,8 @@ class MainView(object):
         self.graphics_view.leaveEvent = self.leave_event
 
         #ZOOM
-        # Ustawienie zakresu wartości suwaka zoomu (od 10% do 300%)
-        self.zoom_image_slider.setRange(10, 300)
+        # Ustawienie zakresu wartości suwaka zoomu (od 10% do 500%)
+        self.zoom_image_slider.setRange(10, 500)
         # Ustawienie początkowej wartości suwaka na 70%
         self.zoom_image_slider.setValue(70)
 
