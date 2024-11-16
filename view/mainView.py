@@ -293,6 +293,12 @@ class MainView(object):
         #Przypisanie sledzenia klikniecia do funkcji
         self.graphics_view.mousePressEvent = self.mouse_press_event
 
+        #Śledzenie myszy
+        self.graphics_view.setMouseTracking(True)
+
+        #Obsługa ruchu myszy
+        self.graphics_view.mouseMoveEvent = self.mouse_move_event
+
         #Wejście i opuszczenie sceny z obrazkiem
         self.graphics_view.enterEvent = self.enter_event
         self.graphics_view.leaveEvent = self.leave_event
@@ -320,6 +326,7 @@ class MainView(object):
     def set_notification_label(self, text):
         self.label_notification.setText(text)
 
+    #Przesyła współrzędne kliknięcia do funkcji
     def mouse_press_event(self, event: QMouseEvent):
         scene_pos = self.graphics_view.mapToScene(event.pos())
         if self.pixmap_item:
@@ -328,6 +335,14 @@ class MainView(object):
             self.presenter.handle_mouse_click(x, y)  # Wywołanie funkcji w prezenterze z współrzędnymi obrazka
         else:
             print("No image loaded.")
+
+    #Przesyła współrzędne położenia do funkcji (odpala się przy każdym przesunięciu)
+    def mouse_move_event(self, event: QMouseEvent):
+        scene_pos = self.graphics_view.mapToScene(event.pos())
+        if self.pixmap_item:
+            image_pos = self.pixmap_item.mapFromScene(scene_pos)
+            x, y = image_pos.x(), image_pos.y()
+            self.presenter.handle_mouse_move(x, y)
 
     #Zmiana kursora gdy jesteśmy w obszarze obrazka
     def enter_event(self, event: QtCore.QEvent):
