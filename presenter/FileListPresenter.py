@@ -26,6 +26,7 @@ class FileListPresenter:
         else:
             # Aktualizacja etykiety informacyjnej na brak aktywnego obrazu
             self.view.set_image_size_label("Brak aktywnego obrazu")
+            self.view.pixmap_item = None #zmiana obrazka na None (żeby zniwelować problem z poruszaniem po scenie przy powtórnym załadowaniu pustego folderu)
             self.view.scene.clear()
 
     def show_image(self, item):
@@ -53,7 +54,6 @@ class FileListPresenter:
 
         # Aktualizacja wartości suwaka, aby odzwierciedlić aktualny poziom zoomu w procentach
         self.view.zoom_image_slider.setValue(int(initial_zoom_value * 100))
-
         self.view.apply_zooming(initial_zoom_value)
 
     def display_image(self, image_path):

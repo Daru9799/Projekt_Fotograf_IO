@@ -333,8 +333,6 @@ class MainView(object):
             image_pos = self.pixmap_item.mapFromScene(scene_pos)
             x, y = image_pos.x(), image_pos.y()
             self.presenter.handle_mouse_click(x, y)  # Wywołanie funkcji w prezenterze z współrzędnymi obrazka
-        else:
-            print("No image loaded.")
 
     #Przesyła współrzędne położenia do funkcji (odpala się przy każdym przesunięciu)
     def mouse_move_event(self, event: QMouseEvent):

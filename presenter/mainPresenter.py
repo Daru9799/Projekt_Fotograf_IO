@@ -14,7 +14,6 @@ class Presenter:
         self.view = view
         self.new_project = ProjectModel(None)
         self.drawing_tool = None  #Aktywne narzędzie rysowania (w przypadku braku ustawiamy na None) Dostępne opcje: "rectangle", "polygon"
-        self.rectangle_start_point = (None, None) #Punkt początkowy nowo rysowanego prostokąta
         #Podprezentery do obsługi poszczególnych modułów aplikacji
         self.file_list_presenter = FileListPresenter(None)
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project)
@@ -71,15 +70,15 @@ class Presenter:
         print(f"Współrzędne kliknięcia: x={x}, y={y}")
         #Logika rysowania prostokąta
         if self.drawing_tool == "rectangle":
-            if self.rectangle_start_point == (None, None):
-                self.rectangle_start_point = (x, y)
+            if self.rectangle_presenter.rectangle_start_point == (None, None):
+                self.rectangle_presenter.update_start_point(x, y)
                 self.view.set_notification_label(f"Rysowanie prostokąta. Wybrano punkt początkowy {int(x)}, {int(y)}. Proszę wybrać punkt końcowy")
             else:
                 points = self.rectangle_presenter.get_rectangle_points()
                 self.view.set_notification_label(f"Pomyślnie narysowano prostokąt! Jego współrzędne to: " + str(points))
                 #self.rectangle_presenter.delete_temp_rectangle() #Usunięcie tymczasowego obiektu
                 ###Tutaj trzeba obsłużyć wysyłanie prośby o dodanie adnotacji i update sceny z nowym narysowanym obiektem (narysować go ponownie z innymi)
-                self.rectangle_start_point = (None, None)
+                self.rectangle_presenter.update_start_point(None, None)
 
         #Logika rysowania poligona
         if self.drawing_tool == "polygon":
@@ -89,10 +88,10 @@ class Presenter:
     def handle_mouse_move(self, x, y):
         x, y = int(x), int(y) #Zamiana współrzędnych na wartości int
         #Obsługa przesunięcia podczas rysowania prostokąta
-        if self.rectangle_start_point != (None, None):
+        if self.rectangle_presenter.rectangle_start_point != (None, None):
             self.rectangle_presenter.delete_temp_rectangle() #usuwa poprzedni cień
             print("siema jesteś tu: " + str(x) + ", " + str(y))
-            self.rectangle_presenter.draw_rectangle(self.rectangle_start_point[0], self.rectangle_start_point[1], x, y)
+            self.rectangle_presenter.draw_rectangle(self.rectangle_presenter.rectangle_start_point[0], self.rectangle_presenter.rectangle_start_point[1], x, y)
 
 
 
