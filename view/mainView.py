@@ -310,7 +310,7 @@ class MainView(object):
         self.graphics_view.mousePressEvent = self.mouse_press_event
 
         #Obsluga klawisza
-        self.graphics_view.keyPressEvent = self.key_press_event
+        self.centralwidget.keyPressEvent = self.key_press_event
 
         #Śledzenie myszy
         self.graphics_view.setMouseTracking(True)
