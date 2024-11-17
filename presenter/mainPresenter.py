@@ -57,7 +57,6 @@ class Presenter:
             self.drawing_tool = None
             self.view.set_notification_label("Brak aktywnego narzędzia")
             self.rectangle_presenter.cancel_drawing_rectangle()
-            self.view.set_draw_rectangle_button_text("Rysuj prostokąt")
 
     # Aktywacja bądź dezaktywacja narzędzia polygon
     def activate_polygon_tool(self):
@@ -101,6 +100,11 @@ class Presenter:
             self.rectangle_presenter.delete_temp_rectangle() #usuwa poprzedni cień
             print("siema jesteś tu: " + str(x) + ", " + str(y))
             self.rectangle_presenter.draw_rectangle(self.rectangle_presenter.rectangle_start_point[0], self.rectangle_presenter.rectangle_start_point[1], x, y)
+
+    def handle_escape_click(self):
+        self.rectangle_presenter.cancel_drawing_rectangle()
+        self.drawing_tool = None
+        self.view.set_notification_label("Brak aktywnego narzędzia")
 
 
 

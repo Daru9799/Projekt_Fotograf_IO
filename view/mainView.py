@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QKeyEvent
 from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtGui import QMouseEvent
 from PyQt5.Qt import Qt
@@ -309,6 +309,9 @@ class MainView(object):
         #Przypisanie sledzenia klikniecia do funkcji
         self.graphics_view.mousePressEvent = self.mouse_press_event
 
+        #Obsluga klawisza
+        self.graphics_view.keyPressEvent = self.key_press_event
+
         #Śledzenie myszy
         self.graphics_view.setMouseTracking(True)
 
@@ -378,3 +381,7 @@ class MainView(object):
 
     def set_draw_rectangle_button_text(self, text):
         self.draw_rectangle_button.setText(text)
+
+    def key_press_event(self, event: QKeyEvent):
+        if event.key() == Qt.Key_Escape:
+            self.presenter.handle_escape_click()
