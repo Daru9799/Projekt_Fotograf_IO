@@ -20,7 +20,20 @@
    <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="1,0,0,0,0">
+   <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="1,0,0,0,0,0">
+    <item row="2" column="5" rowspan="3">
+     <widget class="QListWidget" name="file_list_widget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+     </widget>
+    </item>
     <item row="15" column="0">
      <layout class="QVBoxLayout" name="verticalLayout_5">
       <item>
@@ -69,20 +82,23 @@
       </item>
      </layout>
     </item>
-    <item row="2" column="4" rowspan="3">
-     <widget class="QListWidget" name="file_list_widget">
+    <item row="2" column="0" rowspan="7">
+     <widget class="QListWidget" name="class_list_widget">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
       </property>
      </widget>
     </item>
-    <item row="15" column="4" rowspan="2">
+    <item row="15" column="5" rowspan="2">
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <spacer name="verticalSpacer_2">
@@ -145,55 +161,7 @@
       </item>
      </layout>
     </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label_class_list">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Klasy:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="17" column="1">
-     <widget class="QLabel" name="label_image_size">
-      <property name="font">
-       <font>
-        <pointsize>11</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Brak aktywnego obrazu</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="4">
-     <widget class="QLabel" name="label_file_list">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Dostępne pliki graficzne:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="4" rowspan="4">
+    <item row="6" column="5" rowspan="4">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QLabel" name="label_tools">
@@ -251,29 +219,6 @@
       </item>
      </layout>
     </item>
-    <item row="2" column="1" rowspan="15" colspan="3">
-     <widget class="QGraphicsView" name="graphics_view">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>220</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-    <item row="17" column="2">
-     <widget class="QSlider" name="zoom_image_slider">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
     <item row="9" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -304,27 +249,100 @@
       </item>
      </layout>
     </item>
-    <item row="2" column="0" rowspan="7">
-     <widget class="QListWidget" name="class_list_widget">
+    <item row="2" column="1" rowspan="15" colspan="4">
+     <widget class="QGraphicsView" name="graphics_view">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>220</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_class_list">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="frameShadow">
-       <enum>QFrame::Sunken</enum>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLabel" name="label_notification">
       <property name="font">
        <font>
         <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Klasy:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="5">
+     <widget class="QLabel" name="label_file_list">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Dostępne pliki graficzne:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="17" column="1">
+     <widget class="QLabel" name="label_image_size">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Brak aktywnego obrazu</string>
+      </property>
+     </widget>
+    </item>
+    <item row="17" column="2" colspan="2">
+     <widget class="QSlider" name="zoom_image_slider">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1" colspan="4">
+     <widget class="QLabel" name="label_notification">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>11</pointsize>
        </font>
       </property>
       <property name="text">
@@ -340,7 +358,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu">

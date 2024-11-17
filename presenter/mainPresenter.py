@@ -14,6 +14,7 @@ class Presenter:
         self.view = view
         self.new_project = ProjectModel(None)
         self.drawing_tool = None  #Aktywne narzędzie rysowania (w przypadku braku ustawiamy na None) Dostępne opcje: "rectangle", "polygon"
+        self.image_item = None #Aktywne zdjęcie w liście po prawej
         #Podprezentery do obsługi poszczególnych modułów aplikacji
         self.file_list_presenter = FileListPresenter(None)
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project)
@@ -40,20 +41,28 @@ class Presenter:
 
     #Aktualizacja sceny po zmianie obrazka w liście po prawej stronie
     def folder_list_on_click(self, item):
-        self.file_list_presenter.show_image(item)
+        self.rectangle_presenter.cancel_drawing_rectangle() #Anulowanie rysowania prostokąta po kliknięciu w prawy panel
+        self.view.set_notification_label("Tryb rysowania prostokąta aktywny")
+        if self.image_item != item:
+            self.file_list_presenter.show_image(item)
+            self.image_item = item
 
     #Aktywacja bądź dezaktywacja narzędzia rectangle
     def activate_rectangle_tool(self):
         if self.drawing_tool != "rectangle":
             self.drawing_tool = "rectangle"
             self.view.set_notification_label("Tryb rysowania prostokąta aktywny")
+            self.view.set_draw_rectangle_button_text("Anuluj rysowanie prostokąta")
         else:
             self.drawing_tool = None
             self.view.set_notification_label("Brak aktywnego narzędzia")
+            self.rectangle_presenter.cancel_drawing_rectangle()
+            self.view.set_draw_rectangle_button_text("Rysuj prostokąt")
 
     # Aktywacja bądź dezaktywacja narzędzia polygon
     def activate_polygon_tool(self):
         if self.drawing_tool != "polygon":
+            self.rectangle_presenter.cancel_drawing_rectangle()
             self.drawing_tool = "polygon"
             self.view.set_notification_label("Tryb rysowania poligona aktywny")
         else:
@@ -92,7 +101,6 @@ class Presenter:
             self.rectangle_presenter.delete_temp_rectangle() #usuwa poprzedni cień
             print("siema jesteś tu: " + str(x) + ", " + str(y))
             self.rectangle_presenter.draw_rectangle(self.rectangle_presenter.rectangle_start_point[0], self.rectangle_presenter.rectangle_start_point[1], x, y)
-
 
 
 

@@ -57,3 +57,8 @@ class RectanglePresenter(QObject):
     def update_start_point(self, x, y):
         self.rectangle_start_point = (x, y)
 
+    def cancel_drawing_rectangle(self):
+        if self.rectangle_start_point != (None, None):
+            self.delete_temp_rectangle()
+            self.update_start_point(None, None)
+
