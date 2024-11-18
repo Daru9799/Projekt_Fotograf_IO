@@ -375,13 +375,37 @@ class MainView(object):
     #         x, y = image_pos.x(), image_pos.y()
     #         self.presenter.handle_mouse_move(x, y)
 
+    # def mouse_move_event(self, event: QMouseEvent):
+    #     if self.is_dragging and event.buttons() == Qt.LeftButton and self.presenter.drawing_tool is None:
+    #         # Oblicz przesunięcie względem poprzedniej pozycji
+    #         delta = event.pos() - self.last_mouse_position
+    #         self.last_mouse_position = event.pos()
+    #
+    #         # Przesuń widok w GraphicsView
+    #         self.graphics_view.horizontalScrollBar().setValue(
+    #             self.graphics_view.horizontalScrollBar().value() - delta.x()
+    #         )
+    #         self.graphics_view.verticalScrollBar().setValue(
+    #             self.graphics_view.verticalScrollBar().value() - delta.y()
+    #         )
+    #     else:
+    #         # Zwykłe śledzenie ruchu myszy
+    #         scene_pos = self.graphics_view.mapToScene(event.pos())
+    #         if self.pixmap_item:
+    #             image_pos = self.pixmap_item.mapFromScene(scene_pos)
+    #             x, y = image_pos.x(), image_pos.y()
+    #             self.presenter.handle_mouse_move(x, y)
+
     def mouse_move_event(self, event: QMouseEvent):
+        edge_threshold = 30  # Próg odległości od krawędzi w pikselach
+        view_rect = self.graphics_view.viewport().rect()
+        cursor_pos = event.pos()
+
+        # Przesuwanie obrazu, jeśli przeciąganie jest aktywne i nie rysujemy
         if self.is_dragging and event.buttons() == Qt.LeftButton and self.presenter.drawing_tool is None:
-            # Oblicz przesunięcie względem poprzedniej pozycji
             delta = event.pos() - self.last_mouse_position
             self.last_mouse_position = event.pos()
 
-            # Przesuń widok w GraphicsView
             self.graphics_view.horizontalScrollBar().setValue(
                 self.graphics_view.horizontalScrollBar().value() - delta.x()
             )
@@ -395,6 +419,29 @@ class MainView(object):
                 image_pos = self.pixmap_item.mapFromScene(scene_pos)
                 x, y = image_pos.x(), image_pos.y()
                 self.presenter.handle_mouse_move(x, y)
+
+        # Przesuwanie obrazu, jeśli kursor jest blisko krawędzi
+        if cursor_pos.x() < edge_threshold:
+            # Kursor blisko lewej krawędzi
+            self.graphics_view.horizontalScrollBar().setValue(
+                self.graphics_view.horizontalScrollBar().value() - 20
+            )
+        elif cursor_pos.x() > view_rect.width() - edge_threshold:
+            # Kursor blisko prawej krawędzi
+            self.graphics_view.horizontalScrollBar().setValue(
+                self.graphics_view.horizontalScrollBar().value() + 20
+            )
+
+        if cursor_pos.y() < edge_threshold:
+            # Kursor blisko górnej krawędzi
+            self.graphics_view.verticalScrollBar().setValue(
+                self.graphics_view.verticalScrollBar().value() - 20
+            )
+        elif cursor_pos.y() > view_rect.height() - edge_threshold:
+            # Kursor blisko dolnej krawędzi
+            self.graphics_view.verticalScrollBar().setValue(
+                self.graphics_view.verticalScrollBar().value() + 20
+            )
 
     def mouse_release_event(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton and self.presenter.drawing_tool is None:

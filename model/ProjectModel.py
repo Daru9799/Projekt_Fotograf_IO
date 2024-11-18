@@ -2,7 +2,7 @@ import os
 from operator import indexOf
 from PIL import Image
 from PIL.ExifTags import TAGS
-from statsmodels.sandbox.stats.contrast_tools import contrast_labels
+# from statsmodels.sandbox.stats.contrast_tools import contrast_labels
 
 from model.ImageModel import ImageModel
 from random import randrange

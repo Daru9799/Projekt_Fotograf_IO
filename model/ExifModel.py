@@ -1,5 +1,5 @@
 #Model danych exif
-from statsmodels.sandbox.stats.contrast_tools import contrast_labels
+# from statsmodels.sandbox.stats.contrast_tools import contrast_labels
 
 
 class ExifModel:
