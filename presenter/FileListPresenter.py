@@ -9,8 +9,10 @@ class FileListPresenter:
         self.view = view
         self.project = None
 
+
     def update_project(self, project):
         self.project = project
+
 
     def load_files_to_widget(self):
         # Czyszczenie poprzedniej listy plików
@@ -23,11 +25,13 @@ class FileListPresenter:
             first_item = self.view.file_list_widget.item(0)
             self.view.file_list_widget.setCurrentItem(first_item)
             self.show_image(first_item)
+            self.view.set_zoom_slider_visibility(True)
         else:
             # Aktualizacja etykiety informacyjnej na brak aktywnego obrazu
             self.view.set_image_size_label("Brak aktywnego obrazu")
             self.view.pixmap_item = None #zmiana obrazka na None (żeby zniwelować problem z poruszaniem po scenie przy powtórnym załadowaniu pustego folderu)
             self.view.scene.clear()
+            self.view.set_zoom_slider_visibility(False)
 
     def show_image(self, item):
         file_name = item.text()

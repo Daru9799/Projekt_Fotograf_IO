@@ -297,6 +297,7 @@ class MainView(object):
         self.import_YOLO_action_2.setText(_translate("MainWindow", "Importuj YOLO"))
         self.save_project_action.setText(_translate("MainWindow", "Zapisz"))
         self.save_as_new_project_action.setText(_translate("MainWindow", "Zapisz jako plik projektowy"))
+        self.set_zoom_slider_visibility(False)
 
         ################################### Koniec generowania
         #Ustawienie ikonek
@@ -317,6 +318,9 @@ class MainView(object):
 
         #Obsługa ruchu myszy
         self.graphics_view.mouseMoveEvent = self.mouse_move_event
+        self.is_dragging = False
+        self.last_mouse_position = None
+        self.is_drawing_rectangle = False  # Domyślnie nie rysujemy prostokąta
 
         #Wejście i opuszczenie sceny z obrazkiem
         self.graphics_view.enterEvent = self.enter_event
@@ -346,20 +350,57 @@ class MainView(object):
         self.label_notification.setText(text)
 
     #Przesyła współrzędne kliknięcia do funkcji
+    # def mouse_press_event(self, event: QMouseEvent):
+    #     scene_pos = self.graphics_view.mapToScene(event.pos())
+    #     if self.pixmap_item:
+    #         image_pos = self.pixmap_item.mapFromScene(scene_pos)
+    #         x, y = image_pos.x(), image_pos.y()
+    #         self.presenter.handle_mouse_click(x, y)  # Wywołanie funkcji w prezenterze z współrzędnymi obrazka
+
     def mouse_press_event(self, event: QMouseEvent):
         scene_pos = self.graphics_view.mapToScene(event.pos())
         if self.pixmap_item:
             image_pos = self.pixmap_item.mapFromScene(scene_pos)
             x, y = image_pos.x(), image_pos.y()
             self.presenter.handle_mouse_click(x, y)  # Wywołanie funkcji w prezenterze z współrzędnymi obrazka
+        if event.button() == Qt.LeftButton:
+            self.is_dragging = True
+            self.last_mouse_position = event.pos()
+
 
     #Przesyła współrzędne położenia do funkcji (odpala się przy każdym przesunięciu)
+    # def mouse_move_event(self, event: QMouseEvent):
+    #     scene_pos = self.graphics_view.mapToScene(event.pos())
+    #     if self.pixmap_item:
+    #         image_pos = self.pixmap_item.mapFromScene(scene_pos)
+    #         x, y = image_pos.x(), image_pos.y()
+    #         self.presenter.handle_mouse_move(x, y)
+
     def mouse_move_event(self, event: QMouseEvent):
-        scene_pos = self.graphics_view.mapToScene(event.pos())
-        if self.pixmap_item:
-            image_pos = self.pixmap_item.mapFromScene(scene_pos)
-            x, y = image_pos.x(), image_pos.y()
-            self.presenter.handle_mouse_move(x, y)
+        if self.is_dragging and event.buttons() == Qt.LeftButton:
+            # Oblicz przesunięcie względem poprzedniej pozycji
+            delta = event.pos() - self.last_mouse_position
+            self.last_mouse_position = event.pos()
+
+            # Przesuń widok w GraphicsView
+            self.graphics_view.horizontalScrollBar().setValue(
+                self.graphics_view.horizontalScrollBar().value() - delta.x()
+            )
+            self.graphics_view.verticalScrollBar().setValue(
+                self.graphics_view.verticalScrollBar().value() - delta.y()
+            )
+        else:
+            # Zwykłe śledzenie ruchu myszy
+            scene_pos = self.graphics_view.mapToScene(event.pos())
+            if self.pixmap_item:
+                image_pos = self.pixmap_item.mapFromScene(scene_pos)
+                x, y = image_pos.x(), image_pos.y()
+                self.presenter.handle_mouse_move(x, y)
+
+    def mouse_release_event(self, event: QMouseEvent):
+        if event.button() == Qt.LeftButton:
+            self.is_dragging = False
+            self.last_mouse_position = None
 
     #Zmiana kursora gdy jesteśmy w obszarze obrazka
     def enter_event(self, event: QtCore.QEvent):
@@ -385,3 +426,6 @@ class MainView(object):
     def key_press_event(self, event: QKeyEvent):
         if event.key() == Qt.Key_Escape:
             self.presenter.handle_escape_click()
+
+    def set_zoom_slider_visibility(self, visible: bool):
+        self.zoom_image_slider.setVisible(visible)

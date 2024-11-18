@@ -19,7 +19,6 @@ class Presenter:
         self.file_list_presenter = FileListPresenter(None)
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project)
         self.rectangle_presenter = RectanglePresenter(None)
-
     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
     def update_view(self, view):
         self.view = view
