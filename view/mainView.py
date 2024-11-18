@@ -421,27 +421,28 @@ class MainView(object):
                 self.presenter.handle_mouse_move(x, y)
 
         # Przesuwanie obrazu, jeśli kursor jest blisko krawędzi
-        if cursor_pos.x() < edge_threshold:
-            # Kursor blisko lewej krawędzi
-            self.graphics_view.horizontalScrollBar().setValue(
-                self.graphics_view.horizontalScrollBar().value() - 20
-            )
-        elif cursor_pos.x() > view_rect.width() - edge_threshold:
-            # Kursor blisko prawej krawędzi
-            self.graphics_view.horizontalScrollBar().setValue(
-                self.graphics_view.horizontalScrollBar().value() + 20
-            )
+        if self.presenter.drawing_tool is not None:
+            if cursor_pos.x() < edge_threshold :
+                # Kursor blisko lewej krawędzi
+                self.graphics_view.horizontalScrollBar().setValue(
+                    self.graphics_view.horizontalScrollBar().value() - 20
+                )
+            elif cursor_pos.x() > view_rect.width() - edge_threshold:
+                # Kursor blisko prawej krawędzi
+                self.graphics_view.horizontalScrollBar().setValue(
+                    self.graphics_view.horizontalScrollBar().value() + 20
+                )
 
-        if cursor_pos.y() < edge_threshold:
-            # Kursor blisko górnej krawędzi
-            self.graphics_view.verticalScrollBar().setValue(
-                self.graphics_view.verticalScrollBar().value() - 20
-            )
-        elif cursor_pos.y() > view_rect.height() - edge_threshold:
-            # Kursor blisko dolnej krawędzi
-            self.graphics_view.verticalScrollBar().setValue(
-                self.graphics_view.verticalScrollBar().value() + 20
-            )
+            if cursor_pos.y() < edge_threshold:
+                # Kursor blisko górnej krawędzi
+                self.graphics_view.verticalScrollBar().setValue(
+                    self.graphics_view.verticalScrollBar().value() - 20
+                )
+            elif cursor_pos.y() > view_rect.height() - edge_threshold:
+                # Kursor blisko dolnej krawędzi
+                self.graphics_view.verticalScrollBar().setValue(
+                    self.graphics_view.verticalScrollBar().value() + 20
+                )
 
     def mouse_release_event(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton and self.presenter.drawing_tool is None:
