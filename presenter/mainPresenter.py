@@ -52,6 +52,7 @@ class Presenter:
             self.drawing_tool = "rectangle"
             self.view.set_notification_label("Tryb rysowania prostokąta aktywny")
             self.view.set_draw_rectangle_button_text("Anuluj rysowanie prostokąta")
+            self.view.change_to_cross_cursor()
         else:
             self.drawing_tool = None
             self.view.set_notification_label("Brak aktywnego narzędzia")
@@ -63,6 +64,7 @@ class Presenter:
             self.rectangle_presenter.cancel_drawing_rectangle()
             self.drawing_tool = "polygon"
             self.view.set_notification_label("Tryb rysowania poligona aktywny")
+            self.view.change_to_cross_cursor()
         else:
             self.drawing_tool = None
             self.view.set_notification_label("Brak aktywnego narzędzia")

@@ -309,6 +309,7 @@ class MainView(object):
 
         #Przypisanie sledzenia klikniecia do funkcji
         self.graphics_view.mousePressEvent = self.mouse_press_event
+        self.graphics_view.mouseReleaseEvent = self.mouse_release_event
 
         #Obsluga klawisza
         self.centralwidget.keyPressEvent = self.key_press_event
@@ -321,10 +322,6 @@ class MainView(object):
         self.is_dragging = False
         self.last_mouse_position = None
         self.is_drawing_rectangle = False  # Domyślnie nie rysujemy prostokąta
-
-        #Wejście i opuszczenie sceny z obrazkiem
-        self.graphics_view.enterEvent = self.enter_event
-        self.graphics_view.leaveEvent = self.leave_event
 
         #ZOOM
         # Ustawienie zakresu wartości suwaka zoomu (od 10% do 500%)
@@ -363,7 +360,9 @@ class MainView(object):
             image_pos = self.pixmap_item.mapFromScene(scene_pos)
             x, y = image_pos.x(), image_pos.y()
             self.presenter.handle_mouse_click(x, y)  # Wywołanie funkcji w prezenterze z współrzędnymi obrazka
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.LeftButton and self.presenter.drawing_tool is None:
+            #zmiana kursora
+            self.graphics_view.setCursor(QtCore.Qt.OpenHandCursor)
             self.is_dragging = True
             self.last_mouse_position = event.pos()
 
@@ -398,16 +397,17 @@ class MainView(object):
                 self.presenter.handle_mouse_move(x, y)
 
     def mouse_release_event(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.LeftButton and self.presenter.drawing_tool is None:
             self.is_dragging = False
             self.last_mouse_position = None
+            self.graphics_view.setCursor(QtCore.Qt.ArrowCursor)
 
     #Zmiana kursora gdy jesteśmy w obszarze obrazka
-    def enter_event(self, event: QtCore.QEvent):
+    def change_to_cross_cursor(self):
         self.graphics_view.setCursor(QtCore.Qt.CrossCursor)
 
     #Przywrócenie domyślneog kursora
-    def leave_event(self, event: QtCore.QEvent):
+    def change_to_arrow_cursor(self):
         self.graphics_view.setCursor(QtCore.Qt.ArrowCursor)
 
     #Aktualizacja zooma
