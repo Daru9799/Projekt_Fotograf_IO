@@ -347,13 +347,6 @@ class MainView(object):
         self.label_notification.setText(text)
 
     #Przesyła współrzędne kliknięcia do funkcji
-    # def mouse_press_event(self, event: QMouseEvent):
-    #     scene_pos = self.graphics_view.mapToScene(event.pos())
-    #     if self.pixmap_item:
-    #         image_pos = self.pixmap_item.mapFromScene(scene_pos)
-    #         x, y = image_pos.x(), image_pos.y()
-    #         self.presenter.handle_mouse_click(x, y)  # Wywołanie funkcji w prezenterze z współrzędnymi obrazka
-
     def mouse_press_event(self, event: QMouseEvent):
         scene_pos = self.graphics_view.mapToScene(event.pos())
         if self.pixmap_item:
@@ -366,63 +359,26 @@ class MainView(object):
             self.is_dragging = True
             self.last_mouse_position = event.pos()
 
-
-    #Przesyła współrzędne położenia do funkcji (odpala się przy każdym przesunięciu)
-    # def mouse_move_event(self, event: QMouseEvent):
-    #     scene_pos = self.graphics_view.mapToScene(event.pos())
-    #     if self.pixmap_item:
-    #         image_pos = self.pixmap_item.mapFromScene(scene_pos)
-    #         x, y = image_pos.x(), image_pos.y()
-    #         self.presenter.handle_mouse_move(x, y)
-
-    # def mouse_move_event(self, event: QMouseEvent):
-    #     if self.is_dragging and event.buttons() == Qt.LeftButton and self.presenter.drawing_tool is None:
-    #         # Oblicz przesunięcie względem poprzedniej pozycji
-    #         delta = event.pos() - self.last_mouse_position
-    #         self.last_mouse_position = event.pos()
-    #
-    #         # Przesuń widok w GraphicsView
-    #         self.graphics_view.horizontalScrollBar().setValue(
-    #             self.graphics_view.horizontalScrollBar().value() - delta.x()
-    #         )
-    #         self.graphics_view.verticalScrollBar().setValue(
-    #             self.graphics_view.verticalScrollBar().value() - delta.y()
-    #         )
-    #     else:
-    #         # Zwykłe śledzenie ruchu myszy
-    #         scene_pos = self.graphics_view.mapToScene(event.pos())
-    #         if self.pixmap_item:
-    #             image_pos = self.pixmap_item.mapFromScene(scene_pos)
-    #             x, y = image_pos.x(), image_pos.y()
-    #             self.presenter.handle_mouse_move(x, y)
-
     def mouse_move_event(self, event: QMouseEvent):
+        # Obsługa przeciągania obrazu
+        self.handle_dragging(event)
+
+        # Zwykłe śledzenie ruchu myszy
+        scene_pos = self.graphics_view.mapToScene(event.pos())
+        if self.pixmap_item:
+            image_pos = self.pixmap_item.mapFromScene(scene_pos)
+            x, y = image_pos.x(), image_pos.y()
+            self.presenter.handle_mouse_move(x, y)
+
+        # Obsługa przesuwania obrazu, jeśli kursor jest blisko krawędzi
+        self.handle_edge_scrolling(event.pos())
+
+    def handle_edge_scrolling(self, cursor_pos):
         edge_threshold = 30  # Próg odległości od krawędzi w pikselach
         view_rect = self.graphics_view.viewport().rect()
-        cursor_pos = event.pos()
 
-        # Przesuwanie obrazu, jeśli przeciąganie jest aktywne i nie rysujemy
-        if self.is_dragging and event.buttons() == Qt.LeftButton and self.presenter.drawing_tool is None:
-            delta = event.pos() - self.last_mouse_position
-            self.last_mouse_position = event.pos()
-
-            self.graphics_view.horizontalScrollBar().setValue(
-                self.graphics_view.horizontalScrollBar().value() - delta.x()
-            )
-            self.graphics_view.verticalScrollBar().setValue(
-                self.graphics_view.verticalScrollBar().value() - delta.y()
-            )
-        else:
-            # Zwykłe śledzenie ruchu myszy
-            scene_pos = self.graphics_view.mapToScene(event.pos())
-            if self.pixmap_item:
-                image_pos = self.pixmap_item.mapFromScene(scene_pos)
-                x, y = image_pos.x(), image_pos.y()
-                self.presenter.handle_mouse_move(x, y)
-
-        # Przesuwanie obrazu, jeśli kursor jest blisko krawędzi
         if self.presenter.drawing_tool is not None:
-            if cursor_pos.x() < edge_threshold :
+            if cursor_pos.x() < edge_threshold:
                 # Kursor blisko lewej krawędzi
                 self.graphics_view.horizontalScrollBar().setValue(
                     self.graphics_view.horizontalScrollBar().value() - 20
@@ -444,7 +400,25 @@ class MainView(object):
                     self.graphics_view.verticalScrollBar().value() + 20
                 )
 
+    def handle_dragging(self, event: QMouseEvent):
+        # Sprawdzenie, czy przeciąganie jest aktywne, lewy przycisk myszy jest wciśnięty i nie jest aktywne narzędzie do rysowania
+        if self.is_dragging and event.buttons() == Qt.LeftButton and self.presenter.drawing_tool is None:
+            # Obliczenie różnicy pozycji kursora od ostatniego ruchu
+            delta = event.pos() - self.last_mouse_position
+            # Aktualizacja ostatniej pozycji kursora
+            self.last_mouse_position = event.pos()
+
+            # Przesunięcie paska przewijania w poziomie na podstawie zmiany pozycji kursora
+            self.graphics_view.horizontalScrollBar().setValue(
+                self.graphics_view.horizontalScrollBar().value() - delta.x()
+            )
+            # Przesunięcie paska przewijania w pionie na podstawie zmiany pozycji kursora
+            self.graphics_view.verticalScrollBar().setValue(
+                self.graphics_view.verticalScrollBar().value() - delta.y()
+            )
+
     def mouse_release_event(self, event: QMouseEvent):
+        # Zakończenie przeciągania, gdy lewy przycisk myszy zostanie zwolniony i nie jest aktywne narzędzie do rysowania
         if event.button() == Qt.LeftButton and self.presenter.drawing_tool is None:
             self.is_dragging = False
             self.last_mouse_position = None
