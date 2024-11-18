@@ -97,7 +97,6 @@ class Presenter:
         #Obsługa przesunięcia podczas rysowania prostokąta
         if self.rectangle_presenter.rectangle_start_point != (None, None):
             self.rectangle_presenter.delete_temp_rectangle() #usuwa poprzedni cień
-            print("siema jesteś tu: " + str(x) + ", " + str(y))
             self.rectangle_presenter.draw_rectangle(self.rectangle_presenter.rectangle_start_point[0], self.rectangle_presenter.rectangle_start_point[1], x, y)
 
     def handle_escape_click(self):

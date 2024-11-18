@@ -377,7 +377,7 @@ class MainView(object):
     #         self.presenter.handle_mouse_move(x, y)
 
     def mouse_move_event(self, event: QMouseEvent):
-        if self.is_dragging and event.buttons() == Qt.LeftButton:
+        if self.is_dragging and event.buttons() == Qt.LeftButton and self.presenter.drawing_tool is None:
             # Oblicz przesunięcie względem poprzedniej pozycji
             delta = event.pos() - self.last_mouse_position
             self.last_mouse_position = event.pos()

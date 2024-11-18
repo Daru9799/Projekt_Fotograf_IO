@@ -61,5 +61,5 @@ class RectanglePresenter(QObject):
         if self.rectangle_start_point != (None, None):
             self.delete_temp_rectangle()
             self.update_start_point(None, None)
-            self.view.set_draw_rectangle_button_text("Rysuj prostokąt")
+        self.view.set_draw_rectangle_button_text("Rysuj prostokąt")
 
