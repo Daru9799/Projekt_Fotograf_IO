@@ -29,8 +29,6 @@ class CustomClassListItemView(QWidget):
         self.row.addWidget(self.colorBox)
         self.setLayout(self.row)
 
-
-
     # Metoda do sprawdzania, czy checkbox jest zaznaczony
     def isChecked(self):
         return self.checkbox.isChecked()

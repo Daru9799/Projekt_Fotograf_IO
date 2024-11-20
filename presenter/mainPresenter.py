@@ -103,7 +103,7 @@ class Presenter:
                 print("Nazwa pliku: " + img_obj.filename)
                 for an in img_obj.list_of_annotations:
                     print("Id anotacji: " + str(an.annotation_id))
-                    print("Punkty: " + str(an.area))
+                    print("Punkty: " + str(an.segmentation))
                     print("Klasa: " + str(an.class_id))
                 ###Tutaj trzeba obsłużyć update sceny z nowym narysowanym obiektem (narysować go ponownie z innymi)
                 self.rectangle_presenter.update_start_point(None, None)
