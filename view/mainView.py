@@ -467,3 +467,10 @@ class MainView(object):
         msg.setText(text)
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
+
+    #Zwraca nazwę aktualnei zaznaczonego obrazka
+    def get_selected_image(self):
+        selected_item = self.file_list_widget.currentItem()
+        if selected_item is not None:
+            return selected_item.text()
+        return None
