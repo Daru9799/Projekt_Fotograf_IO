@@ -11,14 +11,15 @@ class RectanglePresenter(QObject):
         self.rectangle_start_point = (None, None)  # Punkt początkowy nowo rysowanego prostokąta (x, y)
         self.points = [] #w tym przypadku zwróci 4 punkty (wierzchołki prostokąta w liście)
         self.temp_rectangle_item = None #referencja to rysowanego rectangle
+        self.color = (0,0,0) #RGB
 
     def draw_rectangle(self, x1, y1, x2, y2):
         #Utworzenie obrazu z przezroczystym tłem w OpenCV (BGRA) (Najpierw jest height potem width, muszą być to wymiary aktualnei wyswietlanego obrazka)
         image = np.zeros((self.view.pixmap_item.pixmap().height(), self.view.pixmap_item.pixmap().width(), 4), dtype=np.uint8)
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) #Konwersja współrzędnych na typ int
         #Parametry obramówki i wypełnienia
-        border_color = (200, 0, 0, 255)
-        fill_color = (255, 0, 0, 80)  #Dla A im mniejsza wartość, tym bardziej przezroczysty
+        border_color = (abs(self.color[0] - 50), abs(self.color[1] - 50), abs(self.color[2] - 50), 255) #Nie mam lepszego pomysłu xD
+        fill_color = (self.color[0], self.color[1], self.color[2], 80)  #Dla A im mniejsza wartość, tym bardziej przezroczysty
         border_thickness = 2
         #Ustawienie współrzędnych tak aby kolejność zawsze wskazywała podążanie od lewego górnego wierzchołka zgodnie ze wskazówkami zegara
         x1, x2 = min(x1, x2), max(x1, x2)
@@ -63,4 +64,7 @@ class RectanglePresenter(QObject):
             self.update_start_point(None, None)
         self.view.set_draw_rectangle_button_text("Rysuj prostokąt")
         self.view.change_to_arrow_cursor()
+
+    def update_color(self, color):
+        self.color = color
 

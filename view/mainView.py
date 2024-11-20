@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import QIcon, QKeyEvent
-from PyQt5.QtWidgets import QGraphicsScene
+from PyQt5.QtWidgets import QGraphicsScene, QApplication, QMessageBox
 from PyQt5.QtGui import QMouseEvent
 from PyQt5.Qt import Qt
 
@@ -451,3 +451,19 @@ class MainView(object):
 
     def set_zoom_slider_visibility(self, visible: bool):
         self.zoom_image_slider.setVisible(visible)
+
+    def get_selected_class(self):
+        selected_item = self.class_list_widget.selectedItems()
+        if selected_item:
+            selected_item = selected_item[0]
+            # Pobieramy CustomClassListItemView powiązany z QListWidgetItem
+            custom_view = self.class_list_widget.itemWidget(selected_item)
+            return custom_view
+        return None
+
+    def show_message_OK(self, title, text):
+        msg = QMessageBox()
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()

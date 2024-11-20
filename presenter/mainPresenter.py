@@ -80,8 +80,13 @@ class Presenter:
         #Logika rysowania prostokąta
         if self.drawing_tool == "rectangle":
             if self.rectangle_presenter.rectangle_start_point == (None, None):
-                self.rectangle_presenter.update_start_point(x, y)
-                self.view.set_notification_label(f"Rysowanie prostokąta. Wybrano punkt początkowy {int(x)}, {int(y)}. Proszę wybrać punkt końcowy")
+                selected_class = self.view.get_selected_class()
+                if selected_class:
+                    self.rectangle_presenter.update_start_point(x, y)
+                    self.rectangle_presenter.update_color(selected_class.Class.color)
+                    self.view.set_notification_label(f"Rysowanie prostokąta. Wybrano punkt początkowy {int(x)}, {int(y)}. Proszę wybrać punkt końcowy")
+                else:
+                    self.view.show_message_OK("Informacja", "Proszę o wybranie klasy")
             else:
                 points = self.rectangle_presenter.get_rectangle_points()
                 self.view.set_notification_label(f"Pomyślnie narysowano prostokąt! Jego współrzędne to: " + str(points))
