@@ -353,20 +353,13 @@ class MainView(object):
         if self.pixmap_item:
             image_pos = self.pixmap_item.mapFromScene(scene_pos)
             x, y = image_pos.x(), image_pos.y()
-            self.presenter.handle_mouse_click(x, y)  # Wywołanie funkcji w prezenterze z współrzędnymi obrazka
-
-        # Jeśli narzędzie do rysowania jest wyłączone, włącz przeciąganie przy lewym przycisku
-        if (event.button() == Qt.LeftButton and self.presenter.drawing_tool is None)\
-                or(event.button() == Qt.RightButton and self.presenter.drawing_tool is not None):
-            self.graphics_view.setCursor(QtCore.Qt.ClosedHandCursor)
-            self.is_dragging = True
-            self.last_mouse_position = event.pos()
-
-        # Jeśli narzędzie do rysowania jest włączone, włącz przeciąganie przy prawym przycisku
-        if event.button() == Qt.RightButton and self.presenter.drawing_tool is not None:
-            self.graphics_view.setCursor(QtCore.Qt.ClosedHandCursor)
-            self.is_dragging = True
-            self.last_mouse_position = event.pos()
+            if event.button() == Qt.LeftButton:
+                self.presenter.handle_mouse_click(x, y)  # Wywołanie funkcji w prezenterze z współrzędnymi obrazka
+            #Przeciąganie po kliknięciu prawego przycisku
+            if event.button() == Qt.RightButton:
+                self.graphics_view.setCursor(QtCore.Qt.ClosedHandCursor)
+                self.is_dragging = True
+                self.last_mouse_position = event.pos()
 
     def mouse_move_event(self, event: QMouseEvent):
         # Obsługuje przeciąganie obrazu, jeśli lewy przycisk myszy jest wciśnięty lub prawy przycisk przy aktywnym narzędziu do rysowania
@@ -383,10 +376,7 @@ class MainView(object):
         # Sprawdzamy, czy przeciąganie jest aktywne:
         # - Dla lewego przycisku, gdy narzędzie do rysowania jest wyłączone
         # - Dla prawego przycisku, gdy narzędzie do rysowania jest włączone
-        if self.is_dragging and (
-                (event.buttons() == Qt.LeftButton and self.presenter.drawing_tool is None) or
-                (event.buttons() == Qt.RightButton and self.presenter.drawing_tool is not None)
-        ):
+        if self.is_dragging and event.buttons() == Qt.RightButton:
             # Obliczanie różnicy pozycji kursora od ostatniego ruchu
             delta = event.pos() - self.last_mouse_position
             # Aktualizacja ostatniej pozycji kursora
@@ -403,10 +393,13 @@ class MainView(object):
 
     def mouse_release_event(self, event: QMouseEvent):
         # Zakończenie przeciągania po zwolnieniu przycisku myszy
-        if event.button() == Qt.LeftButton or event.button() == Qt.RightButton:
+        if event.button() == event.button() == Qt.RightButton:
             self.is_dragging = False
             self.last_mouse_position = None
-            self.graphics_view.setCursor(QtCore.Qt.ArrowCursor)
+            if self.presenter.drawing_tool is None:
+                self.change_to_arrow_cursor()
+            else:
+                self.change_to_cross_cursor()
 
     #Zmiana kursora gdy jesteśmy w obszarze obrazka
     def change_to_cross_cursor(self):
