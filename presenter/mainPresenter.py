@@ -125,5 +125,10 @@ class Presenter:
         self.drawing_tool = None
         self.view.set_notification_label("Brak aktywnego narzędzia")
 
+    def handle_crtl_minus(self):
+        self.file_list_presenter.decrease_zoom()
+
+    def handle_crtl_plus(self):
+        self.file_list_presenter.increase_zoom()
 
 

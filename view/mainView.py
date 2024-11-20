@@ -445,9 +445,24 @@ class MainView(object):
     def set_draw_rectangle_button_text(self, text):
         self.draw_rectangle_button.setText(text)
 
-    def key_press_event(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Escape:
-            self.presenter.handle_escape_click()
+    # def key_press_event(self, event: QKeyEvent):
+    #     if event.key() == Qt.Key_Escape:
+    #         self.presenter.handle_escape_click()
+
+    def key_press_event(self, event):
+        try:
+            # Obsługa ESC
+            if event.key() == Qt.Key_Escape:
+                self.presenter.handle_escape_click()
+
+            # Obsługa Ctrl + / Ctrl -
+            elif event.modifiers() == Qt.ControlModifier:  # Check for Ctrl modifier first
+                if event.key() == Qt.Key_Minus:
+                    self.presenter.handle_crtl_minus()
+                elif event.key() == Qt.Key_Plus or event.key() == Qt.Key_Equal:  # "+" or "="
+                    self.presenter.handle_crtl_plus()
+        except Exception as e:
+            print(f"Error in key_press_event: {e}")
 
     def set_zoom_slider_visibility(self, visible: bool):
         self.zoom_image_slider.setVisible(visible)
