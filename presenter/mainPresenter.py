@@ -8,6 +8,7 @@ from model.ClassModel import ClassModel
 from presenter.FileListPresenter import FileListPresenter
 from presenter.ClassManagerPresenter import ClassManagerPresenter
 from presenter.RectanglePresenter import RectanglePresenter
+from presenter.AnnotationPresenter import AnnotationPreseter
 
 #Głowny prezenter który jest przekazywany widokowi
 class Presenter:
@@ -16,17 +17,18 @@ class Presenter:
         self.new_project = ProjectModel(None)
         self.drawing_tool = None  #Aktywne narzędzie rysowania (w przypadku braku ustawiamy na None) Dostępne opcje: "rectangle", "polygon"
         self.image_item = None #Aktywne zdjęcie w liście po prawej
-        self.annotation_id = 0 #rozwiązanie tymczasowe
         #Podprezentery do obsługi poszczególnych modułów aplikacji
         self.file_list_presenter = FileListPresenter(None)
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project)
         self.rectangle_presenter = RectanglePresenter(None)
+        self.annotation_presenter = AnnotationPreseter(None)
     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
     def update_view(self, view):
         self.view = view
         self.file_list_presenter.view = view
         self.classManagerPresenter.view = view
         self.rectangle_presenter.view = view
+        self.annotation_presenter.view = view
 
     #Utworzenie nowego projektu, wczytanie danych do modelu
     def create_new_project(self):
@@ -93,18 +95,7 @@ class Presenter:
                 points = self.rectangle_presenter.get_rectangle_points()
                 self.view.set_notification_label(f"Pomyślnie narysowano prostokąt! Jego współrzędne to: " + str(points))
                 self.rectangle_presenter.delete_temp_rectangle() #Usunięcie tymczasowego obiektu
-                #Dodawanie nowej adnotacji i dodanie jej do obiektu obrazka
-                selected_class = self.view.get_selected_class()
-                new_annotation = AnnotationModel(annotation_id=self.annotation_id, area=points, class_id = selected_class.Class.class_id)
-                self.annotation_id += 1
-                selected_image_name = self.view.get_selected_image() #wyciagam nazwe zaznaczonego obrazka
-                img_obj = self.new_project.get_img_by_filename(selected_image_name)
-                img_obj.list_of_annotations.append(new_annotation)
-                print("Nazwa pliku: " + img_obj.filename)
-                for an in img_obj.list_of_annotations:
-                    print("Id anotacji: " + str(an.annotation_id))
-                    print("Punkty: " + str(an.area))
-                    print("Klasa: " + str(an.class_id))
+                self.annotation_presenter.add_annotation(points, self.new_project)
                 ###Tutaj trzeba obsłużyć update sceny z nowym narysowanym obiektem (narysować go ponownie z innymi)
                 self.rectangle_presenter.update_start_point(None, None)
 
