@@ -346,21 +346,30 @@ class MainView(object):
     def set_notification_label(self, text):
         self.label_notification.setText(text)
 
-    #Przesyła współrzędne kliknięcia do funkcji
+    # Przesyła współrzędne kliknięcia do funkcji
     def mouse_press_event(self, event: QMouseEvent):
         scene_pos = self.graphics_view.mapToScene(event.pos())
+
         if self.pixmap_item:
             image_pos = self.pixmap_item.mapFromScene(scene_pos)
             x, y = image_pos.x(), image_pos.y()
             self.presenter.handle_mouse_click(x, y)  # Wywołanie funkcji w prezenterze z współrzędnymi obrazka
-        if event.button() == Qt.LeftButton and self.presenter.drawing_tool is None:
-            #zmiana kursora
-            self.graphics_view.setCursor(QtCore.Qt.OpenHandCursor)
+
+        # Jeśli narzędzie do rysowania jest wyłączone, włącz przeciąganie przy lewym przycisku
+        if (event.button() == Qt.LeftButton and self.presenter.drawing_tool is None)\
+                or(event.button() == Qt.RightButton and self.presenter.drawing_tool is not None):
+            self.graphics_view.setCursor(QtCore.Qt.ClosedHandCursor)
+            self.is_dragging = True
+            self.last_mouse_position = event.pos()
+
+        # Jeśli narzędzie do rysowania jest włączone, włącz przeciąganie przy prawym przycisku
+        if event.button() == Qt.RightButton and self.presenter.drawing_tool is not None:
+            self.graphics_view.setCursor(QtCore.Qt.ClosedHandCursor)
             self.is_dragging = True
             self.last_mouse_position = event.pos()
 
     def mouse_move_event(self, event: QMouseEvent):
-        # Obsługa przeciągania obrazu
+        # Obsługuje przeciąganie obrazu, jeśli lewy przycisk myszy jest wciśnięty lub prawy przycisk przy aktywnym narzędziu do rysowania
         self.handle_dragging(event)
 
         # Zwykłe śledzenie ruchu myszy
@@ -370,56 +379,31 @@ class MainView(object):
             x, y = image_pos.x(), image_pos.y()
             self.presenter.handle_mouse_move(x, y)
 
-        # Obsługa przesuwania obrazu, jeśli kursor jest blisko krawędzi
-        self.handle_edge_scrolling(event.pos())
-
-    def handle_edge_scrolling(self, cursor_pos):
-        edge_threshold = 30  # Próg odległości od krawędzi w pikselach
-        view_rect = self.graphics_view.viewport().rect()
-
-        if self.presenter.drawing_tool is not None:
-            if cursor_pos.x() < edge_threshold:
-                # Kursor blisko lewej krawędzi
-                self.graphics_view.horizontalScrollBar().setValue(
-                    self.graphics_view.horizontalScrollBar().value() - 20
-                )
-            elif cursor_pos.x() > view_rect.width() - edge_threshold:
-                # Kursor blisko prawej krawędzi
-                self.graphics_view.horizontalScrollBar().setValue(
-                    self.graphics_view.horizontalScrollBar().value() + 20
-                )
-
-            if cursor_pos.y() < edge_threshold:
-                # Kursor blisko górnej krawędzi
-                self.graphics_view.verticalScrollBar().setValue(
-                    self.graphics_view.verticalScrollBar().value() - 20
-                )
-            elif cursor_pos.y() > view_rect.height() - edge_threshold:
-                # Kursor blisko dolnej krawędzi
-                self.graphics_view.verticalScrollBar().setValue(
-                    self.graphics_view.verticalScrollBar().value() + 20
-                )
-
     def handle_dragging(self, event: QMouseEvent):
-        # Sprawdzenie, czy przeciąganie jest aktywne, lewy przycisk myszy jest wciśnięty i nie jest aktywne narzędzie do rysowania
-        if self.is_dragging and event.buttons() == Qt.LeftButton and self.presenter.drawing_tool is None:
-            # Obliczenie różnicy pozycji kursora od ostatniego ruchu
+        # Sprawdzamy, czy przeciąganie jest aktywne:
+        # - Dla lewego przycisku, gdy narzędzie do rysowania jest wyłączone
+        # - Dla prawego przycisku, gdy narzędzie do rysowania jest włączone
+        if self.is_dragging and (
+                (event.buttons() == Qt.LeftButton and self.presenter.drawing_tool is None) or
+                (event.buttons() == Qt.RightButton and self.presenter.drawing_tool is not None)
+        ):
+            # Obliczanie różnicy pozycji kursora od ostatniego ruchu
             delta = event.pos() - self.last_mouse_position
             # Aktualizacja ostatniej pozycji kursora
             self.last_mouse_position = event.pos()
 
-            # Przesunięcie paska przewijania w poziomie na podstawie zmiany pozycji kursora
+            # Przesunięcie paska przewijania w poziomie
             self.graphics_view.horizontalScrollBar().setValue(
                 self.graphics_view.horizontalScrollBar().value() - delta.x()
             )
-            # Przesunięcie paska przewijania w pionie na podstawie zmiany pozycji kursora
+            # Przesunięcie paska przewijania w pionie
             self.graphics_view.verticalScrollBar().setValue(
                 self.graphics_view.verticalScrollBar().value() - delta.y()
             )
 
     def mouse_release_event(self, event: QMouseEvent):
-        # Zakończenie przeciągania, gdy lewy przycisk myszy zostanie zwolniony i nie jest aktywne narzędzie do rysowania
-        if event.button() == Qt.LeftButton and self.presenter.drawing_tool is None:
+        # Zakończenie przeciągania po zwolnieniu przycisku myszy
+        if event.button() == Qt.LeftButton or event.button() == Qt.RightButton:
             self.is_dragging = False
             self.last_mouse_position = None
             self.graphics_view.setCursor(QtCore.Qt.ArrowCursor)
@@ -489,3 +473,35 @@ class MainView(object):
         if selected_item is not None:
             return selected_item.text()
         return None
+
+
+
+        # Obsługa przesuwania obrazu, jeśli kursor jest blisko krawędzi
+        # self.handle_edge_scrolling(event.pos())
+
+    # def handle_edge_scrolling(self, cursor_pos):
+    #     edge_threshold = 30  # Próg odległości od krawędzi w pikselach
+    #     view_rect = self.graphics_view.viewport().rect()
+    #
+    #     if self.presenter.drawing_tool is not None:
+    #         if cursor_pos.x() < edge_threshold:
+    #             # Kursor blisko lewej krawędzi
+    #             self.graphics_view.horizontalScrollBar().setValue(
+    #                 self.graphics_view.horizontalScrollBar().value() - 20
+    #             )
+    #         elif cursor_pos.x() > view_rect.width() - edge_threshold:
+    #             # Kursor blisko prawej krawędzi
+    #             self.graphics_view.horizontalScrollBar().setValue(
+    #                 self.graphics_view.horizontalScrollBar().value() + 20
+    #             )
+    #
+    #         if cursor_pos.y() < edge_threshold:
+    #             # Kursor blisko górnej krawędzi
+    #             self.graphics_view.verticalScrollBar().setValue(
+    #                 self.graphics_view.verticalScrollBar().value() - 20
+    #             )
+    #         elif cursor_pos.y() > view_rect.height() - edge_threshold:
+    #             # Kursor blisko dolnej krawędzi
+    #             self.graphics_view.verticalScrollBar().setValue(
+    #                 self.graphics_view.verticalScrollBar().value() + 20
+    #             )
