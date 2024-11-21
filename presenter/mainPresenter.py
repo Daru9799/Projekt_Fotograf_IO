@@ -122,4 +122,10 @@ class Presenter:
     def handle_crtl_plus(self):
         self.file_list_presenter.increase_zoom()
 
+    def handle_scroll_up(self):
+        self.file_list_presenter.increase_zoom()
+
+    def handle_scroll_down(self):
+        self.file_list_presenter.decrease_zoom()
+
 

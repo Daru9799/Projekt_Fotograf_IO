@@ -311,6 +311,9 @@ class MainView(object):
         self.graphics_view.mousePressEvent = self.mouse_press_event
         self.graphics_view.mouseReleaseEvent = self.mouse_release_event
 
+        #Scroll
+        self.graphics_view.wheelEvent = self.mouse_wheel_event
+
         #Obsluga klawisza
         self.centralwidget.keyPressEvent = self.key_press_event
 
@@ -434,12 +437,20 @@ class MainView(object):
 
             # Obsługa Ctrl + / Ctrl -
             elif event.modifiers() == Qt.ControlModifier:  # Check for Ctrl modifier first
-                if event.key() == Qt.Key_Minus:
+                if event.key() == Qt.Key_Minus or event.key() == Qt.Key_Underscore:
                     self.presenter.handle_crtl_minus()
                 elif event.key() == Qt.Key_Plus or event.key() == Qt.Key_Equal:  # "+" or "="
                     self.presenter.handle_crtl_plus()
         except Exception as e:
             print(f"Error in key_press_event: {e}")
+
+    #Sprawdzenie kierunku przewijania scrolla
+    def mouse_wheel_event(self, event):
+        if QApplication.keyboardModifiers() == Qt.ControlModifier:
+            if event.angleDelta().y() > 0:  # Scroll w górę
+                self.presenter.handle_scroll_up()
+            elif event.angleDelta().y() < 0:  # Scroll w dół
+                self.presenter.handle_scroll_down()
 
     def set_zoom_slider_visibility(self, visible: bool):
         self.zoom_image_slider.setVisible(visible)
