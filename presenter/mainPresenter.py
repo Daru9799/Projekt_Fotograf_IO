@@ -9,6 +9,7 @@ from presenter.FileListPresenter import FileListPresenter
 from presenter.ClassManagerPresenter import ClassManagerPresenter
 from presenter.RectanglePresenter import RectanglePresenter
 from presenter.AnnotationPresenter import AnnotationPreseter
+from presenter.PolygonPresenter import PolygonPresenter
 
 #Głowny prezenter który jest przekazywany widokowi
 class Presenter:
@@ -21,21 +22,36 @@ class Presenter:
         self.file_list_presenter = FileListPresenter(None)
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project)
         self.rectangle_presenter = RectanglePresenter(None)
+        self.polygon_presenter = PolygonPresenter(None)
         self.annotation_presenter = AnnotationPreseter(None)
+
     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
     def update_view(self, view):
         self.view = view
         self.file_list_presenter.view = view
         self.classManagerPresenter.view = view
         self.rectangle_presenter.view = view
+        self.polygon_presenter.view = view
         self.annotation_presenter.view = view
+
+        # !!!
+        # Linia poniżej finalnie do usunięcia
+        self.create_new_project()
+        # !!!
 
     #Utworzenie nowego projektu, wczytanie danych do modelu
     def create_new_project(self):
-        folder_path = QFileDialog.getExistingDirectory(self.view.centralwidget.parent(), "Wybierz folder ze zdjęciami")
+        # !!!
+        # tymczasowe rozwiązanie !!!:
+        # folder_path = QFileDialog.getExistingDirectory(self.view.centralwidget.parent(), "Wybierz folder ze zdjęciami")
+        # linie poniżej też usunąć
+        folder_path = "./!OBRAZKI DO TESTÓW"
+        # !!!
         if folder_path:
             self.new_project.folder_path = folder_path
-            self.new_project.load_images() #Zaladowanie zdjec do modelu
+            print("Ścieżka do folderu: "+self.new_project.folder_path)
+            self.new_project.load_images()      #Zaladowanie zdjec do modelu
+
             #Lista plików aktualizacja w podprezenterze
             self.file_list_presenter.update_project(self.new_project)
             self.file_list_presenter.load_files_to_widget()
@@ -44,8 +60,9 @@ class Presenter:
 
     #Aktualizacja sceny po zmianie obrazka w liście po prawej stronie
     def folder_list_on_click(self, item):
-        self.rectangle_presenter.cancel_drawing_rectangle() #Anulowanie rysowania prostokąta po kliknięciu w prawy panel
-        self.view.set_notification_label("Tryb rysowania prostokąta aktywny")
+        self.rectangle_presenter.cancel_drawing_rectangle()     #Anulowanie rysowania prostokąta po kliknięciu w prawy panel
+        self.drawing_tool = None
+        self.view.set_notification_label("Brak aktywnego narzędzia")
         if self.image_item != item:
             self.file_list_presenter.show_image(item)
             self.image_item = item
@@ -68,9 +85,14 @@ class Presenter:
             self.rectangle_presenter.cancel_drawing_rectangle()
             self.drawing_tool = "polygon"
             self.view.set_notification_label("Tryb rysowania poligona aktywny")
+            self.view.set_draw_polygon_button_text("Anuluj rysowanie poligona")
             self.view.change_to_cross_cursor()
         else:
             self.drawing_tool = None
+
+            # Zrobić tak żeby kod poniżej zakomentowany był robiony przez PolygonPresenter.cancel_drawing_polygon()
+            # self.view.set_draw_polygon_button_text("Rysuj poligon")
+
             self.view.set_notification_label("Brak aktywnego narzędzia")
 
     #Aktualizacja zooma
@@ -102,6 +124,19 @@ class Presenter:
         #Logika rysowania poligona
         if self.drawing_tool == "polygon":
             self.view.set_notification_label(f"Rysowanie poligona: ")
+            # jeśli plolygon ma conajmniej 3 punkty i klikneliśmy obok współżendnych początkowych
+            if len(self.polygon_presenter.current_polygon_points) > 2 and self.polygon_presenter.is_near_starting_point(x, y):
+                self.polygon_presenter.current_polygon_points.append((int(x), int(y)))
+                self.polygon_presenter.drawing_polygon()
+                self.polygon_presenter.polygon_closed = True
+                # dodajemy wielokąt do listy adnotacji              <--- do implementacji
+                self.polygon_presenter.current_polygon_points.clear()
+                self.polygon_presenter.polygon_closed = False
+            else:
+                self.polygon_presenter.current_polygon_points.append((int(x),int(y)))
+                self.polygon_presenter.drawing_polygon()
+
+
 
     #Obsluga przesuwania myszy w obrębie obszaru obrazka (współrzędne zawsze odnoszą się do obrazka nie całego graphic_view)
     def handle_mouse_move(self, x, y):
@@ -110,6 +145,8 @@ class Presenter:
         if self.rectangle_presenter.rectangle_start_point != (None, None):
             self.rectangle_presenter.delete_temp_rectangle() #usuwa poprzedni cień
             self.rectangle_presenter.draw_rectangle(self.rectangle_presenter.rectangle_start_point[0], self.rectangle_presenter.rectangle_start_point[1], x, y)
+        if self.drawing_tool == "polygon":
+            self.polygon_presenter.set_cursor_pos(x,y)
 
     def handle_escape_click(self):
         self.rectangle_presenter.cancel_drawing_rectangle()

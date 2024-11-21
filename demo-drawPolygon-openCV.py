@@ -129,6 +129,7 @@ class RealTimeOpenCVViewer(QGraphicsView):
         if event.button() == Qt.LeftButton:
             self.is_dragging = False
             self.selected_vertex = None
+        print(self.current_polygon_points)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_R:

@@ -425,6 +425,9 @@ class MainView(object):
     def set_draw_rectangle_button_text(self, text):
         self.draw_rectangle_button.setText(text)
 
+    def set_draw_polygon_button_text(self, text):
+        self.draw_polygon_button.setText(text)
+
     # def key_press_event(self, event: QKeyEvent):
     #     if event.key() == Qt.Key_Escape:
     #         self.presenter.handle_escape_click()
