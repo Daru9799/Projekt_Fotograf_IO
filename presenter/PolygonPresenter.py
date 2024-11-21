@@ -30,8 +30,8 @@ class PolygonPresenter(QObject):
 
     # Funkcja odpowiedzialna za narysowanie wszystkich wirzchołków polygona na nowej powierzchni rysunkowej
     def drawing_polygon(self):
-        print("--- Lista aktualnych punktów polygona: ---")
-        print( self.current_polygon_points)
+        #print("--- Lista aktualnych punktów polygona: ---")
+        #print( self.current_polygon_points)
         drawing_surface = np.zeros((self.view.pixmap_item.pixmap().height(), self.view.pixmap_item.pixmap().width(), 4),dtype=np.uint8)
         #drawing_surface[:, :, 3] = 255
         #border_color = (abs(self.color[0] - 50), abs(self.color[1] - 50), abs(self.color[2] - 50))
@@ -49,8 +49,12 @@ class PolygonPresenter(QObject):
             else: # rysowanie pierszego wierzchołka
                 cv2.circle(drawing_surface, tuple(np_points[0][0]), self.point_radius, self.color, -1)
 
+            if self.polygon_closed:
+                fill_color = (self.color[0], self.color[1], self.color[2], 120)
+                cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
+
             # Rysowanie lini podążającej za kursorem:
-            if len(np_points) > 0:
+            if len(np_points) > 0 and not self.polygon_closed:
                 last_point = np_points[-1][0]  # Ostatni punkt
                 cv2.line(drawing_surface, tuple(last_point), (self.cursor_pos[0], self.cursor_pos[1]), self.color, 2)
 
@@ -75,3 +79,19 @@ class PolygonPresenter(QObject):
         if len(self.current_polygon_points) != 0: # Nie chcemy rysować jeśli polygon nie ma wierzchołków
             self.drawing_polygon()
 
+    # Sprawdza czy punkt (x,y) znajduje się w polu polygona
+    def check_inclusion(self,x,y):
+        np_points = np.array(self.current_polygon_points, dtype=np.int32)
+        #np_points = np_points.reshape((-1, 1, 2))
+        result = cv2.pointPolygonTest(np_points, (x,y), False)
+        return result
+
+    def cancel_drawing_polygon(self):
+        self.view.scene.removeItem(self.temp_polygon_item)
+        self.temp_polygon_item = None
+        self.polygon_closed = False
+        self.current_polygon_points.clear()
+        self.view.set_draw_polygon_button_text("Rysuj poligon")
+
+    def update_color(self, color):
+        self.color = (color[0],color[1],color[2],255)

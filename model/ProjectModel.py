@@ -2,6 +2,7 @@ import os
 from operator import indexOf
 from PIL import Image
 from PIL.ExifTags import TAGS
+import random
 # from statsmodels.sandbox.stats.contrast_tools import contrast_labels
 
 from model.ImageModel import ImageModel
@@ -15,6 +16,10 @@ class ProjectModel:
         self.folder_path = folder_path
         self.list_of_images_model = []
         self.list_of_classes_model = []
+
+        # Seedowanie klas do testów:
+        self.addNewClass("test")
+        self.list_of_classes_model[0].color = (20,44,255)
 
     #Wczytanie zdjec z folderu, utworzenie obiektow i zapisanie ich na liscie
     def load_images(self):
@@ -112,7 +117,7 @@ class ProjectModel:
                 if c.class_id == uniqueId:
                     uniqueId = randrange(1000000,9999999)
                     isUnique = False
-        newClass = ClassModel(class_id=uniqueId, name=clName) # tworzenie obiektu ClassModel
+        newClass = ClassModel(class_id=uniqueId, name=clName, color=self.random_color()) # tworzenie obiektu ClassModel
         self.list_of_classes_model.append(newClass)
 
     def deleteClass(self, clId): # niedokończone
@@ -129,6 +134,10 @@ class ProjectModel:
             if cl.class_id == classObj.class_id:
                 classIndex = indexOf(self.list_of_classes_model,cl)
                 self.list_of_classes_model[classIndex] = classObj
+
+    def random_color(self):
+        """Zwraca losowy kolor w formacie RGB."""
+        return (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     ### Gettery do list
     # Zwrócenie obrazu na podstawie nazwy pliku

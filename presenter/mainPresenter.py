@@ -34,6 +34,7 @@ class Presenter:
         self.polygon_presenter.view = view
         self.annotation_presenter.view = view
 
+        self.classManagerPresenter.updateItems()
         # !!!
         # Linia poniżej finalnie do usunięcia
         self.create_new_project()
@@ -42,7 +43,7 @@ class Presenter:
     #Utworzenie nowego projektu, wczytanie danych do modelu
     def create_new_project(self):
         # !!!
-        # tymczasowe rozwiązanie !!!:
+        # linie poniżej odkomentować
         # folder_path = QFileDialog.getExistingDirectory(self.view.centralwidget.parent(), "Wybierz folder ze zdjęciami")
         # linie poniżej też usunąć
         folder_path = "./!OBRAZKI DO TESTÓW"
@@ -61,6 +62,7 @@ class Presenter:
     #Aktualizacja sceny po zmianie obrazka w liście po prawej stronie
     def folder_list_on_click(self, item):
         self.rectangle_presenter.cancel_drawing_rectangle()     #Anulowanie rysowania prostokąta po kliknięciu w prawy panel
+        self.polygon_presenter.cancel_drawing_polygon()         #Anulowanie rysowania polygona --//--
         self.drawing_tool = None
         self.view.set_notification_label("Brak aktywnego narzędzia")
         if self.image_item != item:
@@ -70,6 +72,7 @@ class Presenter:
     #Aktywacja bądź dezaktywacja narzędzia rectangle
     def activate_rectangle_tool(self):
         if self.drawing_tool != "rectangle":
+            self.polygon_presenter.cancel_drawing_polygon()
             self.drawing_tool = "rectangle"
             self.view.set_notification_label("Tryb rysowania prostokąta aktywny")
             self.view.set_draw_rectangle_button_text("Anuluj rysowanie prostokąta")
@@ -89,13 +92,10 @@ class Presenter:
             self.view.change_to_cross_cursor()
         else:
             self.drawing_tool = None
-
-            # Zrobić tak żeby kod poniżej zakomentowany był robiony przez PolygonPresenter.cancel_drawing_polygon()
-            # self.view.set_draw_polygon_button_text("Rysuj poligon")
-
             self.view.set_notification_label("Brak aktywnego narzędzia")
+            self.polygon_presenter.cancel_drawing_polygon()
 
-    #Aktualizacja zooma
+            #Aktualizacja zooma
     def zoom_slider(self):
         if self.new_project.list_of_images_model: #Jeśli nie ma obrazka to nic nie rób
             self.file_list_presenter.on_zoom_slider_changed()
@@ -103,10 +103,10 @@ class Presenter:
     #Obsluga klikniecia myszy w obszar obrazka (dostaje współrzędne kliknięcia x i y)
     def handle_mouse_click(self, x, y):
         print(f"Współrzędne kliknięcia: x={x}, y={y}")
+        selected_class = self.view.get_selected_class()
         #Logika rysowania prostokąta
         if self.drawing_tool == "rectangle":
             if self.rectangle_presenter.rectangle_start_point == (None, None):
-                selected_class = self.view.get_selected_class()
                 if selected_class:
                     self.rectangle_presenter.update_start_point(x, y)
                     self.rectangle_presenter.update_color(selected_class.Class.color)
@@ -124,17 +124,40 @@ class Presenter:
         #Logika rysowania poligona
         if self.drawing_tool == "polygon":
             self.view.set_notification_label(f"Rysowanie poligona: ")
-            # jeśli plolygon ma conajmniej 3 punkty i klikneliśmy obok współżendnych początkowych
-            if len(self.polygon_presenter.current_polygon_points) > 2 and self.polygon_presenter.is_near_starting_point(x, y):
-                self.polygon_presenter.current_polygon_points.append((int(x), int(y)))
-                self.polygon_presenter.drawing_polygon()
-                self.polygon_presenter.polygon_closed = True
-                # dodajemy wielokąt do listy adnotacji              <--- do implementacji
-                self.polygon_presenter.current_polygon_points.clear()
-                self.polygon_presenter.polygon_closed = False
+
+            if not selected_class: # sprawdzenie czy klasa jest wybrana
+                self.view.show_message_OK("Informacja", "Proszę o wybranie klasy")
+                return
+
+            self.polygon_presenter.update_color(selected_class.Class.color) # update koloru
+            if not self.polygon_presenter.polygon_closed:
+                # jeśli plolygon ma conajmniej 3 punkty i klikneliśmy obok współżendnych początkowych
+                if len(self.polygon_presenter.current_polygon_points) > 2 and self.polygon_presenter.is_near_starting_point(x, y):
+                    self.polygon_presenter.polygon_closed = True
+                    self.polygon_presenter.current_polygon_points.append((int(x), int(y)))
+                    self.polygon_presenter.drawing_polygon()
+
+                    points = self.polygon_presenter.current_polygon_points
+                    self.annotation_presenter.add_annotation(points, self.new_project) # dodajemy wielokąt do listy adnotacji
+
+                    # self.polygon_presenter.current_polygon_points.clear()   # do odkomentowania potem
+                    # self.polygon_presenter.polygon_closed = False             # do odkomentowania potem
+                else:
+                    self.polygon_presenter.current_polygon_points.append((int(x),int(y)))
+                    self.polygon_presenter.drawing_polygon()
             else:
-                self.polygon_presenter.current_polygon_points.append((int(x),int(y)))
-                self.polygon_presenter.drawing_polygon()
+                # Tymczasowe,testowe: sprawdzanie czy kliknięty punkt znajduje się obszarze polygona
+                result = self.polygon_presenter.check_inclusion(int(x),int(y))
+                if result > 0:
+                    print("Punkt znajduje się wewnątrz wielokąta.")
+                elif result == 0:
+                    print("Punkt znajduje się na krawędzi wielokąta.")
+                else:
+                    print("Punkt znajduje się na zewnątrz wielokąta.")
+                    self.polygon_presenter.current_polygon_points.clear()   # do odkomentowania potem
+                    self.polygon_presenter.polygon_closed = False
+                    self.polygon_presenter.drawing_polygon()
+
 
 
 
@@ -150,6 +173,7 @@ class Presenter:
 
     def handle_escape_click(self):
         self.rectangle_presenter.cancel_drawing_rectangle()
+        self.polygon_presenter.cancel_drawing_polygon()
         self.drawing_tool = None
         self.view.set_notification_label("Brak aktywnego narzędzia")
 
