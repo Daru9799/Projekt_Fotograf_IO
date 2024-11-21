@@ -1,4 +1,3 @@
-from PyQt5.QtWidgets import QFileDialog
 #Modele
 from model.ProjectModel import ProjectModel
 from model.AnnotationModel import AnnotationModel
@@ -64,7 +63,7 @@ class Presenter:
         self.rectangle_presenter.cancel_drawing_rectangle()     #Anulowanie rysowania prostokąta po kliknięciu w prawy panel
         self.polygon_presenter.cancel_drawing_polygon()         #Anulowanie rysowania polygona --//--
         self.drawing_tool = None
-        self.view.set_notification_label("Brak aktywnego narzędzia")
+        self.view.set_no_active_tool_text()
         if self.image_item != item:
             self.file_list_presenter.show_image(item)
             self.image_item = item
@@ -74,12 +73,12 @@ class Presenter:
         if self.drawing_tool != "rectangle":
             self.polygon_presenter.cancel_drawing_polygon()
             self.drawing_tool = "rectangle"
-            self.view.set_notification_label("Tryb rysowania prostokąta aktywny")
+            self.view.set_notification_label("Tryb rysowania prostokąta aktywny. Wybierz punkt początkowy LPM.")
             self.view.set_draw_rectangle_button_text("Anuluj rysowanie prostokąta")
             self.view.change_to_cross_cursor()
         else:
             self.drawing_tool = None
-            self.view.set_notification_label("Brak aktywnego narzędzia")
+            self.view.set_no_active_tool_text()
             self.rectangle_presenter.cancel_drawing_rectangle()
 
     # Aktywacja bądź dezaktywacja narzędzia polygon
@@ -92,7 +91,7 @@ class Presenter:
             self.view.change_to_cross_cursor()
         else:
             self.drawing_tool = None
-            self.view.set_notification_label("Brak aktywnego narzędzia")
+            self.view.set_no_active_tool_text()
             self.polygon_presenter.cancel_drawing_polygon()
 
             #Aktualizacja zooma
@@ -110,12 +109,13 @@ class Presenter:
                 if selected_class:
                     self.rectangle_presenter.update_start_point(x, y)
                     self.rectangle_presenter.update_color(selected_class.Class.color)
-                    self.view.set_notification_label(f"Rysowanie prostokąta. Wybrano punkt początkowy {int(x)}, {int(y)}. Proszę wybrać punkt końcowy")
+                    self.view.set_notification_label(f"Rysowanie prostokąta. Wybrano punkt początkowy. Proszę wybrać punkt końcowy LPM.")
                 else:
                     self.view.show_message_OK("Informacja", "Proszę o wybranie klasy")
             else:
                 points = self.rectangle_presenter.get_rectangle_points()
-                self.view.set_notification_label(f"Pomyślnie narysowano prostokąt! Jego współrzędne to: " + str(points))
+                print(f"Pomyślnie narysowano prostokąt! Jego współrzędne to: " + str(points))
+                self.view.set_notification_label(f"Pomyślnie utworzono nową adnotację! Tryb rysowania prostokąta aktywny. Wybierz punkt początkowy LPM.")
                 self.rectangle_presenter.delete_temp_rectangle() #Usunięcie tymczasowego obiektu
                 self.annotation_presenter.add_annotation(points, self.new_project)
                 ###Tutaj trzeba obsłużyć update sceny z nowym narysowanym obiektem (narysować go ponownie z innymi)
@@ -175,7 +175,7 @@ class Presenter:
         self.rectangle_presenter.cancel_drawing_rectangle()
         self.polygon_presenter.cancel_drawing_polygon()
         self.drawing_tool = None
-        self.view.set_notification_label("Brak aktywnego narzędzia")
+        self.view.set_no_active_tool_text()
 
     def handle_crtl_minus(self):
         self.file_list_presenter.decrease_zoom()

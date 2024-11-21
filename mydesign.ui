@@ -135,24 +135,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBox">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Dodaj EXIF do metadanych</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="show_exif_button">
         <property name="text">
          <string>Pokaż dane exif</string>
@@ -346,7 +328,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Brak aktywnego narzędzia</string>
+       <string>Brak aktywnego narzędzia do rysowania.</string>
       </property>
      </widget>
     </item>
@@ -358,7 +340,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu">
@@ -366,7 +348,6 @@
      <string>Plik</string>
     </property>
     <addaction name="new_project_action"/>
-    <addaction name="show_statistics_action"/>
     <addaction name="save_project_action"/>
     <addaction name="save_as_new_project_action"/>
    </widget>
@@ -384,9 +365,16 @@
     <addaction name="import_COCO_action_2"/>
     <addaction name="import_YOLO_action_2"/>
    </widget>
+   <widget class="QMenu" name="menuAdnotacje">
+    <property name="title">
+     <string>Adnotacje</string>
+    </property>
+    <addaction name="show_statistics_action_2"/>
+   </widget>
    <addaction name="file_menu"/>
    <addaction name="export_menu"/>
    <addaction name="import_menu"/>
+   <addaction name="menuAdnotacje"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="new_project_action">
@@ -437,6 +425,11 @@
   <action name="save_as_new_project_action">
    <property name="text">
     <string>Zapisz jako plik projektowy</string>
+   </property>
+  </action>
+  <action name="show_statistics_action_2">
+   <property name="text">
+    <string>Statystyki</string>
    </property>
   </action>
  </widget>

@@ -100,9 +100,7 @@ class FileListPresenter:
         if current_item:
             active_image = self.project.get_img_by_filename(current_item.text())
             if active_image:
-                print(f"Increasing zoom for {current_item.text()}: current zoom = {active_image.zoom}")
                 active_image.zoom = min(active_image.zoom + 0.1, 5.0)  # Limit zoom to 500%
-                print(f"New zoom value: {active_image.zoom}")
                 self.view.zoom_image_slider.setValue(int(active_image.zoom * 100))
                 self.view.apply_zooming(active_image.zoom)
 
@@ -111,8 +109,6 @@ class FileListPresenter:
         if current_item:
             active_image = self.project.get_img_by_filename(current_item.text())
             if active_image:
-                print(f"Decreasing zoom for {current_item.text()}: current zoom = {active_image.zoom}")
                 active_image.zoom = max(active_image.zoom - 0.1, 0.1)  # Minimum zoom 10%
-                print(f"New zoom value: {active_image.zoom}")
                 self.view.zoom_image_slider.setValue(int(active_image.zoom * 100))
                 self.view.apply_zooming(active_image.zoom)

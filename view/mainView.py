@@ -87,17 +87,6 @@ class MainView(object):
         self.label_exif_data.setIndent(-1)
         self.label_exif_data.setObjectName("label_exif_data")
         self.verticalLayout_2.addWidget(self.label_exif_data)
-        self.checkBox = QtWidgets.QCheckBox(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.checkBox.sizePolicy().hasHeightForWidth())
-        self.checkBox.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setPointSize(10)
-        self.checkBox.setFont(font)
-        self.checkBox.setObjectName("checkBox")
-        self.verticalLayout_2.addWidget(self.checkBox)
         self.show_exif_button = QtWidgets.QPushButton(self.centralwidget)
         self.show_exif_button.setObjectName("show_exif_button")
         self.verticalLayout_2.addWidget(self.show_exif_button)
@@ -213,7 +202,7 @@ class MainView(object):
         self.gridLayout_2.setColumnStretch(0, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1054, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1054, 26))
         self.menubar.setObjectName("menubar")
         self.file_menu = QtWidgets.QMenu(self.menubar)
         self.file_menu.setObjectName("file_menu")
@@ -221,6 +210,8 @@ class MainView(object):
         self.export_menu.setObjectName("export_menu")
         self.import_menu = QtWidgets.QMenu(self.menubar)
         self.import_menu.setObjectName("import_menu")
+        self.menuAdnotacje = QtWidgets.QMenu(self.menubar)
+        self.menuAdnotacje.setObjectName("menuAdnotacje")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -245,17 +236,20 @@ class MainView(object):
         self.save_project_action.setObjectName("save_project_action")
         self.save_as_new_project_action = QtWidgets.QAction(MainWindow)
         self.save_as_new_project_action.setObjectName("save_as_new_project_action")
+        self.show_statistics_action_2 = QtWidgets.QAction(MainWindow)
+        self.show_statistics_action_2.setObjectName("show_statistics_action_2")
         self.file_menu.addAction(self.new_project_action)
-        self.file_menu.addAction(self.show_statistics_action)
         self.file_menu.addAction(self.save_project_action)
         self.file_menu.addAction(self.save_as_new_project_action)
         self.export_menu.addAction(self.export_COCO_action)
         self.export_menu.addAction(self.export_YOLO_action)
         self.import_menu.addAction(self.import_COCO_action_2)
         self.import_menu.addAction(self.import_YOLO_action_2)
+        self.menuAdnotacje.addAction(self.show_statistics_action_2)
         self.menubar.addAction(self.file_menu.menuAction())
         self.menubar.addAction(self.export_menu.menuAction())
         self.menubar.addAction(self.import_menu.menuAction())
+        self.menubar.addAction(self.menuAdnotacje.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -273,7 +267,6 @@ class MainView(object):
         self.label_annotation_list.setText(_translate("MainWindow", "Lista dodanych adnotacji:"))
         self.delete_annotation_button.setText(_translate("MainWindow", "Usuń adnotację"))
         self.label_exif_data.setText(_translate("MainWindow", "Dane exif:"))
-        self.checkBox.setText(_translate("MainWindow", "Dodaj EXIF do metadanych"))
         self.show_exif_button.setText(_translate("MainWindow", "Pokaż dane exif"))
         self.label_tools.setText(_translate("MainWindow", "Narzędzia:"))
         self.draw_rectangle_button.setText(_translate("MainWindow", "Rysuj Prostokąt"))
@@ -283,10 +276,11 @@ class MainView(object):
         self.label_class_list.setText(_translate("MainWindow", "Klasy:"))
         self.label_file_list.setText(_translate("MainWindow", "Dostępne pliki graficzne:"))
         self.label_image_size.setText(_translate("MainWindow", "Brak aktywnego obrazu"))
-        self.label_notification.setText(_translate("MainWindow", "Brak aktywnego narzędzia"))
+        self.label_notification.setText(_translate("MainWindow", "Brak aktywnego narzędzia do rysowania."))
         self.file_menu.setTitle(_translate("MainWindow", "Plik"))
         self.export_menu.setTitle(_translate("MainWindow", "Eksportuj"))
         self.import_menu.setTitle(_translate("MainWindow", "Importuj"))
+        self.menuAdnotacje.setTitle(_translate("MainWindow", "Adnotacje"))
         self.new_project_action.setText(_translate("MainWindow", "Załaduj folder ze zdjęciami"))
         self.import_COCO_action.setText(_translate("MainWindow", "Importuj COCO"))
         self.import_YOLO_action.setText(_translate("MainWindow", "Importuj YOLO"))
@@ -297,9 +291,10 @@ class MainView(object):
         self.import_YOLO_action_2.setText(_translate("MainWindow", "Importuj YOLO"))
         self.save_project_action.setText(_translate("MainWindow", "Zapisz"))
         self.save_as_new_project_action.setText(_translate("MainWindow", "Zapisz jako plik projektowy"))
-        self.set_zoom_slider_visibility(False)
+        self.show_statistics_action_2.setText(_translate("MainWindow", "Statystyki"))
 
-        ################################### Koniec generowania
+######################################## Koniec generowania
+        self.set_zoom_slider_visibility(False)
         #Ustawienie ikonek
         MainWindow.setWindowIcon(QIcon("img/cameraIcon.png"))
 
@@ -480,6 +475,9 @@ class MainView(object):
         if selected_item is not None:
             return selected_item.text()
         return None
+
+    def set_no_active_tool_text(self):
+        self.set_notification_label("Brak aktywnego narzędzia do rysowania.")
 
 
 
