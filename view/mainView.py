@@ -336,6 +336,7 @@ class MainView(object):
         self.draw_rectangle_button.clicked.connect(self.presenter.activate_rectangle_tool) #Kliknięcie przycisku rysuj prostokąt
         self.draw_polygon_button.clicked.connect(self.presenter.activate_polygon_tool)  # Kliknięcie przycisku rysuj poligon
         self.zoom_image_slider.valueChanged.connect(self.presenter.zoom_slider) #Kliknięcie w zooma
+        self.delete_annotation_button.clicked.connect(self.presenter.annotation_presenter.delete_selected_annotations)# Usuń Annotacje- przycisk
 
 ###Funkcje pomocnicze (np. Settery zeby nie grzebac bezposrednio w zmiennych)
     def set_image_size_label(self, text):
