@@ -10,6 +10,7 @@ from presenter.RectanglePresenter import RectanglePresenter
 from presenter.AnnotationPresenter import AnnotationPreseter
 from presenter.PolygonPresenter import PolygonPresenter
 
+
 #Głowny prezenter który jest przekazywany widokowi
 class Presenter:
     def __init__(self, view):
@@ -22,7 +23,9 @@ class Presenter:
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project)
         self.rectangle_presenter = RectanglePresenter(None)
         self.polygon_presenter = PolygonPresenter(None)
-        self.annotation_presenter = AnnotationPreseter(None)
+        self.annotation_presenter = AnnotationPreseter(None,self.new_project)
+       # self.annotation_list_presenter = AnnotationListPresenter(None, self.new_project)
+
 
     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
     def update_view(self, view):
@@ -32,6 +35,7 @@ class Presenter:
         self.rectangle_presenter.view = view
         self.polygon_presenter.view = view
         self.annotation_presenter.view = view
+
 
         self.classManagerPresenter.updateItems()
         # !!!
@@ -117,7 +121,8 @@ class Presenter:
                 print(f"Pomyślnie narysowano prostokąt! Jego współrzędne to: " + str(points))
                 self.view.set_notification_label(f"Pomyślnie utworzono nową adnotację! Tryb rysowania prostokąta aktywny. Wybierz punkt początkowy LPM.")
                 self.rectangle_presenter.delete_temp_rectangle() #Usunięcie tymczasowego obiektu
-                self.annotation_presenter.add_annotation(points, self.new_project)
+                self.annotation_presenter.add_annotation(points)
+
                 ###Tutaj trzeba obsłużyć update sceny z nowym narysowanym obiektem (narysować go ponownie z innymi)
                 self.rectangle_presenter.update_start_point(None, None)
 
@@ -138,7 +143,7 @@ class Presenter:
                     self.polygon_presenter.drawing_polygon()
 
                     points = self.polygon_presenter.current_polygon_points
-                    self.annotation_presenter.add_annotation(points, self.new_project) # dodajemy wielokąt do listy adnotacji
+                    self.annotation_presenter.add_annotation(points) # dodajemy wielokąt do listy adnotacji
 
                     # self.polygon_presenter.current_polygon_points.clear()   # do odkomentowania potem
                     # self.polygon_presenter.polygon_closed = False             # do odkomentowania potem
