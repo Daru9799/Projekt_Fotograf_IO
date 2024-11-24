@@ -134,19 +134,19 @@ class Presenter:
                 # jeśli plolygon ma conajmniej 3 punkty i klikneliśmy obok współżendnych początkowych
                 if len(self.polygon_presenter.current_polygon_points) > 2 and self.polygon_presenter.is_near_starting_point(x, y):
                     self.polygon_presenter.polygon_closed = True
-                    self.polygon_presenter.current_polygon_points.append((int(x), int(y)))
                     self.polygon_presenter.drawing_polygon()
 
                     points = self.polygon_presenter.current_polygon_points
                     self.annotation_presenter.add_annotation(points, self.new_project) # dodajemy wielokąt do listy adnotacji
 
-                    # self.polygon_presenter.current_polygon_points.clear()   # do odkomentowania potem
+                    # self.polygon_presenter.current_polygon_points.clear()     # do odkomentowania potem
                     # self.polygon_presenter.polygon_closed = False             # do odkomentowania potem
                 else:
                     self.polygon_presenter.current_polygon_points.append((int(x),int(y)))
                     self.polygon_presenter.drawing_polygon()
             else:
                 # Tymczasowe,testowe: sprawdzanie czy kliknięty punkt znajduje się obszarze polygona
+                # <<
                 result = self.polygon_presenter.check_inclusion(int(x),int(y))
                 if result > 0:
                     print("Punkt znajduje się wewnątrz wielokąta.")
@@ -157,6 +157,7 @@ class Presenter:
                     self.polygon_presenter.current_polygon_points.clear()   # do odkomentowania potem
                     self.polygon_presenter.polygon_closed = False
                     self.polygon_presenter.drawing_polygon()
+                # >>
 
 
 
