@@ -35,8 +35,6 @@ class Presenter:
         self.rectangle_presenter.view = view
         self.polygon_presenter.view = view
         self.annotation_presenter.view = view
-
-
         self.classManagerPresenter.updateItems()
         # !!!
         # Linia poniżej finalnie do usunięcia
@@ -70,6 +68,7 @@ class Presenter:
         self.view.set_no_active_tool_text()
         if self.image_item != item:
             self.file_list_presenter.show_image(item)
+            self.annotation_presenter.updateItems()
             self.image_item = item
 
     #Aktywacja bądź dezaktywacja narzędzia rectangle

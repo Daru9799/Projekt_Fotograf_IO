@@ -39,6 +39,7 @@ class FileListPresenter:
         print(image_path)
         self.display_image(image_path)
 
+
         # Wyszukiwanie obrazu w projekcie
         active_image = self.project.get_img_by_filename(file_name)
         if active_image is not None:

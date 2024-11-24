@@ -17,16 +17,33 @@ class AnnotationPreseter:
         new_annotation = AnnotationModel(annotation_id=annotation_id, area=points, class_id=selected_class.Class.class_id)
         img_obj.list_of_annotations.append(new_annotation)
         img_obj.list_of_annotations.sort(key=lambda annotation: annotation.annotation_id)  # Sortowanie po ID
-        self.updateItems(img_obj.list_of_annotations)
+        self.updateItems()
         print("Nazwa pliku: " + img_obj.filename)
         for an in img_obj.list_of_annotations:
             print("Id anotacji: " + str(an.annotation_id))
             print("Punkty: " + str(an.segmentation))
             print("Klasa: " + str(an.class_id))
 
-    def updateItems(self, annotations_list):
-        self.view.annotation_list_widget.blockSignals(True)  # Zablokowanie sygnałów, aby uniknąć nadmiarowego odświeżania
+    def updateItems(self):
+        # Pobranie nazwy zaznaczonego obrazka
+        selected_image_name = self.view.get_selected_image()
+
+        # Próba pobrania obiektu obrazu na podstawie nazwy
+        img_obj = self.project.get_img_by_filename(selected_image_name)
+
+        # Sprawdzenie, czy obrazek został znaleziony
+        if img_obj is None:
+            print("Błąd: Nie znaleziono obiektu obrazka.")
+            return
+
+        # Pobranie listy adnotacji z obiektu obrazka
+        annotations_list = img_obj.list_of_annotations
+
+        # Zablokowanie sygnałów, aby uniknąć nadmiarowego odświeżania
+        self.view.annotation_list_widget.blockSignals(True)
         self.view.annotation_list_widget.clear()  # Usunięcie wszystkich elementów, aby uniknąć duplikatów
+
+        # Dodanie wszystkich adnotacji do widoku
         for annotation in annotations_list:
             item = QListWidgetItem()
             row = AnnotationListView(annotation, self)  # Tworzenie widoku dla adnotacji
@@ -34,7 +51,9 @@ class AnnotationPreseter:
             item.setSizeHint(row.minimumSizeHint())  # Ustawienie rozmiaru elementu w liście
             self.view.annotation_list_widget.addItem(item)  # Dodanie elementu do listy
             self.view.annotation_list_widget.setItemWidget(item, row)  # Ustawienie widgetu dla danego elementu
-        self.view.annotation_list_widget.blockSignals(False)  # Odblokowanie sygnałów
+
+        # Odblokowanie sygnałów
+        self.view.annotation_list_widget.blockSignals(False)
 
     # Szuka maksymalnego ID wśród adnotacji i zwraca wartość+1, w przypadku pustej listy adnotacji zwraca 1
     def create_new_id(self, img_obj):
@@ -69,7 +88,7 @@ class AnnotationPreseter:
         print(f"Usunięto {removed_count} adnotacji z pliku: {img_obj.filename}")
 
         # Zaktualizowanie widoku
-        self.updateItems(img_obj.list_of_annotations)
+        self.updateItems()
 
     # Pobranie zaznaczonych adnotacji
     def get_checked_annotations(self):
