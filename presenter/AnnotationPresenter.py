@@ -8,13 +8,14 @@ class AnnotationPreseter:
         self.view = view
         self.project = project
 
+
     # Dodawanie nowej adnotacji i dodanie jej do obiektu obrazka
     def add_annotation(self, points):
         selected_class = self.view.get_selected_class()
         selected_image_name = self.view.get_selected_image()  # Wyciągam nazwę zaznaczonego obrazka
         img_obj = self.project.get_img_by_filename(selected_image_name)
         annotation_id = self.create_new_id(img_obj)
-        new_annotation = AnnotationModel(annotation_id=annotation_id, area=points, class_id=selected_class.Class.class_id)
+        new_annotation = AnnotationModel(annotation_id=annotation_id, area=points, class_id=selected_class.Class.class_id,color=selected_class.Class.color)
         img_obj.list_of_annotations.append(new_annotation)
         img_obj.list_of_annotations.sort(key=lambda annotation: annotation.annotation_id)  # Sortowanie po ID
         self.updateItems()
@@ -23,6 +24,7 @@ class AnnotationPreseter:
             print("Id anotacji: " + str(an.annotation_id))
             print("Punkty: " + str(an.segmentation))
             print("Klasa: " + str(an.class_id))
+            print("kolor:" + str(an.color))
 
     def updateItems(self):
         # Pobranie nazwy zaznaczonego obrazka
@@ -104,3 +106,9 @@ class AnnotationPreseter:
                 checked_annotations.append(row_widget.getAnnotation())  # Dodanie obiektu adnotacji
 
         return checked_annotations
+
+
+
+
+
+    
