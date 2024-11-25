@@ -338,6 +338,10 @@ class MainView(object):
         self.zoom_image_slider.valueChanged.connect(self.presenter.zoom_slider) #Kliknięcie w zooma
         self.delete_annotation_button.clicked.connect(self.presenter.annotation_presenter.delete_selected_annotations)# Usuń Annotacje- przycisk
         self.show_exif_button.clicked.connect(self.presenter.open_exif_window)
+
+###Wskazówki dla użytkownika
+        self.delete_annotation_button.setToolTip("Zaznacz kwadrat obok wybranej adnotacji, a następnie kliknij tutaj, aby ją usunąć")
+        self.zoom_image_slider.setToolTip("Przesuń w prawo/lewo w celu zwiększenia/zmniejszenia obrazu")
 ###Funkcje pomocnicze (np. Settery zeby nie grzebac bezposrednio w zmiennych)
     def set_image_size_label(self, text):
         self.label_image_size.setText(text)
