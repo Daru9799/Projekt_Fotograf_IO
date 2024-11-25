@@ -1,3 +1,5 @@
+from PyQt5.QtWidgets import QFileDialog
+
 #Modele
 from model.ProjectModel import ProjectModel
 from model.AnnotationModel import AnnotationModel
@@ -9,6 +11,7 @@ from presenter.ClassManagerPresenter import ClassManagerPresenter
 from presenter.RectanglePresenter import RectanglePresenter
 from presenter.AnnotationPresenter import AnnotationPreseter
 from presenter.PolygonPresenter import PolygonPresenter
+from view.ExifWindowView import ExifWindow
 
 
 #Głowny prezenter który jest przekazywany widokowi
@@ -193,5 +196,18 @@ class Presenter:
 
     def handle_scroll_down(self):
         self.file_list_presenter.decrease_zoom()
+
+    #Funkcja odpowiedzialna za przekazanie informacji exif do okna, które wyświetla je i otworzenie tego okna
+    def open_exif_window(self):
+        selected_image_name = self.view.get_selected_image()
+        img_obj = self.new_project.get_img_by_filename(selected_image_name)
+        if selected_image_name is not None:
+            exif_data = img_obj.exif_obj
+            if exif_data is not None:
+                self.exif_window = ExifWindow(exif_data, selected_image_name)
+                self.exif_window.exec_()
+        else:
+            self.view.show_message_OK("Informacja", "Proszę wybrać obraz z listy.")
+
 
 

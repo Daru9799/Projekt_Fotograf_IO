@@ -23,13 +23,3 @@ class ExifModel:
 
     def get_info(self):
         print(f" Producer: {self.producer}, Camera Model: {self.model_of_camera}, Lens: {self.lens}, Orientation: {self.orientation}, Flash: {self.flash}, DateTime: {self.capture_data}, ISO: {self.iso}, Focal Length: {self.focal_length}, Exposure Time: {self.exposure_time}, Aperture: {self.aperture}, Saturation: {self.saturation}, Contrast: {self.contrast}, Sharpness: {self.sharpness}, Digital Zoom Ratio: {self.digital_zoom_ratio}, Brightness Value: {self.brightness_value}, Exposure Bias: {self.exposure_bias}")
-
-#FLASH
-# 0:  FlashDidNotFire
-# 1:  FlashFired
-# 2:  StrobeReturnLightDetected
-# 4:  StrobeReturnLightNotDetected
-# 8:  CompulsoryFlashMode
-# 16: AutoMode
-# 32: NoFlashFunction
-# 64: RedEyeReductionMode

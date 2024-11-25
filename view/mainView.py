@@ -337,7 +337,7 @@ class MainView(object):
         self.draw_polygon_button.clicked.connect(self.presenter.activate_polygon_tool)  # Kliknięcie przycisku rysuj poligon
         self.zoom_image_slider.valueChanged.connect(self.presenter.zoom_slider) #Kliknięcie w zooma
         self.delete_annotation_button.clicked.connect(self.presenter.annotation_presenter.delete_selected_annotations)# Usuń Annotacje- przycisk
-
+        self.show_exif_button.clicked.connect(self.presenter.open_exif_window)
 ###Funkcje pomocnicze (np. Settery zeby nie grzebac bezposrednio w zmiennych)
     def set_image_size_label(self, text):
         self.label_image_size.setText(text)
@@ -410,13 +410,9 @@ class MainView(object):
 
     #Aktualizacja zooma
     def apply_zooming(self, zoom_value):
-        try:
-            self.graphics_view.resetTransform()
-            # Zastosowanie nowego skalowania
-            self.graphics_view.scale(zoom_value, zoom_value)
-            print(f"Applied zoom: scale_factor={zoom_value}")
-        except Exception as e:
-            print(f"Error in apply_zooming: {e}")
+        self.graphics_view.resetTransform()
+        # Zastosowanie nowego skalowania
+        self.graphics_view.scale(zoom_value, zoom_value)
 
     def set_draw_rectangle_button_text(self, text):
         self.draw_rectangle_button.setText(text)

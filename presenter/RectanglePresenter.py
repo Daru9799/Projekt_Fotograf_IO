@@ -20,7 +20,7 @@ class RectanglePresenter(QObject):
         #Parametry obramówki i wypełnienia
         border_color = (abs(self.color[0] - 50), abs(self.color[1] - 50), abs(self.color[2] - 50), 255) #Nie mam lepszego pomysłu xD
         fill_color = (self.color[0], self.color[1], self.color[2], 80)  #Dla A im mniejsza wartość, tym bardziej przezroczysty
-        border_thickness = 2
+        border_thickness = 1
         #Ustawienie współrzędnych tak aby kolejność zawsze wskazywała podążanie od lewego górnego wierzchołka zgodnie ze wskazówkami zegara
         x1, x2 = min(x1, x2), max(x1, x2)
         y1, y2 = min(y1, y2), max(y1, y2)

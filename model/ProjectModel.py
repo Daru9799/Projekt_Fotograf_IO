@@ -66,7 +66,7 @@ class ProjectModel:
         contrast = exif_info.get("Contrast", "No data")
         sharpness = exif_info.get("Sharpness", "No data")
         digital_zoom_ratio = exif_info.get("DigitalZoomRatio", "No data")
-        brightness_value = exif_info.get("BrightnessValue", "No Data")
+        brightness_value = exif_info.get("BrightnessValue", "No data")
         exposure_bias = exif_info.get("ExposureBiasValue", "No data")
 
         exif_model = ExifModel(
