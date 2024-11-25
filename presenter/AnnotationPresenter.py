@@ -26,7 +26,8 @@ class AnnotationPreseter:
 
         # Dodanie i sortowanie adnotacji
         img_obj.list_of_annotations.append(new_annotation)
-        img_obj.list_of_annotations.sort(key=lambda annotation: annotation.class_id)
+        img_obj.list_of_annotations.sort(key=lambda annotation: (annotation.class_id, annotation.annotation_id))
+
 
         # Aktualizacja widoku
         self.updateItems()
