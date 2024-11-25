@@ -44,7 +44,7 @@ class AnnotationListView(QWidget):
         self.label.setStyleSheet(f"background-color: {qcolor.name()}; border: none; color: {text_color};")
 
     def set_class_name(self, class_name):
-        self.label.setText(f"{class_name} - {self.Annotation.annotation_id}")
+        self.label.setText(f" {class_name} - {self.Annotation.annotation_id}")
 
 
 
