@@ -18,9 +18,9 @@ class AnnotationListView(QWidget):
         self.colorBox = QPushButton()
         self.colorBox.setFixedSize(QSize(25, 25))
 
-        r, g, b = self.Annotation.color  # Rozpakowanie krotki (R, G, B)
-        qcolor = QColor(r, g, b)  # Tworzenie koloru
-        self.colorBox.setStyleSheet(f"background-color: {qcolor.name()}; border: none;")
+        # r, g, b = self.Annotation.color  # Rozpakowanie krotki (R, G, B)
+        # qcolor = QColor(r, g, b)  # Tworzenie koloru
+        # self.colorBox.setStyleSheet(f"background-color: {qcolor.name()}; border: none;")
 
         # Connect color change
         # self.colorBox.clicked.connect(self.setColor)
@@ -37,4 +37,8 @@ class AnnotationListView(QWidget):
     def getAnnotation(self):
         return self.Annotation
 
+    def set_color(self,class_color):
+        r, g, b = class_color  # Rozpakowanie krotki (R, G, B)
+        qcolor = QColor(r, g, b)  # Tworzenie koloru
+        self.colorBox.setStyleSheet(f"background-color: {qcolor.name()}; border: none;")
 

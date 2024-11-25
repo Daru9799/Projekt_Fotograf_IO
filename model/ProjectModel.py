@@ -147,3 +147,8 @@ class ProjectModel:
                 return img_obj
         return None  # Jeśli nie znaleziono obrazu o podanej nazwie zwroci None
 
+    def get_color_by_class_id(self,class_id):
+        for cl in self.list_of_classes_model:
+            if cl.class_id==class_id:
+                return cl.color
+        return

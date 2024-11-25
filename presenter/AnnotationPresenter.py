@@ -15,16 +15,16 @@ class AnnotationPreseter:
         selected_image_name = self.view.get_selected_image()  # Wyciągam nazwę zaznaczonego obrazka
         img_obj = self.project.get_img_by_filename(selected_image_name)
         annotation_id = self.create_new_id(img_obj)
-        new_annotation = AnnotationModel(annotation_id=annotation_id, area=points, class_id=selected_class.Class.class_id,color=selected_class.Class.color)
+        new_annotation = AnnotationModel(annotation_id=annotation_id, area=points, class_id=selected_class.Class.class_id)
         img_obj.list_of_annotations.append(new_annotation)
         img_obj.list_of_annotations.sort(key=lambda annotation: annotation.annotation_id)  # Sortowanie po ID
+
         self.updateItems()
         print("Nazwa pliku: " + img_obj.filename)
         for an in img_obj.list_of_annotations:
             print("Id anotacji: " + str(an.annotation_id))
             print("Punkty: " + str(an.segmentation))
             print("Klasa: " + str(an.class_id))
-            print("kolor:" + str(an.color))
 
     def updateItems(self):
         # Pobranie nazwy zaznaczonego obrazka
@@ -49,7 +49,11 @@ class AnnotationPreseter:
         for annotation in annotations_list:
             item = QListWidgetItem()
             row = AnnotationListView(annotation, self)  # Tworzenie widoku dla adnotacji
-            print("ok")
+
+            color = self.project.get_color_by_class_id(annotation.class_id)
+            row.set_color(color)
+
+
             item.setSizeHint(row.minimumSizeHint())  # Ustawienie rozmiaru elementu w liście
             self.view.annotation_list_widget.addItem(item)  # Dodanie elementu do listy
             self.view.annotation_list_widget.setItemWidget(item, row)  # Ustawienie widgetu dla danego elementu
@@ -108,7 +112,15 @@ class AnnotationPreseter:
         return checked_annotations
 
 
+    def update_color(self,current_class):
+        selected_image_name = self.view.get_selected_image()  # Pobranie nazwy zaznaczonego obrazka
+        img_obj = self.project.get_img_by_filename(selected_image_name)
+        annotations_list = img_obj.list_of_annotations
 
+        for an in annotations_list:
+            if an.class_id==current_class.class_id:
+                self.view.annotation_list_widget.set_color(current_class.color)
+        self.updateItems()
 
 
     
