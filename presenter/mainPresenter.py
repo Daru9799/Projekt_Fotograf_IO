@@ -23,7 +23,7 @@ class Presenter:
         self.image_item = None #Aktywne zdjęcie w liście po prawej
         #Podprezentery do obsługi poszczególnych modułów aplikacji
         self.file_list_presenter = FileListPresenter(None)
-        self.classManagerPresenter = ClassManagerPresenter(None,self.new_project)
+        self.classManagerPresenter = ClassManagerPresenter(None,self.new_project,self)
         self.rectangle_presenter = RectanglePresenter(None)
         self.polygon_presenter = PolygonPresenter(None)
         self.annotation_presenter = AnnotationPreseter(None,self.new_project)

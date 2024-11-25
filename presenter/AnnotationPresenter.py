@@ -8,18 +8,30 @@ class AnnotationPreseter:
         self.view = view
         self.project = project
 
-
-    # Dodawanie nowej adnotacji i dodanie jej do obiektu obrazka
     def add_annotation(self, points):
         selected_class = self.view.get_selected_class()
-        selected_image_name = self.view.get_selected_image()  # Wyciągam nazwę zaznaczonego obrazka
+        selected_image_name = self.view.get_selected_image()  # Pobranie nazwy zaznaczonego obrazka
         img_obj = self.project.get_img_by_filename(selected_image_name)
-        annotation_id = self.create_new_id(img_obj)
-        new_annotation = AnnotationModel(annotation_id=annotation_id, area=points, class_id=selected_class.Class.class_id)
-        img_obj.list_of_annotations.append(new_annotation)
-        img_obj.list_of_annotations.sort(key=lambda annotation: annotation.annotation_id)  # Sortowanie po ID
 
+        # Generowanie ID z uwzględnieniem klasy
+        class_id = selected_class.Class.class_id
+        annotation_id = self.create_new_id(img_obj, class_id)
+
+        # Tworzenie nowej adnotacji
+        new_annotation = AnnotationModel(
+            annotation_id=annotation_id,
+            area=points,
+            class_id=class_id
+        )
+
+        # Dodanie i sortowanie adnotacji
+        img_obj.list_of_annotations.append(new_annotation)
+        img_obj.list_of_annotations.sort(key=lambda annotation: annotation.class_id)
+
+        # Aktualizacja widoku
         self.updateItems()
+
+        # Debugging: wypisywanie informacji
         print("Nazwa pliku: " + img_obj.filename)
         for an in img_obj.list_of_annotations:
             print("Id anotacji: " + str(an.annotation_id))
@@ -49,11 +61,10 @@ class AnnotationPreseter:
         for annotation in annotations_list:
             item = QListWidgetItem()
             row = AnnotationListView(annotation, self)  # Tworzenie widoku dla adnotacji
-
             color = self.project.get_color_by_class_id(annotation.class_id)
+            class_name = self.project.get_name_by_class_id(annotation.class_id)
             row.set_color(color)
-
-
+            row.set_class_name(class_name)
             item.setSizeHint(row.minimumSizeHint())  # Ustawienie rozmiaru elementu w liście
             self.view.annotation_list_widget.addItem(item)  # Dodanie elementu do listy
             self.view.annotation_list_widget.setItemWidget(item, row)  # Ustawienie widgetu dla danego elementu
@@ -61,12 +72,15 @@ class AnnotationPreseter:
         # Odblokowanie sygnałów
         self.view.annotation_list_widget.blockSignals(False)
 
-    # Szuka maksymalnego ID wśród adnotacji i zwraca wartość+1, w przypadku pustej listy adnotacji zwraca 1
-    def create_new_id(self, img_obj):
-        # Tworzy listę wszystkich istniejących ID adnotacji
-        existing_ids = [annotation.annotation_id for annotation in img_obj.list_of_annotations]
+    def create_new_id(self, img_obj, class_id):
+        # Tworzy listę ID istniejących adnotacji dla danej klasy
+        existing_ids = [
+            annotation.annotation_id
+            for annotation in img_obj.list_of_annotations
+            if annotation.class_id == class_id
+        ]
 
-        # Znajduje najmniejsze brakujące ID w sekwencji
+        # Znajduje najmniejsze brakujące ID w sekwencji dla danej klasy
         new_id = 1
         while new_id in existing_ids:
             new_id += 1
@@ -110,17 +124,5 @@ class AnnotationPreseter:
                 checked_annotations.append(row_widget.getAnnotation())  # Dodanie obiektu adnotacji
 
         return checked_annotations
-
-
-    def update_color(self,current_class):
-        selected_image_name = self.view.get_selected_image()  # Pobranie nazwy zaznaczonego obrazka
-        img_obj = self.project.get_img_by_filename(selected_image_name)
-        annotations_list = img_obj.list_of_annotations
-
-        for an in annotations_list:
-            if an.class_id==current_class.class_id:
-                self.view.annotation_list_widget.set_color(current_class.color)
-        self.updateItems()
-
 
     

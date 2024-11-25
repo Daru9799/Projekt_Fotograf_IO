@@ -4,9 +4,10 @@ from view.CreateClassWindowView import CreateClassWindowView
 from view.CustomClassListItemView import CustomClassListItemView
 
 class ClassManagerPresenter:
-    def __init__(self, view, project):
+    def __init__(self, view, project, presenter):
         self.view = view
         self.project = project
+        self.presenter = presenter
 
         #Tworzenie widoku
         self.window = QtWidgets.QDialog(self.view) # Użycie QDialog zamiast QMainWindow() pozwala na zlockowanie głównego widoku
@@ -61,3 +62,4 @@ class ClassManagerPresenter:
         updatedClass = Class
         updatedClass.color = (rgba[0],rgba[1],rgba[2])
         self.project.updateClass(updatedClass)
+        self.presenter.annotation_presenter.updateItems()

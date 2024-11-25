@@ -152,3 +152,9 @@ class ProjectModel:
             if cl.class_id==class_id:
                 return cl.color
         return
+
+    def get_name_by_class_id(self, class_id):
+        for cl in self.list_of_classes_model:
+            if cl.class_id == class_id:
+                return cl.name
+        return
