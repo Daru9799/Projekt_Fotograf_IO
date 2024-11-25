@@ -105,6 +105,11 @@ class Presenter:
         if self.new_project.list_of_images_model: #Jeśli nie ma obrazka to nic nie rób
             self.file_list_presenter.on_zoom_slider_changed()
 
+    def zoom_value(self):
+        if self.new_project.list_of_images_model:  # Jeśli nie ma obrazka to nic nie rób
+            self.file_list_presenter.on_zoom_value_changed()
+
+
     #Obsluga klikniecia myszy w obszar obrazka (dostaje współrzędne kliknięcia x i y)
     def handle_mouse_click(self, x, y):
         print(f"Współrzędne kliknięcia: x={x}, y={y}")

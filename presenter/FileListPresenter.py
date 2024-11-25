@@ -1,5 +1,5 @@
 import os
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QIntValidator
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtCore import QRectF
 
@@ -95,6 +95,49 @@ class FileListPresenter:
             active_image.zoom_change(zoom_value)
 
         self.view.apply_zooming(zoom_value)
+        self.view.zoom_value_widget.setText(str(int(zoom_value*100)))
+
+    def on_zoom_value_changed(self):
+        try:
+            # Pobierz wartość wpisaną w pole tekstowe
+            text = self.view.zoom_value_widget.text().lstrip("0")  # Usuń początkowe zera
+            zoom_value = int(text)
+            print(zoom_value)
+
+            # Aktualny zoom ze slidera (dla użycia, gdy pole jest puste)
+            current_zoom = self.view.zoom_image_slider.value() / 100.0
+
+            # Jeśli pole tekstowe jest puste lub zawiera tylko "+" lub "-", wstaw aktualny zoom
+            if zoom_value == "" or zoom_value == "-" or zoom_value == "+":
+                self.view.zoom_value_widget.setText(str(int(current_zoom * 100)))
+                return
+
+            # Sprawdź, czy wpisana wartość jest liczbą
+
+
+            # Ogranicz wartość do zakresu 10–500
+            if zoom_value > 500:
+                zoom_value = 500
+            elif zoom_value < 10:
+                zoom_value = 10
+
+            # Ustaw poprawioną wartość w polu tekstowym
+            self.view.zoom_value_widget.setText(str(zoom_value))
+
+            # Przelicz zoom na ułamek i zastosuj
+            zoom_fraction = zoom_value / 100.0
+            active_image = self.project.get_img_by_filename(
+                self.view.file_list_widget.currentItem().text()
+            )
+
+            if active_image is not None:
+                active_image.zoom_change(zoom_fraction)
+                self.view.zoom_image_slider.setValue(int(active_image.zoom * 100))
+            self.view.apply_zooming(zoom_fraction)
+
+        except ValueError:
+            # Obsługa błędu, jeśli wpisana wartość nie jest liczbą
+            self.view.zoom_value_widget.setText(str(int(current_zoom * 100)))  # Resetuj do aktualnego zoomu
 
     def increase_zoom(self):
         current_item = self.view.file_list_widget.currentItem()
@@ -104,6 +147,8 @@ class FileListPresenter:
                 active_image.zoom = min(active_image.zoom + 0.1, 5.0)  # Limit zoom to 500%
                 self.view.zoom_image_slider.setValue(int(active_image.zoom * 100))
                 self.view.apply_zooming(active_image.zoom)
+                self.view.zoom_value_widget.setText(str(int(active_image.zoom * 100)))
+
 
     def decrease_zoom(self):
         current_item = self.view.file_list_widget.currentItem()
@@ -113,3 +158,4 @@ class FileListPresenter:
                 active_image.zoom = max(active_image.zoom - 0.1, 0.1)  # Minimum zoom 10%
                 self.view.zoom_image_slider.setValue(int(active_image.zoom * 100))
                 self.view.apply_zooming(active_image.zoom)
+                self.view.zoom_value_widget.setText(str(int(active_image.zoom * 100)))

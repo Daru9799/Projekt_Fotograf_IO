@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtGui import QIcon, QKeyEvent
+from PyQt5.QtGui import QIcon, QKeyEvent, QIntValidator
 from PyQt5.QtWidgets import QGraphicsScene, QApplication, QMessageBox
-from PyQt5.QtGui import QMouseEvent
+from PyQt5.QtGui import QMouseEvent, QIntValidator
 from PyQt5.Qt import Qt
 
 
@@ -179,15 +179,51 @@ class MainView(object):
         self.label_image_size.setFont(font)
         self.label_image_size.setObjectName("label_image_size")
         self.gridLayout_2.addWidget(self.label_image_size, 17, 1, 1, 1)
+        # self.zoom_image_slider = QtWidgets.QSlider(self.centralwidget)
+        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        # sizePolicy.setHorizontalStretch(0)
+        # sizePolicy.setVerticalStretch(0)
+        # sizePolicy.setHeightForWidth(self.zoom_image_slider.sizePolicy().hasHeightForWidth())
+        # self.zoom_image_slider.setSizePolicy(sizePolicy)
+        # self.zoom_image_slider.setOrientation(QtCore.Qt.Horizontal)
+        # self.zoom_image_slider.setObjectName("zoom_image_slider")
+        # self.gridLayout_2.addWidget(self.zoom_image_slider, 17, 2, 1, 2)
+
+
+
+        # Pusta kolumna dla wyrównania
+        # Spacer z lewej strony
+        spacer_left = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+
+        # Suwak zooma
         self.zoom_image_slider = QtWidgets.QSlider(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.zoom_image_slider.sizePolicy().hasHeightForWidth())
-        self.zoom_image_slider.setSizePolicy(sizePolicy)
         self.zoom_image_slider.setOrientation(QtCore.Qt.Horizontal)
         self.zoom_image_slider.setObjectName("zoom_image_slider")
-        self.gridLayout_2.addWidget(self.zoom_image_slider, 17, 2, 1, 2)
+
+        # Pole wartości zooma
+        self.zoom_value_widget = QtWidgets.QLineEdit(self.centralwidget)
+        self.zoom_value_widget.setFixedWidth(50)  # Stała szerokość
+        self.zoom_value_widget.setAlignment(QtCore.Qt.AlignCenter)  # Wyśrodkowanie tekstu w polu
+        self.zoom_value_widget.setObjectName("zoom_value_widget")
+
+        # Spacer z prawej strony
+        spacer_right = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+
+        # Ustawienia proporcji kolumn
+        self.gridLayout_2.setColumnStretch(1, 1)  # Lewy spacer
+        self.gridLayout_2.setColumnStretch(2, 3)  # Suwak (kolumna środkowa)
+        self.gridLayout_2.setColumnStretch(3, 1)  # Pole wartości zooma
+        self.gridLayout_2.setColumnStretch(4, 1)  # Prawy spacer
+
+        # Dodanie elementów do siatki
+        self.gridLayout_2.addItem(spacer_left, 17, 1, 1, 1)  # Lewa kolumna
+        self.gridLayout_2.addWidget(self.zoom_image_slider, 17, 2, 1, 1)  # Środkowa kolumna - suwak
+        self.gridLayout_2.addWidget(self.zoom_value_widget, 17, 3, 1, 1)  # Prawa kolumna - pole wartości
+        self.gridLayout_2.addItem(spacer_right, 17, 4, 1, 1)  # Prawa kolumna
+
+
+
+
         self.label_notification = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -324,9 +360,10 @@ class MainView(object):
         #ZOOM
         # Ustawienie zakresu wartości suwaka zoomu (od 10% do 500%)
         self.zoom_image_slider.setRange(10, 500)
+        self.zoom_value_widget.setValidator(QIntValidator(self.zoom_value_widget))
+        self.zoom_value_widget.setText(str(70))
         # Ustawienie początkowej wartości suwaka na 70%
         self.zoom_image_slider.setValue(70)
-
 
 ###Podpięcia pod akcje (odwolujemy sie do nazw przyciskow, list itd.) wywoluja one odpowiednie funkcje w presenterze
         self.new_project_action.triggered.connect(self.presenter.create_new_project) #załadowanie folderu ze zdjęciami
@@ -338,6 +375,8 @@ class MainView(object):
         self.zoom_image_slider.valueChanged.connect(self.presenter.zoom_slider) #Kliknięcie w zooma
         self.delete_annotation_button.clicked.connect(self.presenter.annotation_presenter.delete_selected_annotations)# Usuń Annotacje- przycisk
         self.show_exif_button.clicked.connect(self.presenter.open_exif_window)
+        self.zoom_value_widget.editingFinished.connect(self.presenter.zoom_value)
+
 
 ###Wskazówki dla użytkownika
         self.delete_annotation_button.setToolTip("Zaznacz kwadrat obok wybranej adnotacji, a następnie kliknij tutaj, aby ją usunąć")
@@ -424,10 +463,6 @@ class MainView(object):
     def set_draw_polygon_button_text(self, text):
         self.draw_polygon_button.setText(text)
 
-    # def key_press_event(self, event: QKeyEvent):
-    #     if event.key() == Qt.Key_Escape:
-    #         self.presenter.handle_escape_click()
-
     def key_press_event(self, event):
         try:
             # Obsługa ESC
@@ -453,6 +488,7 @@ class MainView(object):
 
     def set_zoom_slider_visibility(self, visible: bool):
         self.zoom_image_slider.setVisible(visible)
+        self.zoom_value_widget.setVisible(visible)
 
     def get_selected_class(self):
         selected_item = self.class_list_widget.selectedItems()
@@ -511,3 +547,4 @@ class MainView(object):
     #             self.graphics_view.verticalScrollBar().setValue(
     #                 self.graphics_view.verticalScrollBar().value() + 20
     #             )
+

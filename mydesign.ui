@@ -332,6 +332,9 @@
       </property>
      </widget>
     </item>
+    <item row="17" column="4">
+     <widget class="QLineEdit" name="zoom_value_widget"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
