@@ -11,6 +11,7 @@ from presenter.ClassManagerPresenter import ClassManagerPresenter
 from presenter.RectanglePresenter import RectanglePresenter
 from presenter.AnnotationPresenter import AnnotationPreseter
 from presenter.PolygonPresenter import PolygonPresenter
+from presenter.ScenePreseter import ScenePresenter
 from view.ExifWindowView import ExifWindow
 
 
@@ -28,6 +29,7 @@ class Presenter:
         self.polygon_presenter = PolygonPresenter(None)
         self.annotation_presenter = AnnotationPreseter(None,self.new_project)
        # self.annotation_list_presenter = AnnotationListPresenter(None, self.new_project)
+        self.scene_presenter = ScenePresenter(None,self,self.new_project)
 
 
     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
@@ -38,7 +40,10 @@ class Presenter:
         self.rectangle_presenter.view = view
         self.polygon_presenter.view = view
         self.annotation_presenter.view = view
+        self.scene_presenter.view = view
         self.classManagerPresenter.updateItems()
+
+
         # !!!
         # Linia poniżej finalnie do usunięcia
         self.create_new_project()
@@ -60,6 +65,10 @@ class Presenter:
             #Lista plików aktualizacja w podprezenterze
             self.file_list_presenter.update_project(self.new_project)
             self.file_list_presenter.load_files_to_widget()
+            # Przypisanie pierwszego pokazanego zdjęcia do image_item
+            # self.image_item = self.new_project.get_img_by_filename(self.new_project.list_of_images_model[0].filename)
+
+
         else:
             self.view.set_notification_label("Nie wybrano folderu.")
 
@@ -73,6 +82,11 @@ class Presenter:
             self.file_list_presenter.show_image(item)
             self.annotation_presenter.updateItems()
             self.image_item = item
+
+            self.scene_presenter.reset_to_default()
+            self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
+            self.scene_presenter.draw_annotations()              # Rysowanie wczytanych adnotacji
+
 
     #Aktywacja bądź dezaktywacja narzędzia rectangle
     def activate_rectangle_tool(self):
@@ -170,6 +184,8 @@ class Presenter:
                     self.polygon_presenter.polygon_closed = False
                     self.polygon_presenter.drawing_polygon()
                 # >>
+        self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
+        self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
 
 
 

@@ -1,4 +1,5 @@
 #Model obrazka (informacje o nazwie, rozmiarach, danych exif i adnotacjach)
+import copy
 class ImageModel:
     def __init__(self, image_id=None, filename="", width=0, height=0, exif_obj=None, list_of_annotations=None):
         self.image_id = image_id
@@ -20,4 +21,6 @@ class ImageModel:
     def get_zoom(self):
         return self.zoom
 
+    def get_annotation_list(self):
+        return copy.deepcopy(self.list_of_annotations)
 

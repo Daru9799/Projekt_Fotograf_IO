@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QListWidgetItem
 
 from model.AnnotationModel import AnnotationModel
 from view.AnnotationListView import AnnotationListView
+import copy
 
 class AnnotationPreseter:
     def __init__(self, view, project):
@@ -9,6 +10,7 @@ class AnnotationPreseter:
         self.project = project
 
     def add_annotation(self, points):
+        points = copy.deepcopy(points)  # potrzebne bo generowało Bug'a
         selected_class = self.view.get_selected_class()
         selected_image_name = self.view.get_selected_image()  # Pobranie nazwy zaznaczonego obrazka
         img_obj = self.project.get_img_by_filename(selected_image_name)

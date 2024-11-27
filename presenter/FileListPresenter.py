@@ -79,6 +79,7 @@ class FileListPresenter:
             self.view.pixmap_item = QGraphicsPixmapItem(pixmap)
             self.view.scene.addItem(self.view.pixmap_item)
 
+
             # Ustawienie rozmiaru sceny na rozmiar obrazka
             scene_rect = QRectF(pixmap.rect())
             print(f"Setting scene rect: {scene_rect}")
