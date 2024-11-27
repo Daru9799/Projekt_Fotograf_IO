@@ -5,9 +5,10 @@ from PyQt5.QtCore import QRectF
 
 # Prezenter zarządzający listą plików i interakcjami z nią
 class FileListPresenter:
-    def __init__(self, view):
+    def __init__(self, view, presenter):
         self.view = view
         self.project = None
+        self.presenter = presenter
 
 
     def update_project(self, project):
@@ -26,6 +27,7 @@ class FileListPresenter:
             self.view.file_list_widget.setCurrentItem(first_item)
             self.show_image(first_item)
             self.view.set_zoom_slider_visibility(True)
+            self.presenter.image_item = first_item
         else:
             # Aktualizacja etykiety informacyjnej na brak aktywnego obrazu
             self.view.set_image_size_label("Brak aktywnego obrazu")

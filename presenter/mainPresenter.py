@@ -23,7 +23,7 @@ class Presenter:
         self.drawing_tool = None  #Aktywne narzędzie rysowania (w przypadku braku ustawiamy na None) Dostępne opcje: "rectangle", "polygon"
         self.image_item = None #Aktywne zdjęcie w liście po prawej
         #Podprezentery do obsługi poszczególnych modułów aplikacji
-        self.file_list_presenter = FileListPresenter(None)
+        self.file_list_presenter = FileListPresenter(None, self)
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project,self)
         self.rectangle_presenter = RectanglePresenter(None)
         self.polygon_presenter = PolygonPresenter(None)
