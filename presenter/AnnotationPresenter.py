@@ -12,8 +12,8 @@ class AnnotationPreseter:
     def add_annotation(self, points):
         points = copy.deepcopy(points)  # potrzebne bo generowało Bug'a
         selected_class = self.view.get_selected_class()
-        selected_image_name = self.view.get_selected_image()  # Pobranie nazwy zaznaczonego obrazka
-        img_obj = self.project.get_img_by_filename(selected_image_name)
+
+        img_obj = self.get_selected_image_obj()
 
         # Generowanie ID z uwzględnieniem klasy
         class_id = selected_class.Class.class_id
@@ -29,32 +29,12 @@ class AnnotationPreseter:
         # Dodanie i sortowanie adnotacji
         img_obj.list_of_annotations.append(new_annotation)
         img_obj.list_of_annotations.sort(key=lambda annotation: (annotation.class_id, annotation.annotation_id))
-
-
         # Aktualizacja widoku
         self.updateItems()
 
-        # Debugging: wypisywanie informacji
-        print("Nazwa pliku: " + img_obj.filename)
-        for an in img_obj.list_of_annotations:
-            print("Id anotacji: " + str(an.annotation_id))
-            print("Punkty: " + str(an.segmentation))
-            print("Klasa: " + str(an.class_id))
-
     def updateItems(self):
-        # Pobranie nazwy zaznaczonego obrazka
-        selected_image_name = self.view.get_selected_image()
-
-        # Próba pobrania obiektu obrazu na podstawie nazwy
-        img_obj = self.project.get_img_by_filename(selected_image_name)
-
-        # Sprawdzenie, czy obrazek został znaleziony
-        if img_obj is None:
-            print("Błąd: Nie znaleziono obiektu obrazka.")
-            return
-
         # Pobranie listy adnotacji z obiektu obrazka
-        annotations_list = img_obj.list_of_annotations
+        annotations_list = self.get_selected_image_obj().list_of_annotations
 
         # Zablokowanie sygnałów, aby uniknąć nadmiarowego odświeżania
         self.view.annotation_list_widget.blockSignals(True)
@@ -90,28 +70,33 @@ class AnnotationPreseter:
 
         return new_id
 
-    # Usuwanie zaznaczonych adnotacji
     def delete_selected_annotations(self):
-        # Pobranie wybranego obrazka i odpowiadającego mu obiektu
-        selected_image_name = self.view.get_selected_image()  # Pobranie nazwy zaznaczonego obrazka
-        img_obj = self.project.get_img_by_filename(selected_image_name)
+        # Pobranie obiektu obrazu dla wybranego obrazka
+        img_obj = self.get_selected_image_obj()
+        if img_obj is None:
+            return
 
         # Pobranie zaznaczonych adnotacji
         checked_annotations = self.get_checked_annotations()
 
-        # Usunięcie zaznaczonych adnotacji z listy
-        initial_count = len(img_obj.list_of_annotations)
-        img_obj.list_of_annotations = [
-            annotation for annotation in img_obj.list_of_annotations
-            if annotation not in checked_annotations
-        ]
+        # Jeśli nie zaznaczono żadnych adnotacji, wyświetl komunikat informacyjny
+        if len(checked_annotations) == 0:
+            self.view.show_message_OK("Informacja", "Zaznacz adnotację do usunięcia")
+            return
 
-        # Informacja o liczbie usuniętych adnotacji
-        removed_count = initial_count - len(img_obj.list_of_annotations)
-        print(f"Usunięto {removed_count} adnotacji z pliku: {img_obj.filename}")
+        # Wyświetlenie okna potwierdzenia
+        confirmation = self.view.show_message_Yes_No("Potwierdzenie",
+                                                     "Czy na pewno chcesz usunąć zaznaczone adnotacje?")
 
-        # Zaktualizowanie widoku
-        self.updateItems()
+        # Jeśli użytkownik potwierdzi usunięcie
+        if confirmation:
+            # Usunięcie zaznaczonych adnotacji z listy
+            img_obj.list_of_annotations = [
+                annotation for annotation in img_obj.list_of_annotations
+                if annotation not in checked_annotations
+            ]
+            # Zaktualizowanie widoku po usunięciu
+            self.updateItems()
 
     # Pobranie zaznaczonych adnotacji
     def get_checked_annotations(self):
@@ -127,5 +112,30 @@ class AnnotationPreseter:
                 checked_annotations.append(row_widget.getAnnotation())  # Dodanie obiektu adnotacji
 
         return checked_annotations
+
+    def delete_annotations_by_class(self, class_id):
+        img_obj = self.get_selected_image_obj()
+        if img_obj is None:
+            return
+
+        img_obj.list_of_annotations = [
+            annotation for annotation in img_obj.list_of_annotations
+            if annotation.class_id != class_id
+        ]
+
+        # Zaktualizowanie widoku
+        self.updateItems()
+
+    def get_selected_image_obj(self):
+        selected_image_name = self.view.get_selected_image()
+        img_obj = self.project.get_img_by_filename(selected_image_name)
+        if img_obj is None:
+            print("Błąd: Nie znaleziono obiektu obrazka.")
+            return None
+        return img_obj
+
+
+
+
 
     

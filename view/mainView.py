@@ -506,6 +506,21 @@ class MainView(object):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
+    def show_message_Yes_No(self, title, text):
+        msg = QMessageBox()
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+
+        yes_button = msg.button(QMessageBox.Yes)
+        no_button = msg.button(QMessageBox.No)
+
+        yes_button.setText("Tak")
+        no_button.setText("Anuluj")
+
+        response = msg.exec_()
+        return response == QMessageBox.Yes
+
     #Zwraca nazwę aktualnei zaznaczonego obrazka
     def get_selected_image(self):
         selected_item = self.file_list_widget.currentItem()

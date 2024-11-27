@@ -44,6 +44,8 @@ class ClassManagerPresenter:
             custom_view = self.view.class_list_widget.itemWidget(selected_item)
             # Wywołujemy usuwanie z listy Klasy
             self.project.deleteClass(custom_view.Class.class_id)
+            self.presenter.annotation_presenter.delete_annotations_by_class(custom_view.Class.class_id)
+
             self.updateItems() # odświeżenie listy
 
     # Metoda aktualizująca class_list_widget

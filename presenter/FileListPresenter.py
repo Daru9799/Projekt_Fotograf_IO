@@ -1,7 +1,8 @@
 import os
 from PyQt5.QtGui import QPixmap, QIntValidator
 from PyQt5.QtWidgets import QGraphicsPixmapItem
-from PyQt5.QtCore import QRectF
+from PyQt5.QtCore import QRectF, Qt
+
 
 # Prezenter zarządzający listą plików i interakcjami z nią
 class FileListPresenter:
@@ -102,45 +103,31 @@ class FileListPresenter:
 
     def on_zoom_value_changed(self):
         try:
-            # Pobierz wartość wpisaną w pole tekstowe
-            text = self.view.zoom_value_widget.text().lstrip("0")  # Usuń początkowe zera
+            # Retrieve input and current zoom
+            text = self.view.zoom_value_widget.text().strip()  # Remove leading/trailing spaces
+            current_zoom = int(self.view.zoom_image_slider.value())  # Current zoom as integer
+            validator = self.view.zoom_value_widget.validator()
+
+            # Validate and parse zoom value
             zoom_value = int(text)
-            print(zoom_value)
+            zoom_value = max(10, min(zoom_value,500))  # Clamp value
 
-            # Aktualny zoom ze slidera (dla użycia, gdy pole jest puste)
-            current_zoom = self.view.zoom_image_slider.value() / 100.0
-
-            # Jeśli pole tekstowe jest puste lub zawiera tylko "+" lub "-", wstaw aktualny zoom
-            if zoom_value == "" or zoom_value == "-" or zoom_value == "+":
-                self.view.zoom_value_widget.setText(str(int(current_zoom * 100)))
-                return
-
-            # Sprawdź, czy wpisana wartość jest liczbą
-
-
-            # Ogranicz wartość do zakresu 10–500
-            if zoom_value > 500:
-                zoom_value = 500
-            elif zoom_value < 10:
-                zoom_value = 10
-
-            # Ustaw poprawioną wartość w polu tekstowym
+            # Update the text field with clamped value
             self.view.zoom_value_widget.setText(str(zoom_value))
 
-            # Przelicz zoom na ułamek i zastosuj
+            # Apply the zoom
             zoom_fraction = zoom_value / 100.0
-            active_image = self.project.get_img_by_filename(
-                self.view.file_list_widget.currentItem().text()
-            )
-
-            if active_image is not None:
-                active_image.zoom_change(zoom_fraction)
-                self.view.zoom_image_slider.setValue(int(active_image.zoom * 100))
+            active_item = self.view.file_list_widget.currentItem()
+            if active_item is not None:
+                active_image = self.project.get_img_by_filename(active_item.text())
+                if active_image is not None:
+                    active_image.zoom_change(zoom_fraction)
+                    self.view.zoom_image_slider.setValue(int(active_image.zoom * 100))
             self.view.apply_zooming(zoom_fraction)
 
         except ValueError:
-            # Obsługa błędu, jeśli wpisana wartość nie jest liczbą
-            self.view.zoom_value_widget.setText(str(int(current_zoom * 100)))  # Resetuj do aktualnego zoomu
+            # Handle non-numeric input by resetting to current zoom
+            self.view.zoom_value_widget.setText(str(current_zoom))
 
     def increase_zoom(self):
         current_item = self.view.file_list_widget.currentItem()
