@@ -53,8 +53,24 @@ class AnnotationPreseter:
             self.view.annotation_list_widget.addItem(item)  # Dodanie elementu do listy
             self.view.annotation_list_widget.setItemWidget(item, row)  # Ustawienie widgetu dla danego elementu
 
+        # connection przy zmianie elem. listy
+        self.view.annotation_list_widget.itemSelectionChanged.connect(self.onItemSelectionChanged)
+
         # Odblokowanie sygnałów
         self.view.annotation_list_widget.blockSignals(False)
+
+
+    def onItemSelectionChanged(self):
+        selected_items = self.view.annotation_list_widget.selectedItems()
+        for item in selected_items:
+            # Pobierz widget powiązany z elementem
+            annotation_view = self.view.annotation_list_widget.itemWidget(item)
+
+            # Sprawdzenie, czy widget istnieje i czy nie ma wybranego narzędzia do adnotacji
+            if annotation_view and self.presenter.drawing_tool is None:
+                polygon_segmentation = annotation_view.getAnnotation().get_segmentation()
+                self.presenter.scene_presenter.set_seleted_polygon(polygon_segmentation)
+                self.presenter.scene_presenter.draw_annotations()
 
 
     def create_new_id(self, img_obj, class_id):

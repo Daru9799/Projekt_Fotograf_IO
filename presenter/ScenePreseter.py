@@ -1,4 +1,4 @@
-from poligony import polygons
+# from poligony import polygons
 from PyQt5.QtCore import QObject
 import cv2
 import numpy as np
@@ -16,6 +16,7 @@ class ScenePresenter:
         self.active_image_model = None
         self.point_radius = 5  # Promień kółek dla wierzchołków
         self.polygons_pixmap_ref = None
+        self.selected_polygon = [[],[]]
 
     # pobiera listę "annotations" obrazu i na jej podstawie generuje liste "polygons"
     def get_annotations_from_project(self):
@@ -37,12 +38,19 @@ class ScenePresenter:
                 np_points = np.array(poly[0], dtype=np.int32)
                 np_points = np_points.reshape((-1, 1, 2))
                 border_color = (poly[1][0], poly[1][1], poly[1][2], 255)
-
                 # Rysowanie kontóra
                 cv2.polylines(drawing_surface, [np_points], isClosed=True, thickness=2, color=border_color)
                 #Wypełnianie polygona kolorem:
-                fill_color = (poly[1][0], poly[1][1], poly[1][2], 120)
-                cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
+                #if self.selected_polygon is not None:
+                if poly[0] == self.selected_polygon[0]:
+                    fill_color = (poly[1][0], poly[1][1], poly[1][2], 120)
+                    cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
+                    for point in np_points:
+                        cv2.circle(drawing_surface, tuple(point[0]), self.point_radius, border_color, -1)
+
+                else:
+                    fill_color = (poly[1][0], poly[1][1], poly[1][2], 160)
+                    cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
 
         self.draw_item_on_scene(drawing_surface)
 
@@ -63,22 +71,31 @@ class ScenePresenter:
         self.view.scene.removeItem(self.polygons_pixmap_ref)
         self.polygons_pixmap_ref = QGraphicsPixmapItem(pixmap)
         self.view.scene.addItem(self.polygons_pixmap_ref)
-        print("Rysowanie na scenie")
+        #print("Rysowanie na scenie")
 
 
     def save_annotations(self):
         # zapisz do listy annotation_objects wszystkie adnotacje z listy adnotacji obrazka (obiekty)
         pass
 
+    # Funkcja która po klinięciu na polygon ustawia go jako aktywny/selected
+    def select_polygon_on_click(self,x,y):
+        selected_polygon = None
+        for poly in self.polygons:
+            result = self.check_inclusion(poly[0],x,y)
+            if result >= 0:
+                selected_polygon = poly
+                break
+        if selected_polygon is not None:
+            self.selected_polygon = selected_polygon
+        else:
+            self.selected_polygon = [[],[]]
+        print("Wybrany polygon to:",self.selected_polygon)
 
-    def reset_to_default(self):
-        self.polygons_pixmap_ref = None
 
-        self.reset_annotations()
-        self.get_annotations_from_project()
-        self.draw_annotations()
 
     def reset_annotations(self):
+        self.selected_polygon = [[],[]]
         self.annotations = []
         self.polygons = []
 
@@ -86,3 +103,27 @@ class ScenePresenter:
         self.reset_annotations()
         self.get_annotations_from_project()
         self.draw_annotations()
+
+    def reset_to_default(self):
+        self.polygons_pixmap_ref = None
+        self.reset_annotations()
+        self.get_annotations_from_project()
+        self.draw_annotations()
+
+    def reset_selected_polygon(self):
+        self.selected_polygon = [[],[]]
+
+    def check_inclusion(self,polygon,x,y):
+        np_points = np.array(polygon, dtype=np.int32)
+        #np_points = np_points.reshape((-1, 1, 2))
+        result = cv2.pointPolygonTest(np_points, (x,y), False)
+        return result
+
+    def get_seleted_polygon(self):
+        polygon = self.selected_polygon[0]
+        return polygon
+
+    def set_seleted_polygon(self,poly):
+        for p in self.polygons:
+            if p[0] == poly:
+                self.selected_polygon = p;

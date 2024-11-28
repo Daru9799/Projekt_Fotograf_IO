@@ -91,6 +91,7 @@ class Presenter:
     def activate_rectangle_tool(self):
         if self.drawing_tool != "rectangle":
             self.polygon_presenter.cancel_drawing_polygon()
+            self.scene_presenter.reset_selected_polygon()
             self.drawing_tool = "rectangle"
             self.view.set_notification_label("Tryb rysowania prostokąta aktywny. Wybierz punkt początkowy LPM.")
             self.view.set_draw_rectangle_button_text("Anuluj rysowanie prostokąta")
@@ -104,6 +105,7 @@ class Presenter:
     def activate_polygon_tool(self):
         if self.drawing_tool != "polygon":
             self.rectangle_presenter.cancel_drawing_rectangle()
+            self.scene_presenter.reset_selected_polygon()
             self.drawing_tool = "polygon"
             self.view.set_notification_label("Tryb rysowania poligona aktywny")
             self.view.set_draw_polygon_button_text("Anuluj rysowanie poligona")
@@ -184,6 +186,21 @@ class Presenter:
                     self.polygon_presenter.polygon_closed = False
                     self.polygon_presenter.drawing_polygon()
                 # >>
+        if self.drawing_tool is None:
+            # Sprawdza czy nie klikneliśmy na poligon
+            self.scene_presenter.select_polygon_on_click(int(x),int(y))
+
+            # Poniższy kod służy do zaznaczenia adnotacji(setSelect(True)) w liście adnotacji
+            items = [self.view.annotation_list_widget.item(i) for i in range(self.view.annotation_list_widget.count())]
+            for i in items:
+                i.setSelected(False) # Na początku odznacz
+                custom_i = self.view.annotation_list_widget.itemWidget(i)
+                if custom_i.getAnnotation().get_segmentation() == self.scene_presenter.get_seleted_polygon():
+                    i.setSelected(True)
+
+
+
+
         self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
         self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
 
