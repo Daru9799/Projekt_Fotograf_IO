@@ -49,9 +49,9 @@ class PolygonPresenter(QObject):
             else: # rysowanie pierszego wierzchołka
                 cv2.circle(drawing_surface, tuple(np_points[0][0]), self.point_radius, self.color, -1)
 
-            if self.polygon_closed:
-                fill_color = (self.color[0], self.color[1], self.color[2], 120)
-                cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
+            # if self.polygon_closed:
+            #     fill_color = (self.color[0], self.color[1], self.color[2], 120)
+            #     cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
 
             # Rysowanie lini podążającej za kursorem:
             if len(np_points) > 0 and not self.polygon_closed:

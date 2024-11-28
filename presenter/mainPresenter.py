@@ -27,7 +27,7 @@ class Presenter:
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project,self)
         self.rectangle_presenter = RectanglePresenter(None)
         self.polygon_presenter = PolygonPresenter(None)
-        self.annotation_presenter = AnnotationPreseter(None,self.new_project)
+        self.annotation_presenter = AnnotationPreseter(None, self, self.new_project)
        # self.annotation_list_presenter = AnnotationListPresenter(None, self.new_project)
         self.scene_presenter = ScenePresenter(None,self,self.new_project)
 
@@ -84,8 +84,7 @@ class Presenter:
             self.image_item = item
 
             self.scene_presenter.reset_to_default()
-            self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
-            self.scene_presenter.draw_annotations()              # Rysowanie wczytanych adnotacji
+            #self.scene_presenter.refresh()           # Rysowanie wczytanych adnotacji
 
 
     #Aktywacja bądź dezaktywacja narzędzia rectangle
@@ -165,8 +164,9 @@ class Presenter:
                     points = self.polygon_presenter.current_polygon_points
                     self.annotation_presenter.add_annotation(points) # dodajemy wielokąt do listy adnotacji
 
-                    # self.polygon_presenter.current_polygon_points.clear()     # do odkomentowania potem
-                    # self.polygon_presenter.polygon_closed = False             # do odkomentowania potem
+                    self.polygon_presenter.current_polygon_points.clear()     # do odkomentowania potem
+                    self.polygon_presenter.polygon_closed = False             # do odkomentowania potem
+                    self.polygon_presenter.drawing_polygon()
                 else:
                     self.polygon_presenter.current_polygon_points.append((int(x),int(y)))
                     self.polygon_presenter.drawing_polygon()

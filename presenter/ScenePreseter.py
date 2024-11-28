@@ -26,7 +26,7 @@ class ScenePresenter:
             points_list = obj.get_segmentation()
             color = self.project.get_color_by_class_id(obj.class_id)
             self.polygons.append([points_list,color])
-        print("pobrano")
+        # print("pobrano")
 
     # na podstawie listy polygons narysuj poligony
     def draw_annotations(self):
@@ -44,7 +44,7 @@ class ScenePresenter:
                 fill_color = (poly[1][0], poly[1][1], poly[1][2], 120)
                 cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
 
-            self.draw_item_on_scene(drawing_surface)
+        self.draw_item_on_scene(drawing_surface)
 
 
     def draw_item_on_scene(self, draw_surf):
@@ -57,9 +57,10 @@ class ScenePresenter:
         pixmap = QPixmap.fromImage(qimage)
 
         # Dodanie wszystkich adnotacji na obrazek
-        if self.polygons_pixmap_ref is not None:  # Sprawdź, czy obiekt wciąż istnieje w scenie
-            self.view.scene.removeItem(self.polygons_pixmap_ref)
-        self.polygons_pixmap_ref = None
+        # if self.polygons_pixmap_ref is not None:  # Sprawdź, czy obiekt wciąż istnieje w scenie
+        #    self.view.scene.removeItem(self.polygons_pixmap_ref)
+        # self.polygons_pixmap_ref = None
+        self.view.scene.removeItem(self.polygons_pixmap_ref)
         self.polygons_pixmap_ref = QGraphicsPixmapItem(pixmap)
         self.view.scene.addItem(self.polygons_pixmap_ref)
         print("Rysowanie na scenie")
@@ -69,8 +70,19 @@ class ScenePresenter:
         # zapisz do listy annotation_objects wszystkie adnotacje z listy adnotacji obrazka (obiekty)
         pass
 
+
     def reset_to_default(self):
+        self.polygons_pixmap_ref = None
+
+        self.reset_annotations()
+        self.get_annotations_from_project()
+        self.draw_annotations()
+
+    def reset_annotations(self):
         self.annotations = []
         self.polygons = []
-        self.active_image_model = None
-        self.polygons_pixmap_ref = None
+
+    def refresh(self):
+        self.reset_annotations()
+        self.get_annotations_from_project()
+        self.draw_annotations()

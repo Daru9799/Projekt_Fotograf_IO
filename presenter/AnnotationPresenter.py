@@ -5,8 +5,9 @@ from view.AnnotationListView import AnnotationListView
 import copy
 
 class AnnotationPreseter:
-    def __init__(self, view, project):
+    def __init__(self, view, presenter, project):
         self.view = view
+        self.presenter = presenter
         self.project = project
 
     def add_annotation(self, points):
@@ -55,6 +56,7 @@ class AnnotationPreseter:
         # Odblokowanie sygnałów
         self.view.annotation_list_widget.blockSignals(False)
 
+
     def create_new_id(self, img_obj, class_id):
         # Tworzy listę ID istniejących adnotacji dla danej klasy
         existing_ids = [
@@ -97,6 +99,9 @@ class AnnotationPreseter:
             ]
             # Zaktualizowanie widoku po usunięciu
             self.updateItems()
+            self.presenter.scene_presenter.refresh()
+
+
 
     # Pobranie zaznaczonych adnotacji
     def get_checked_annotations(self):
