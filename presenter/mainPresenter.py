@@ -144,6 +144,8 @@ class Presenter:
                 self.view.set_notification_label(f"Pomyślnie utworzono nową adnotację! Tryb rysowania prostokąta aktywny. Wybierz punkt początkowy LPM.")
                 self.rectangle_presenter.delete_temp_rectangle() #Usunięcie tymczasowego obiektu
                 self.annotation_presenter.add_annotation(points)
+                self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
+                self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
 
                 ###Tutaj trzeba obsłużyć update sceny z nowym narysowanym obiektem (narysować go ponownie z innymi)
                 self.rectangle_presenter.update_start_point(None, None)
@@ -168,7 +170,9 @@ class Presenter:
 
                     self.polygon_presenter.current_polygon_points.clear()     # do odkomentowania potem
                     self.polygon_presenter.polygon_closed = False             # do odkomentowania potem
-                    self.polygon_presenter.drawing_polygon()
+                    self.polygon_presenter.drawing_polygon()                  # usuwa narysowany, zamknięty poligon
+                    self.scene_presenter.get_annotations_from_project()       # Pobranie adnotacji do rysowania
+                    self.scene_presenter.draw_annotations()                   # Rysowanie wczytanych adnotacji
                 else:
                     self.polygon_presenter.current_polygon_points.append((int(x),int(y)))
                     self.polygon_presenter.drawing_polygon()
@@ -190,6 +194,10 @@ class Presenter:
             # Sprawdza czy nie klikneliśmy na poligon
             self.scene_presenter.select_polygon_on_click(int(x),int(y))
 
+            #if self.scene_presenter.selected_polygon == [[],[]]:
+            self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
+            self.scene_presenter.draw_annotations()
+
             # Poniższy kod służy do zaznaczenia adnotacji(setSelect(True)) w liście adnotacji
             items = [self.view.annotation_list_widget.item(i) for i in range(self.view.annotation_list_widget.count())]
             for i in items:
@@ -198,11 +206,11 @@ class Presenter:
                 if custom_i.getAnnotation().get_segmentation() == self.scene_presenter.get_seleted_polygon():
                     i.setSelected(True)
 
+            # Edycja punktów zaznaczonego polygona:
+            self.scene_presenter.active_dragging(int(x),int(y))
 
-
-
-        self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
-        self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
+        # self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
+        # self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
 
 
 
@@ -216,6 +224,11 @@ class Presenter:
             self.rectangle_presenter.draw_rectangle(self.rectangle_presenter.rectangle_start_point[0], self.rectangle_presenter.rectangle_start_point[1], x, y)
         if self.drawing_tool == "polygon":
             self.polygon_presenter.set_cursor_pos(x,y)
+        if self.drawing_tool is None:
+            self.scene_presenter.dragging_move(x,y)
+
+    def handle_mouse_left_click_release(self):
+        self.scene_presenter.release_dragging_click()
 
     def handle_escape_click(self):
         self.rectangle_presenter.cancel_drawing_rectangle()

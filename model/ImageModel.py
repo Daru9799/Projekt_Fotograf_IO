@@ -24,3 +24,6 @@ class ImageModel:
     def get_annotation_list(self):
         return copy.deepcopy(self.list_of_annotations)
 
+    def set_annotation_list(self, list):
+        self.list_of_annotations = list
+

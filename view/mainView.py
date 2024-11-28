@@ -443,6 +443,12 @@ class MainView(object):
             else:
                 self.change_to_cross_cursor()
 
+        if event.button() == event.button() == Qt.LeftButton:
+            self.is_dragging = False
+            self.last_mouse_position = None
+            # Testowo, do zmiany : ----------------------------------------------- !!!!!!!!!!!!!!!!!!!!!!!!
+            self.presenter.handle_mouse_left_click_release()
+
     #Zmiana kursora gdy jesteśmy w obszarze obrazka
     def change_to_cross_cursor(self):
         self.graphics_view.setCursor(QtCore.Qt.CrossCursor)

@@ -3,6 +3,7 @@ from operator import indexOf
 from PIL import Image
 from PIL.ExifTags import TAGS
 import random
+import copy
 # from statsmodels.sandbox.stats.contrast_tools import contrast_labels
 
 from model.ImageModel import ImageModel
@@ -135,6 +136,15 @@ class ProjectModel:
                 classIndex = indexOf(self.list_of_classes_model,cl)
                 self.list_of_classes_model[classIndex] = classObj
 
+    def uppdate_annotation_by_image_object(self, img_obj):
+        for img in self.list_of_images_model:
+            if img.image_id == img_obj.image_id:
+                imgIndex = indexOf(self.list_of_images_model, img)
+                new_annot = img_obj.get_annotation_list()
+                img.set_annotation_list(new_annot)
+                self.list_of_images_model[imgIndex] = img
+
+
     def random_color(self):
         """Zwraca losowy kolor w formacie RGB."""
         return (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
@@ -158,3 +168,5 @@ class ProjectModel:
             if cl.class_id == class_id:
                 return cl.name
         return
+
+
