@@ -7,9 +7,12 @@ from PyQt5.QtGui import QImage, QPixmap
 
 class PolygonPresenter(QObject):
 
-    def __init__(self, view):
+    def __init__(self, view, presenter):
         super().__init__()
         self.view = view
+        self.presenter = presenter
+
+
         self.current_polygon_points = []
         self.polygon_closed = False
         self.point_radius = 5  # Promień kółek dla wierzchołków
@@ -92,6 +95,9 @@ class PolygonPresenter(QObject):
         self.polygon_closed = False
         self.current_polygon_points.clear()
         self.view.set_draw_polygon_button_text("Rysuj poligon")
+
+        #Wczytanie na nowo adnotacji żeby żadna adnotacja nie była zaznaczona po wyjściu z rysowania
+        self.presenter.annotation_presenter.updateItems()
 
     def update_color(self, color):
         self.color = (color[0],color[1],color[2],255)

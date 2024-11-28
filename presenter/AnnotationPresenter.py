@@ -55,6 +55,7 @@ class AnnotationPreseter:
 
         # connection przy zmianie elem. listy
         self.view.annotation_list_widget.itemSelectionChanged.connect(self.onItemSelectionChanged)
+        self.view.annotation_list_widget.itemClicked.connect(self.onItemSelectionChanged)
 
         # Odblokowanie sygnałów
         self.view.annotation_list_widget.blockSignals(False)

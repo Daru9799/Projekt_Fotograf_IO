@@ -25,8 +25,8 @@ class Presenter:
         #Podprezentery do obsługi poszczególnych modułów aplikacji
         self.file_list_presenter = FileListPresenter(None, self)
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project,self)
-        self.rectangle_presenter = RectanglePresenter(None)
-        self.polygon_presenter = PolygonPresenter(None)
+        self.rectangle_presenter = RectanglePresenter(None, self)
+        self.polygon_presenter = PolygonPresenter(None, self)
         self.annotation_presenter = AnnotationPreseter(None, self, self.new_project)
        # self.annotation_list_presenter = AnnotationListPresenter(None, self.new_project)
         self.scene_presenter = ScenePresenter(None,self,self.new_project)

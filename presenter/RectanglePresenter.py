@@ -5,9 +5,11 @@ from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QImage, QPixmap
 
 class RectanglePresenter(QObject):
-    def __init__(self, view):
+    def __init__(self, view,presenter):
         super().__init__()
         self.view = view
+        self.presenter = presenter
+
         self.rectangle_start_point = (None, None)  # Punkt początkowy nowo rysowanego prostokąta (x, y)
         self.points = [] #w tym przypadku zwróci 4 punkty (wierzchołki prostokąta w liście)
         self.temp_rectangle_item = None #referencja to rysowanego rectangle
@@ -64,6 +66,9 @@ class RectanglePresenter(QObject):
             self.update_start_point(None, None)
         self.view.set_draw_rectangle_button_text("Rysuj prostokąt")
         self.view.change_to_arrow_cursor()
+
+        # Wczytanie na nowo adnotacji żeby żadna adnotacja nie była zaznaczona po wyjściu z rysowania
+        self.presenter.annotation_presenter.updateItems()
 
     def update_color(self, color):
         self.color = color
