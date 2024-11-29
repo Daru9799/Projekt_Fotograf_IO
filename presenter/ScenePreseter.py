@@ -6,6 +6,9 @@ import copy
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QImage, QPixmap
 
+from model.AnnotationModel import AnnotationModel
+
+
 class ScenePresenter:
     def __init__(self, view, presenter, project):
         self.view = view
@@ -15,18 +18,19 @@ class ScenePresenter:
         self.annotations = [] #lista adnotacji
         self.polygons = [] #przechowuje liste dwuelementową (punkty, kolor): [[(x,y), (x,y), ...], RGB]
         self.active_image_model = None
-        self.point_radius = 6  # Promień kółek dla wierzchołków
+        self.point_radius = 3  # Promień kółek dla wierzchołków
         self.polygons_pixmap_ref = None
         self.selected_polygon = [[],[]]
 
         self.is_dragging = False
-        self.selected_vertex = [[[],[]],0]
+        self.selected_vertex = None
 
     # pobiera listę "annotations" obrazu i na jej podstawie generuje liste "polygons"
     def get_annotations_from_project(self):
         image = self.presenter.image_item
         self.active_image_model = self.project.get_img_by_filename(image.text())
         self.annotations = self.active_image_model.get_annotation_list()
+        self.polygons = []
         for obj in self.annotations:
             points_list = obj.get_segmentation()
             color = self.project.get_color_by_class_id(obj.class_id)
@@ -51,6 +55,9 @@ class ScenePresenter:
                     cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
                     for point in np_points:
                         cv2.circle(drawing_surface, tuple(point[0]), self.point_radius, border_color, -1)
+                    # print("Wirzchołki były takie same jak w selected_polygon")
+                    # print(poly[0])
+                    # print(self.selected_polygon[0])
 
                 else:
                     # Wypełnianie polygona kolorem:
@@ -86,7 +93,27 @@ class ScenePresenter:
         self.view.scene.addItem(self.polygons_pixmap_ref)
         #print("Rysowanie na scenie")
 
-    # Funkcja która po klinięciu na polygon ustawia go jako aktywny/selected
+
+    def handle_select_polygon(self,x,y):
+        if self.selected_polygon == [[],[]]:
+            poly = copy.deepcopy(self.select_polygon_on_click( x, y))
+            self.selected_polygon = poly
+            return
+
+        near_active_polygon_point = False
+        for point in self.selected_polygon[0]:
+            distance = np.linalg.norm(np.array([x, y]) - np.array(point))
+            if distance <= self.point_radius:
+                near_active_polygon_point = True  # Punkt jest blisko wierzchołka
+
+        if near_active_polygon_point:
+            pass
+        else:
+            poly = copy.deepcopy(self.select_polygon_on_click(x, y))
+            self.selected_polygon = poly
+
+
+    # Funkcja która po zwraca tablice wierzchołków poligona po kliknięciu w jego obszar
     def select_polygon_on_click(self,x,y):
         selected_polygon = None
         for poly in self.polygons:
@@ -94,48 +121,79 @@ class ScenePresenter:
             if result:
                 selected_polygon = poly
                 break
-        if selected_polygon is not None:
-            self.selected_polygon = selected_polygon
-        else:
-            self.selected_polygon = [[],[]]
-        print("Wybrany polygon to:",self.selected_polygon)
+        if selected_polygon is None:
+            selected_polygon = [[],[]]
+        return selected_polygon
+
+        #print("Wybrany polygon to:",self.selected_polygon)
+
 
     def active_dragging(self,x,y):
-        # print(self.selected_polygon)
-        if self.selected_polygon != [[],[]]:
+        # for i in self.polygons:
+        #     print(i)
+        if self.selected_polygon != [[],[]]:        # Sprawdź czy jest zaznaczony jakiś polygon
             polygon_points = self.selected_polygon
             for idx, polygon_point in enumerate(polygon_points[0]):
                 distance = np.linalg.norm(np.array([x, y]) - np.array(polygon_point))
-                if distance < self.point_radius:
-                    self.selected_vertex = (copy.deepcopy(polygon_points), idx)
+                if distance < (self.point_radius + 3):                  # point_radius powiększone o 3
+                    self.selected_vertex = (polygon_points[0], idx)     # aby łatwiej było chwytać
                     self.is_dragging = True
                     #self.polygons.remove(polygon_points)
                     break
+        #print("aktualne poligony po kliknięciem")
+        print("aktualne poligony kiedy kliknięto kliknięciem")
+        for i in self.polygons:
+            print(i)
 
     def dragging_move(self,x,y):
         if self.is_dragging and self.selected_vertex:
             # Przesuwanie wybranego wierzchołka
-            polygon_points, idx = self.selected_vertex[0][0] ,self.selected_vertex[1]
+            polygon_points, idx = self.selected_vertex[0] ,self.selected_vertex[1]
             polygon_points[idx] = (x, y)
-            print("polygon_points")
-            print(polygon_points)
-            self.selected_vertex = ([polygon_points,self.selected_vertex[0][1]],idx)
+            # print("polygon_points")
+            # print(polygon_points)
             self.draw_annotations()  # Aktualizacja obrazu po przesunięciu wierzchołka
 
     def release_dragging_click(self):
         if self.selected_vertex is not None:
-            #self.polygons.append(self.selected_vertex[0])
-            #self.save_edited_annotations()
-            pass
-        #print(self.selected_polygon)
-        self.is_dragging = False
-        self.selected_vertex = [[[],[]],0]
-        self.draw_annotations()
+            print("aktualne poligony")
+            for i in self.polygons:
+                print(i)
+            print("puszczenie LP myszy")
 
+        #print(self.selected_polygon)
+        if self.is_dragging: # jeśli wierzchołek był przesuwany
+            self.save_edited_annotations()
+            self.presenter.annotation_presenter.updateItems() # Odświeżenie listy adnotacji
+            self.draw_annotations()
+        self.is_dragging = False
+        self.selected_vertex = None
 
 
     def save_edited_annotations(self):
-        self.project.uppdate_annotation_by_image_object(self.active_image_model)
+        for polygon in self.polygons:
+            new_points, new_color = polygon  # Wierzchołki i kolor z listy self.polygons
+
+            # Szukamy adnotacji, która najlepiej pasuje do obecnego polygonu
+            best_match = None
+            min_difference = float('inf')
+
+            for annotation in self.annotations:
+                current_points = annotation.get_segmentation()
+
+                # Liczymy różnicę w liczbie i położeniu wierzchołków
+                difference = len(set(new_points).symmetric_difference(set(current_points)))
+
+                # Aktualizacja, jeśli różnica jest najmniejsza
+                if difference < min_difference:
+                    min_difference = difference
+                    best_match = annotation
+
+            # Aktualizujemy wierzchołki w najlepiej dopasowanym obiekcie adnotacji
+            if best_match:
+                best_match.set_segmentation(new_points)
+        self.project.uppdate_annotation_by_image_object(self.active_image_model, self.annotations)
+        print("ok")
 
     def reset_annotations(self):
         self.selected_polygon = [[],[]]
@@ -168,7 +226,7 @@ class ScenePresenter:
         # Sprawdzenie, czy punkt jest w pobliżu któregokolwiek wierzchołka
         for point in polygon:
             distance = np.linalg.norm(np.array([x, y]) - np.array(point))
-            if distance <= self.point_radius:
+            if distance <= (self.point_radius + 3):                               # point_radius powiększone o 3
                 return True  # Punkt jest blisko wierzchołka
 
         return False

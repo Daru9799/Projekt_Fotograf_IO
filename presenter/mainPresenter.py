@@ -192,11 +192,9 @@ class Presenter:
                 # >>
         if self.drawing_tool is None:
             # Sprawdza czy nie klikneliśmy na poligon
-            self.scene_presenter.select_polygon_on_click(int(x),int(y))
+            self.scene_presenter.handle_select_polygon(int(x),int(y))
 
-            #if self.scene_presenter.selected_polygon == [[],[]]:
-            self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
-            self.scene_presenter.draw_annotations()
+            self.scene_presenter.draw_annotations()     # Odświerzenie widoku
 
             # Poniższy kod służy do zaznaczenia adnotacji(setSelect(True)) w liście adnotacji
             items = [self.view.annotation_list_widget.item(i) for i in range(self.view.annotation_list_widget.count())]
@@ -211,8 +209,6 @@ class Presenter:
 
         # self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
         # self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
-
-
 
 
     #Obsluga przesuwania myszy w obrębie obszaru obrazka (współrzędne zawsze odnoszą się do obrazka nie całego graphic_view)

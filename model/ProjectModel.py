@@ -136,11 +136,11 @@ class ProjectModel:
                 classIndex = indexOf(self.list_of_classes_model,cl)
                 self.list_of_classes_model[classIndex] = classObj
 
-    def uppdate_annotation_by_image_object(self, img_obj):
+    def uppdate_annotation_by_image_object(self, img_obj, annot_list):
         for img in self.list_of_images_model:
             if img.image_id == img_obj.image_id:
                 imgIndex = indexOf(self.list_of_images_model, img)
-                new_annot = img_obj.get_annotation_list()
+                new_annot = copy.deepcopy(annot_list)
                 img.set_annotation_list(new_annot)
                 self.list_of_images_model[imgIndex] = img
 

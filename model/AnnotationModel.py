@@ -12,3 +12,8 @@ class AnnotationModel:
     def get_segmentation(self):
         return copy.deepcopy(self.segmentation)
 
+    def set_segmentation(self, lista):
+        cp_list = copy.deepcopy(lista)
+        self.segmentation = cp_list
+
+
