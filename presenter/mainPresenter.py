@@ -159,53 +159,42 @@ class Presenter:
                 return
 
             self.polygon_presenter.update_color(selected_class.Class.color) # update koloru
-            if not self.polygon_presenter.polygon_closed:
-                # jeśli plolygon ma conajmniej 3 punkty i klikneliśmy obok współżendnych początkowych
-                if len(self.polygon_presenter.current_polygon_points) > 2 and self.polygon_presenter.is_near_starting_point(x, y):
-                    self.polygon_presenter.polygon_closed = True
-                    self.polygon_presenter.drawing_polygon()
 
-                    points = self.polygon_presenter.current_polygon_points
-                    self.annotation_presenter.add_annotation(points) # dodajemy wielokąt do listy adnotacji
+            # jeśli plolygon ma conajmniej 3 punkty i klikneliśmy obok współżendnych początkowych
+            if len(self.polygon_presenter.current_polygon_points) > 2 and self.polygon_presenter.is_near_starting_point(x, y):
+                self.polygon_presenter.polygon_closed = True
+                self.polygon_presenter.drawing_polygon()
 
-                    self.polygon_presenter.current_polygon_points.clear()     # do odkomentowania potem
-                    self.polygon_presenter.polygon_closed = False             # do odkomentowania potem
-                    self.polygon_presenter.drawing_polygon()                  # usuwa narysowany, zamknięty poligon
-                    self.scene_presenter.get_annotations_from_project()       # Pobranie adnotacji do rysowania
-                    self.scene_presenter.draw_annotations()                   # Rysowanie wczytanych adnotacji
-                else:
-                    self.polygon_presenter.current_polygon_points.append((int(x),int(y)))
-                    self.polygon_presenter.drawing_polygon()
+                points = self.polygon_presenter.current_polygon_points
+                self.annotation_presenter.add_annotation(points) # dodajemy wielokąt do listy adnotacji
+
+                self.polygon_presenter.current_polygon_points.clear()     # do odkomentowania potem
+                self.polygon_presenter.polygon_closed = False             # do odkomentowania potem
+                self.polygon_presenter.drawing_polygon()                  # usuwa narysowany, zamknięty poligon
+                self.scene_presenter.get_annotations_from_project()       # Pobranie adnotacji do rysowania
+                self.scene_presenter.draw_annotations()                   # Rysowanie wczytanych adnotacji
             else:
-                # Tymczasowe,testowe: sprawdzanie czy kliknięty punkt znajduje się obszarze polygona
-                # <<
-                result = self.polygon_presenter.check_inclusion(int(x),int(y))
-                if result > 0:
-                    print("Punkt znajduje się wewnątrz wielokąta.")
-                elif result == 0:
-                    print("Punkt znajduje się na krawędzi wielokąta.")
-                else:
-                    print("Punkt znajduje się na zewnątrz wielokąta.")
-                    self.polygon_presenter.current_polygon_points.clear()   # do odkomentowania potem
-                    self.polygon_presenter.polygon_closed = False
-                    self.polygon_presenter.drawing_polygon()
-                # >>
+                self.polygon_presenter.current_polygon_points.append((int(x),int(y)))
+                self.polygon_presenter.drawing_polygon()
+
         if self.drawing_tool is None:
             # Sprawdza czy nie klikneliśmy na poligon
-            self.scene_presenter.handle_select_polygon(int(x),int(y))
-
-            self.scene_presenter.draw_annotations()     # Odświerzenie widoku
+            #self.scene_presenter.handle_select_polygon(int(x),int(y))
+            self.scene_presenter.active_dragging(int(x), int(y))
 
             # Poniższy kod służy do zaznaczenia adnotacji(setSelect(True)) w liście adnotacji
-            items = [self.view.annotation_list_widget.item(i) for i in range(self.view.annotation_list_widget.count())]
-            for i in items:
-                i.setSelected(False) # Na początku odznacz
-                custom_i = self.view.annotation_list_widget.itemWidget(i)
-                if custom_i.getAnnotation().get_segmentation() == self.scene_presenter.get_seleted_polygon():
-                    i.setSelected(True)
+            # items = [self.view.annotation_list_widget.item(i) for i in range(self.view.annotation_list_widget.count())]
+            # for i in items:
+            #     i.setSelected(False) # Na początku odznacz
+            #     custom_i = self.view.annotation_list_widget.itemWidget(i)
+            #     if custom_i.getAnnotation().get_segmentation() == self.scene_presenter.get_seleted_polygon():
+            #         i.setSelected(True)
+
+            self.scene_presenter.draw_annotations()  # Odświerzenie widoku
 
             # Edycja punktów zaznaczonego polygona:
-            self.scene_presenter.active_dragging(int(x),int(y))
+            print("Aktywny poligon :")
+            print(self.scene_presenter.selected_polygon)
 
         # self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
         # self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
@@ -225,6 +214,13 @@ class Presenter:
 
     def handle_mouse_left_click_release(self):
         self.scene_presenter.release_dragging_click()
+
+        items = [self.view.annotation_list_widget.item(i) for i in range(self.view.annotation_list_widget.count())]
+        for i in items:
+            i.setSelected(False)  # Na początku odznacz
+            custom_i = self.view.annotation_list_widget.itemWidget(i)
+            if custom_i.getAnnotation().get_segmentation() == self.scene_presenter.get_seleted_polygon():
+                i.setSelected(True)
 
     def handle_escape_click(self):
         self.rectangle_presenter.cancel_drawing_rectangle()

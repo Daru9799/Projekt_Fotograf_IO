@@ -78,9 +78,9 @@ class RealTimeOpenCVViewer(QGraphicsView):
             point = event.pos()
             scene_point = self.mapToScene(point)
             x, y = int(scene_point.x()), int(scene_point.y())
-            print("Kliknięto LP Myszy:")
-            print("polygons:")
-            print(self.polygons)
+            # print("Kliknięto LP Myszy:")
+            # print("polygons:")
+            # print(self.polygons)
             if self.allow_drawing:
                 # Sprawdzanie, czy kliknięto na początkowy wierzchołek, aby zamknąć wielokąt
                 if len(self.current_polygon_points) > 2 and self.is_near_starting_point(x, y):

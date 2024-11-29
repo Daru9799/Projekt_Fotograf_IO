@@ -8,7 +8,6 @@ from PyQt5.QtGui import QImage, QPixmap
 
 from model.AnnotationModel import AnnotationModel
 
-
 class ScenePresenter:
     def __init__(self, view, presenter, project):
         self.view = view
@@ -18,7 +17,9 @@ class ScenePresenter:
         self.annotations = [] #lista adnotacji
         self.polygons = [] #przechowuje liste dwuelementową (punkty, kolor): [[(x,y), (x,y), ...], RGB]
         self.active_image_model = None
-        self.point_radius = 3  # Promień kółek dla wierzchołków
+        self.point_radius = 4  # Promień kółek dla wierzchołków [px]
+        self.point_dst_multiplier = 1
+        self.expand_dst = 4 # [px]
         self.polygons_pixmap_ref = None
         self.selected_polygon = [[],[]]
 
@@ -35,7 +36,6 @@ class ScenePresenter:
             points_list = obj.get_segmentation()
             color = self.project.get_color_by_class_id(obj.class_id)
             self.polygons.append([points_list,color])
-        # print("pobrano")
 
     # na podstawie listy polygons narysuj poligony
     def draw_annotations(self):
@@ -46,6 +46,7 @@ class ScenePresenter:
                 np_points = np.array(poly[0], dtype=np.int32)
                 np_points = np_points.reshape((-1, 1, 2))
                 border_color = (poly[1][0], poly[1][1], poly[1][2], 255)
+
                 # Rysowanie kontóra
                 cv2.polylines(drawing_surface, [np_points], isClosed=True, thickness=2, color=border_color)
 
@@ -63,14 +64,6 @@ class ScenePresenter:
                     # Wypełnianie polygona kolorem:
                     fill_color = (poly[1][0], poly[1][1], poly[1][2], 160)
                     cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
-
-            #Tymczasowo do sprawdzenia:
-            # np_points = np.array(self.selected_vertex[0][1], dtype=np.int32)
-            # np_points = np_points.reshape((-1, 1, 2))
-            # border_color = (self.selected_vertex[0][1][0], self.selected_vertex[0][1][1], self.selected_vertex[0][1][2], 255)
-            # cv2.polylines(drawing_surface, [np_points], isClosed=True, thickness=2, color=border_color)
-            # cv2.fillPoly(drawing_surface, [np_points], color=border_color)
-
 
         self.draw_item_on_scene(drawing_surface)
 
@@ -100,13 +93,14 @@ class ScenePresenter:
             self.selected_polygon = poly
             return
 
+        # Kod który sprawdza czy nie klikneliśmy obok wierzchołka zaznaczonego/aktywnego poligona
         near_active_polygon_point = False
         for point in self.selected_polygon[0]:
             distance = np.linalg.norm(np.array([x, y]) - np.array(point))
             if distance <= self.point_radius:
                 near_active_polygon_point = True  # Punkt jest blisko wierzchołka
 
-        if near_active_polygon_point:
+        if near_active_polygon_point:   # jeśli klikneliśmy obok wierzchołka zaznaczonego/aktywnego poligona
             pass
         else:
             poly = copy.deepcopy(self.select_polygon_on_click(x, y))
@@ -127,38 +121,73 @@ class ScenePresenter:
 
         #print("Wybrany polygon to:",self.selected_polygon)
 
+    def is_near_edge(self, x, y, polygon):
+        """Sprawdza, czy punkt (x, y) jest blisko krawędzi wielokąta."""
+        for i in range(len(polygon)):
+            p1 = np.array(polygon[i])
+            p2 = np.array(polygon[(i + 1) % len(polygon)])  # Następny wierzchołek (zamknięcie pętli)
+            edge_vec = p2 - p1
+            point_vec = np.array([x, y]) - p1
+            edge_length = np.linalg.norm(edge_vec)
+            if edge_length == 0:
+                continue
+            projection_length = np.dot(point_vec, edge_vec) / edge_length
+            if 0 <= projection_length <= edge_length:
+                projection_point = p1 + projection_length * (edge_vec / edge_length)
+                distance = np.linalg.norm(np.array([x, y]) - projection_point)
+                if distance < self.point_radius * 2:  # Wartość progu dla kliknięcia
+                    return i, tuple(projection_point)
+        return None, None
+
 
     def active_dragging(self,x,y):
-        # for i in self.polygons:
-        #     print(i)
+        old_selection = self.selected_polygon
+        self.handle_select_polygon(x,y)
         if self.selected_polygon != [[],[]]:        # Sprawdź czy jest zaznaczony jakiś polygon
-            polygon_points = self.selected_polygon
-            for idx, polygon_point in enumerate(polygon_points[0]):
-                distance = np.linalg.norm(np.array([x, y]) - np.array(polygon_point))
-                if distance < (self.point_radius + 3):                  # point_radius powiększone o 3
-                    self.selected_vertex = (polygon_points[0], idx)     # aby łatwiej było chwytać
-                    self.is_dragging = True
-                    #self.polygons.remove(polygon_points)
-                    break
-        #print("aktualne poligony po kliknięciem")
-        print("aktualne poligony kiedy kliknięto kliknięciem")
-        for i in self.polygons:
-            print(i)
+            if self.selected_polygon == old_selection:            #sprawdź czy to co klikneliśmy nie było już zaznaczone
+                polygon_points = self.selected_polygon
+                for idx, polygon_point in enumerate(polygon_points[0]):
+                    distance = np.linalg.norm(np.array([x, y]) - np.array(polygon_point))
+                    if distance < ((self.point_radius*self.point_dst_multiplier) + 5):                  # point_radius powiększone o 5
+                        self.selected_vertex = (polygon_points[0], idx)     # aby łatwiej było chwytać
+                        self.is_dragging = True
+                        #self.polygons.remove(polygon_points)
+                        break
+                if not self.is_dragging:
+                    for polygon_points, color in self.polygons:
+                        edge_index, new_vertex = self.is_near_edge(x, y, polygon_points)
+                        if edge_index is not None:
+                            polygon_points.insert(edge_index + 1, (int(new_vertex[0]), int(new_vertex[1])))
+                            self.selected_polygon[0] = polygon_points
+                            self.selected_vertex = (polygon_points, (edge_index + 1))
+                            self.is_dragging = True
+                            self.draw_annotations()
+                            break
+            else:
+                #print("pass")
+                pass
+
+        if self.is_dragging:
+            self.draw_annotations()
 
     def dragging_move(self,x,y):
         if self.is_dragging and self.selected_vertex:
             # Przesuwanie wybranego wierzchołka
             polygon_points, idx = self.selected_vertex[0] ,self.selected_vertex[1]
             polygon_points[idx] = (x, y)
+            # print("*" * 20)
             # print("polygon_points")
             # print(polygon_points)
+            # print("selected_polygon")
+            # print(self.selected_polygon[0])
+            # print("*"*20)
             self.draw_annotations()  # Aktualizacja obrazu po przesunięciu wierzchołka
 
     def release_dragging_click(self):
         if self.selected_vertex is not None:
-            print("aktualne poligony")
-            for i in self.polygons:
-                print(i)
+            # print("aktualne poligony")
+            # for i in self.polygons:
+            #     print(i)
             print("puszczenie LP myszy")
 
         #print(self.selected_polygon)
@@ -193,7 +222,6 @@ class ScenePresenter:
             if best_match:
                 best_match.set_segmentation(new_points)
         self.project.uppdate_annotation_by_image_object(self.active_image_model, self.annotations)
-        print("ok")
 
     def reset_annotations(self):
         self.selected_polygon = [[],[]]
@@ -214,19 +242,36 @@ class ScenePresenter:
     def reset_selected_polygon(self):
         self.selected_polygon = [[],[]]
 
+
+    # Sorawdza czy punkt znajduje się w obrębie poligona
+    # Wierzchołki jako większe punkty też się wliczają w obszar poligona
     def check_inclusion(self,polygon,x,y):
         np_points = np.array(polygon, dtype=np.int32)
+        centroid = np.mean(np_points, axis=0)
+
+        # Obliczenie wektorów normalnych i przesunięcie wierzchołków
+        expansion_distance = self.expand_dst  # Powiększenie o 10 piksele
+        expanded_polygon = []
+        for point in np_points:
+            # Wektor od środka ciężkości do wierzchołka
+            direction = point - centroid
+            # Normalizacja wektora kierunku i przesunięcie
+            normalized_direction = direction / (np.linalg.norm(direction) + 1e-6)
+            expanded_point = point + normalized_direction * expansion_distance
+            expanded_polygon.append(expanded_point)
+
+        expanded_polygon = np.array(expanded_polygon, dtype=np.int32)
 
         # Sprawdzenie, czy punkt znajduje się wewnątrz wielokąta
-        result = cv2.pointPolygonTest(np_points, (x, y), False)
+        result = cv2.pointPolygonTest(expanded_polygon, (x, y), False)
 
         if result >= 0:
             return True  # Punkt jest wewnątrz lub na krawędzi wielokąta
 
         # Sprawdzenie, czy punkt jest w pobliżu któregokolwiek wierzchołka
-        for point in polygon:
+        for point in expanded_polygon:
             distance = np.linalg.norm(np.array([x, y]) - np.array(point))
-            if distance <= (self.point_radius + 3):                               # point_radius powiększone o 3
+            if distance <= ((self.point_radius*self.point_dst_multiplier) + 5):                               # point_radius powiększone
                 return True  # Punkt jest blisko wierzchołka
 
         return False
