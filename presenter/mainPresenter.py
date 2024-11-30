@@ -78,6 +78,9 @@ class Presenter:
         # Przypisanie pierwszego pokazanego zdjęcia do image_item
         #self.image_item = self.new_project.get_img_by_filename(self.new_project.list_of_images_model[0].filename)
 
+        self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
+        self.scene_presenter.draw_annotations()              # Rysowanie wczytanych adnotacji
+
     #Aktualizacja sceny po zmianie obrazka w liście po prawej stronie
     def folder_list_on_click(self, item):
         self.rectangle_presenter.cancel_drawing_rectangle()     #Anulowanie rysowania prostokąta po kliknięciu w prawy panel
