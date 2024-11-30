@@ -12,6 +12,8 @@ from presenter.RectanglePresenter import RectanglePresenter
 from presenter.AnnotationPresenter import AnnotationPreseter
 from presenter.PolygonPresenter import PolygonPresenter
 from presenter.ScenePreseter import ScenePresenter
+from presenter.ImportFromFile import ImportFromFile
+from presenter.ExportToFile import ExportToFile
 from view.ExifWindowView import ExifWindow
 
 
@@ -30,6 +32,8 @@ class Presenter:
         self.annotation_presenter = AnnotationPreseter(None, self, self.new_project)
        # self.annotation_list_presenter = AnnotationListPresenter(None, self.new_project)
         self.scene_presenter = ScenePresenter(None,self,self.new_project)
+        self.import_from_file = ImportFromFile(None)
+        self.export_to_file = ExportToFile()
 
 
     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
@@ -41,6 +45,7 @@ class Presenter:
         self.polygon_presenter.view = view
         self.annotation_presenter.view = view
         self.scene_presenter.view = view
+        self.import_from_file.view = view
         self.classManagerPresenter.updateItems()
 
 
@@ -58,19 +63,20 @@ class Presenter:
         folder_path = "./!OBRAZKI DO TESTÓW"
         # !!!
         if folder_path:
-            self.new_project.folder_path = folder_path
-            print("Ścieżka do folderu: "+self.new_project.folder_path)
-            self.new_project.load_images()      #Zaladowanie zdjec do modelu
-
-            #Lista plików aktualizacja w podprezenterze
-            self.file_list_presenter.update_project(self.new_project)
-            self.file_list_presenter.load_files_to_widget()
-            # Przypisanie pierwszego pokazanego zdjęcia do image_item
-            # self.image_item = self.new_project.get_img_by_filename(self.new_project.list_of_images_model[0].filename)
-
-
+            self.update_view_after_loading_new_project(folder_path)
         else:
             self.view.set_notification_label("Nie wybrano folderu.")
+
+    def update_view_after_loading_new_project(self, folder_path):
+        self.new_project.folder_path = folder_path
+        #print("Ścieżka do folderu: " + self.new_project.folder_path)
+        self.new_project.load_images()  # Zaladowanie zdjec do modelu
+
+        # Lista plików aktualizacja w podprezenterze
+        self.file_list_presenter.update_project(self.new_project)
+        self.file_list_presenter.load_files_to_widget()
+        # Przypisanie pierwszego pokazanego zdjęcia do image_item
+        #self.image_item = self.new_project.get_img_by_filename(self.new_project.list_of_images_model[0].filename)
 
     #Aktualizacja sceny po zmianie obrazka w liście po prawej stronie
     def folder_list_on_click(self, item):
@@ -252,5 +258,24 @@ class Presenter:
         else:
             self.view.show_message_OK("Informacja", "Proszę wybrać obraz z listy.")
 
+    def import_from_coco(self):
+        if self.new_project.list_of_images_model:
+            confirmation = self.view.show_message_Yes_No("Uwaga!", "Import anuluje wszystkie niezapisane dane. Czy chcesz kontynuować?")
+            if confirmation:
+                img_list, class_list, annot_list, json_path = self.import_from_file.import_from_COCO()
+            else:
+                return 0
+        else:
+            img_list, class_list, annot_list, json_path = self.import_from_file.import_from_COCO()
 
+        ##Przypisywanie obrazków i klas do listy projektowej
+        self.new_project.list_of_images_model = img_list
+        self.new_project.list_of_classes_model = class_list
+        #Przypisanie adnotacji do obrazków
 
+        #Aktualizacja widoku (na razie jako folder z obrazkami przekazuje None, potem będzie to json_path/images/)
+        self.update_view_after_loading_new_project(None)
+
+    #Stąd przekazanie importów/eksportów do podprezenterów
+    def export_to_coco(self):
+        print("TEST. EKSPORTUJE.")

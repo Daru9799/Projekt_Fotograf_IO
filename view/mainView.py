@@ -376,6 +376,8 @@ class MainView(object):
         self.delete_annotation_button.clicked.connect(self.presenter.annotation_presenter.delete_selected_annotations)# Usuń Annotacje- przycisk
         self.show_exif_button.clicked.connect(self.presenter.open_exif_window)
         self.zoom_value_widget.editingFinished.connect(self.presenter.zoom_value)
+        self.export_COCO_action.triggered.connect(self.presenter.export_to_coco)
+        self.import_COCO_action_2.triggered.connect(self.presenter.import_from_coco)
 
 
 ###Wskazówki dla użytkownika
@@ -536,8 +538,6 @@ class MainView(object):
 
     def set_no_active_tool_text(self):
         self.set_notification_label("Brak aktywnego narzędzia do rysowania.")
-
-
 
         # Obsługa przesuwania obrazu, jeśli kursor jest blisko krawędzi
         # self.handle_edge_scrolling(event.pos())

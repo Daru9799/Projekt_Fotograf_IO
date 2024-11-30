@@ -95,6 +95,7 @@ class PolygonPresenter(QObject):
         self.polygon_closed = False
         self.current_polygon_points.clear()
         self.view.set_draw_polygon_button_text("Rysuj poligon")
+        self.view.change_to_arrow_cursor()
 
         #Wczytanie na nowo adnotacji żeby żadna adnotacja nie była zaznaczona po wyjściu z rysowania
         self.presenter.annotation_presenter.updateItems()
