@@ -45,25 +45,27 @@ class ExportToFile:
         return json_file_path
 
     def export_images(self, folder_path):
-        # Usuwamy rozszerzenie .json z folder_path, aby wskazywało na folder
-        folder_path = os.path.splitext(folder_path)[0]
         images_folder = os.path.join(folder_path, 'images')
-        print(images_folder)
+        os.makedirs(images_folder, exist_ok=True)  # Tworzymy folder 'images', jeśli nie istnieje
 
-        if not os.path.exists(images_folder):
-            os.makedirs(images_folder)  # Tworzymy folder 'images', jeśli nie istnieje
-
-        # Iterujemy po obrazkach
         for img_obj in self.project.list_of_images_model:
-            source_path = img_obj.filename
-            print(str(source_path))
+            # Używamy nowej metody, aby uzyskać pełną ścieżkę
+            source_path = self.project.get_full_path_by_filename(img_obj.filename)
+
+            if not source_path:
+                self.view.show_message("Błąd", f"Nie znaleziono ścieżki dla pliku: {img_obj.filename}")
+                continue
+
+            # Ścieżka docelowa w folderze 'images'
             destination_path = os.path.join(images_folder, os.path.basename(source_path))
 
             try:
+                # Kopiujemy obraz do folderu docelowego
                 shutil.copy(source_path, destination_path)
-                self.view.file_list_widget.addItem(os.path.basename(source_path))
+                self.view.file_list_widget.addItem(os.path.basename(source_path))  # Dodajemy plik do widoku
             except Exception as e:
                 self.view.show_message("Błąd", f"Nie udało się skopiować obrazu {img_obj.filename}: {str(e)}")
+
 
 
 

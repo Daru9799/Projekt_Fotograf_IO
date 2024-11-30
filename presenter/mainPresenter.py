@@ -1,3 +1,5 @@
+import os
+
 from PyQt5.QtWidgets import QFileDialog
 
 #Modele
@@ -287,19 +289,25 @@ class Presenter:
             self.view.show_message_OK("Brak danych", "Brak obrazków lub klas do eksportu!")
             return
 
+        # Wywołujemy okno dialogowe do wyboru lokalizacji i nazwy pliku JSON
         json_path = self.export_to_file.select_save_location_and_create_folder()
 
-        # Jeśli nie wybrano pliku to przerywamy operację
+        # Jeśli nie wybrano pliku, przerywamy operację
         if not json_path:
-            #self.view.show_message_OK("Błąd", "Nie udało się wybrać lokalizacji dla pliku JSON.")
             return
 
         # Tworzymy strukturę folderów i plik JSON
         json_file_path = self.export_to_file.create_folder_structure(json_path)
-        self.export_to_file.export_images(json_file_path)
+
+        # Wyodrębniamy folder nadrzędny z pełnej ścieżki JSON
+        folder_path = os.path.dirname(json_file_path)  # Pobieramy folder nadrzędny
+
+        # Eksportujemy obrazy do folderu 'images' w folderze nadrzędnym
+        self.export_to_file.export_images(folder_path)
 
         # Potwierdzenie zakończenia eksportu
         self.view.show_message_OK("Eksport zakończony", f"Plik COCO zapisany w: {json_file_path}")
+
 
 
 

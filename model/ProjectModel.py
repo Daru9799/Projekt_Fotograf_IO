@@ -169,4 +169,10 @@ class ProjectModel:
                 return cl.name
         return
 
+    def get_full_path_by_filename(self, filename):
+        for i in self.list_of_images_model:
+            if i.filename == filename:
+                return os.path.join(self.folder_path, filename)  # Tworzy pełną ścieżkę
+        return None  # Jeśli nie znaleziono pliku, zwraca None
+
 
