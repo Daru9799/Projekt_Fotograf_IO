@@ -33,7 +33,7 @@ class Presenter:
        # self.annotation_list_presenter = AnnotationListPresenter(None, self.new_project)
         self.scene_presenter = ScenePresenter(None,self,self.new_project)
         self.import_from_file = ImportFromFile(None)
-        self.export_to_file = ExportToFile()
+        self.export_to_file = ExportToFile(None,self.new_project)
 
 
     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
@@ -46,6 +46,7 @@ class Presenter:
         self.annotation_presenter.view = view
         self.scene_presenter.view = view
         self.import_from_file.view = view
+        self.export_to_file.view=view
         self.classManagerPresenter.updateItems()
 
 
@@ -281,4 +282,24 @@ class Presenter:
 
     #Stąd przekazanie importów/eksportów do podprezenterów
     def export_to_coco(self):
-        print("TEST. EKSPORTUJE.")
+        # Sprawdzamy, czy projekt zawiera dane do eksportu
+        if not self.new_project.list_of_images_model or not self.new_project.list_of_classes_model:
+            self.view.show_message_OK("Brak danych", "Brak obrazków lub klas do eksportu!")
+            return
+
+        json_path = self.export_to_file.select_save_location_and_create_folder()
+
+        # Jeśli nie wybrano pliku to przerywamy operację
+        if not json_path:
+            #self.view.show_message_OK("Błąd", "Nie udało się wybrać lokalizacji dla pliku JSON.")
+            return
+
+        # Tworzymy strukturę folderów i plik JSON
+        json_file_path = self.export_to_file.create_folder_structure(json_path)
+        self.export_to_file.export_images(json_file_path)
+
+        # Potwierdzenie zakończenia eksportu
+        self.view.show_message_OK("Eksport zakończony", f"Plik COCO zapisany w: {json_file_path}")
+
+
+
