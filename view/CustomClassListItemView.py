@@ -17,21 +17,31 @@ class CustomClassListItemView(QWidget):
 
         # Dodawanie widgetów
         self.label = QLabel(Class.name)
-        self.checkbox = QCheckBox("?")
+        self.checkboxHidden = QCheckBox("Ukryj")
+        self.checkboxToDelete = QCheckBox("")
         self.colorBox = QPushButton()
         self.colorBox.setFixedSize(QSize(25,25)) # Ustawiamy rozmiar Buttona
         self.colorBox.setStyleSheet(f"background-color: rgb({self.Class.color[0]},{self.Class.color[1]},{self.Class.color[2]});")
 
         self.colorBox.clicked.connect(self.setColor)
+        self.checkboxHidden.stateChanged.connect(self.onCheckboxHiddenChanged)
 
         self.row.addWidget(self.label)
-        self.row.addWidget(self.checkbox)
+        self.row.addWidget(self.checkboxHidden)
+        self.row.addWidget(self.checkboxToDelete)
         self.row.addWidget(self.colorBox)
         self.setLayout(self.row)
 
     # Metoda do sprawdzania, czy checkbox jest zaznaczony
-    def isChecked(self):
-        return self.checkbox.isChecked()
+    def isHiddenChecked(self):
+        return self.checkboxHidden.isChecked()
+
+    def onCheckboxHiddenChanged(self, state):
+        self.presenter.presenter.scene_presenter.get_annotations_from_project()
+        self.presenter.presenter.scene_presenter.draw_annotations()
+
+    def isToDeleteChecked(self):
+        return self.checkboxToDelete.isChecked()
 
     def setColor(self):
         rgb = QColorDialog.getColor().getRgb()

@@ -1,6 +1,6 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-
-#from presenter.ClassManagerPresenter import ClassManagerPresenter
+from PyQt5.QtGui import QRegularExpressionValidator
+from PyQt5.QtCore import QRegularExpression
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 class CreateClassWindowView(object):
     def setupUi(self, Add_new_class_window, presenter):
@@ -23,6 +23,11 @@ class CreateClassWindowView(object):
         self.Class_name_line_edit.setAutoFillBackground(False)
         self.Class_name_line_edit.setObjectName("Class_name_line_edit")
 
+        # Validator: tylko litery, cyfry i spacje
+        regex = QRegularExpression("[a-zA-Z0-9 ]*")  # Wyrażenie regularne
+        validator = QRegularExpressionValidator(regex, self.Class_name_line_edit)
+        self.Class_name_line_edit.setValidator(validator)
+
         self.retranslateUi(Add_new_class_window)
         QtCore.QMetaObject.connectSlotsByName(Add_new_class_window)
 
@@ -31,7 +36,4 @@ class CreateClassWindowView(object):
         Add_new_class_window.setWindowTitle(_translate("Add_new_class_window", "New Class"))
         self.Save_class.setText(_translate("Add_new_class_window", "Zapisz"))
         self.Class_name_line_edit.setText(_translate("Add_new_class_window", ""))
-
-
-    # Podpięcia pod akcje
-        self.Save_class.clicked.connect(self.presenter.saveClass)   #Zapis klasy
+        self.Save_class.clicked.connect(self.presenter.saveClass)

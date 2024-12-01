@@ -31,11 +31,19 @@ class ScenePresenter:
         image = self.presenter.image_item
         self.active_image_model = self.project.get_img_by_filename(image.text())
         self.annotations = self.active_image_model.get_annotation_list()
-        self.polygons = []
+        self.polygons = []  # Czyszczenie polygonów
+
+        # Pobranie ID ukrytych klas
+        hidden_class_ids = {cl.class_id for cl in
+                            self.presenter.classManagerPresenter.getHiddenClass()}  # Zbiór ID ukrytych klas
+        print("Ukryte klasy (IDs):", hidden_class_ids)
+
+        # Dodanie poligonów tylko dla widocznych klas
         for obj in self.annotations:
-            points_list = obj.get_segmentation()
-            color = self.project.get_color_by_class_id(obj.class_id)
-            self.polygons.append([points_list,color])
+            if obj.class_id not in hidden_class_ids:  # Sprawdzanie, czy klasa nie jest ukryta
+                points_list = obj.get_segmentation()
+                color = self.project.get_color_by_class_id(obj.class_id)
+                self.polygons.append([points_list, color])
 
     # na podstawie listy polygons narysuj poligony
     def draw_annotations(self):

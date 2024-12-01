@@ -1,3 +1,5 @@
+import copy
+
 from PyQt5.QtWidgets import QFileDialog, QListWidgetItem, QColorDialog
 from PyQt5 import QtWidgets
 from view.CreateClassWindowView import CreateClassWindowView
@@ -28,24 +30,31 @@ class ClassManagerPresenter:
         self.updateItems() # aktulizacja
         self.window.close()
 
-
-    # !!!
-    #   Narazie usuwa tylko 1 wybrany item, ale też można zaznaczyć jedną kalsę na raz
-    #   więc nwm czy tak to zostawić
-    # ! Trzeba jescze dodać jakiegoś MessageBox'a do potwierdzenia usuwania
     def deleteClass(self):
-        selectedItems = self.view.class_list_widget.selectedItems()
+        checked_classes = []
 
-        if selectedItems: # sprawdzenie czy cokolwiek jest zaznaczone
-            # Wybieramy pierwszy zaznaczony element
-            selected_item = selectedItems[0]
+        for index in range(self.view.class_list_widget.count()):
+            item = self.view.class_list_widget.item(index)
+            row_widget = self.view.class_list_widget.itemWidget(item)
 
-            # Pobieramy CustomClassListItemView powiązany z QListWidgetItem
-            custom_view = self.view.class_list_widget.itemWidget(selected_item)
+            if row_widget.isToDeleteChecked():
+                checked_classes.append(row_widget.Class)   # Dodajmey ID klasy które chcemy usunąć
+
+        # Kiedy klikniemy a nie ma zaznaczonych klas:
+        if len(checked_classes) == 0:
+            self.view.show_message_OK("Informacja", "Zaznacz klasę do usunięcia")
+            return
+
+        # Potwierdzenie usunięcia klas:
+        class_names = ", ".join([cls.name for cls in checked_classes])
+        confirmation = self.view.show_message_Yes_No("Potwierdzenie",
+                                                     f"Czy na pewno chcesz usunąć zaznaczone klasy: {class_names}?")
+
+        if confirmation:
             # Wywołujemy usuwanie z listy Klasy
-            self.project.deleteClass(custom_view.Class.class_id)
-            self.presenter.annotation_presenter.delete_annotations_by_class(custom_view.Class.class_id)
-
+            for cl in checked_classes:
+                self.project.deleteClass(cl.class_id)
+                self.presenter.annotation_presenter.delete_annotations_by_class(cl.class_id)
             self.updateItems() # odświeżenie listy
 
     # Metoda aktualizująca class_list_widget
@@ -65,3 +74,17 @@ class ClassManagerPresenter:
         updatedClass.color = (rgba[0],rgba[1],rgba[2])
         self.project.updateClass(updatedClass)
         self.presenter.annotation_presenter.updateItems()
+
+    # Metoda zwracająca listę obkietów Klass z zaznaczonym checkboxem hidden
+    def getHiddenClass(self):
+        checked_classes = []
+
+        for index in range(self.view.class_list_widget.count()):
+            item = self.view.class_list_widget.item(index)
+            row_widget = self.view.class_list_widget.itemWidget(item)
+
+            if row_widget.isHiddenChecked():
+                checked_classes.append(row_widget.Class)
+
+        result = copy.deepcopy(checked_classes)
+        return result
