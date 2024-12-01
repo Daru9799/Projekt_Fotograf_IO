@@ -284,29 +284,23 @@ class Presenter:
 
     #Stąd przekazanie importów/eksportów do podprezenterów
     def export_to_coco(self):
-        # Sprawdzamy, czy projekt zawiera dane do eksportu
-        if not self.new_project.list_of_images_model or not self.new_project.list_of_classes_model:
-            self.view.show_message_OK("Brak danych", "Brak obrazków lub klas do eksportu!")
+        # 1. Wybierz lokalizację zapisu
+        save_path = self.export_to_file.select_save_location_and_create_folder()
+        if not save_path:
+            # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
             return
 
-        # Wywołujemy okno dialogowe do wyboru lokalizacji i nazwy pliku JSON
-        json_path = self.export_to_file.select_save_location_and_create_folder()
+        # 2. Utwórz strukturę folderów i pobierz ścieżkę do pliku JSON
+        json_file_path = self.export_to_file.create_folder_structure(save_path)
 
-        # Jeśli nie wybrano pliku, przerywamy operację
-        if not json_path:
-            return
-
-        # Tworzymy strukturę folderów i plik JSON
-        json_file_path = self.export_to_file.create_folder_structure(json_path)
-
-        # Wyodrębniamy folder nadrzędny z pełnej ścieżki JSON
-        folder_path = os.path.dirname(json_file_path)  # Pobieramy folder nadrzędny
-
-        # Eksportujemy obrazy do folderu 'images' w folderze nadrzędnym
+        # 3. Eksportuj obrazy
+        folder_path = os.path.dirname(json_file_path)
         self.export_to_file.export_images(folder_path)
 
-        # Potwierdzenie zakończenia eksportu
-        self.view.show_message_OK("Eksport zakończony", f"Plik COCO zapisany w: {json_file_path}")
+        # 4. Utwórz i zapisz dane JSON
+        self.export_to_file.create_json_file(json_file_path)
+
+        self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {folder_path}")
 
 
 
