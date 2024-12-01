@@ -63,32 +63,38 @@ class ExportToFile:
 
     def create_json_file(self, output_path):
         # Przygotowanie danych JSON
-        selected_image_name = self.view.get_selected_image()
-        img_obj = self.project.get_img_by_filename(selected_image_name)
-        annotation_list=img_obj.list_of_annotations
+        annotations = []
+        images = []
 
-        images = [
-            {
-                "file_name": img.filename,
-                "height": img.height,
-                "width": img.width,
-                "id": img.image_id
-            } for img in self.project.list_of_images_model
-        ]
+        for img in self.project.list_of_images_model:
+            # Pobierz listę adnotacji dla danego obrazu
+            image_annotations = [
+                {
+                    "annotation_id": an.annotation_id,
+                    "class_id": an.class_id,
+                    "image_id": img.image_id,  # Powiązanie adnotacji z obrazem
+                    "segmentation": [coord for point in an.segmentation for coord in point]  # Spłaszczenie punktów
+                } for an in img.list_of_annotations
+            ]
 
+            # Dodaj adnotacje do globalnej listy, jeśli istnieją
+            if image_annotations:
+                annotations.extend(image_annotations)
+
+                # Dodaj obraz do listy `images` tylko, jeśli ma adnotacje
+                images.append({
+                    "file_name": img.filename,
+                    "height": img.height,
+                    "width": img.width,
+                    "id": img.image_id
+                })
+
+        # Przygotowanie kategorii
         categories = [
             {
                 "id": cl.class_id,
                 "name": cl.name
             } for cl in self.project.list_of_classes_model
-        ]
-        annotations=[
-            {
-                "annotation_id":an.annotation_id,
-                "class_id":an.class_id,
-                "segmentatiob":an.segmentation
-
-            }for an in annotation_list
         ]
 
         data = {
@@ -110,3 +116,6 @@ class ExportToFile:
             print(f"Plik JSON został utworzony: {output_path}")
         except Exception as e:
             print(f"Błąd podczas tworzenia pliku JSON: {str(e)}")
+
+
+
