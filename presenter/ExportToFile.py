@@ -47,6 +47,10 @@ class ExportToFile:
         os.makedirs(images_folder, exist_ok=True)  # Tworzymy folder 'images', jeśli nie istnieje
 
         for img_obj in self.project.list_of_images_model:
+            # Sprawdzamy, czy obraz ma przypisane adnotacje
+            if not img_obj.list_of_annotations:
+                continue
+
             source_path = self.project.get_full_path_by_filename(img_obj.filename)
 
             if not source_path:
@@ -68,14 +72,36 @@ class ExportToFile:
 
         for img in self.project.list_of_images_model:
             # Pobierz listę adnotacji dla danego obrazu
-            image_annotations = [
-                {
+            image_annotations = []
+
+            for an in img.list_of_annotations:
+                # Obliczanie bounding box (bbox) i pola (area)
+                segmentation_flat = [coord for point in an.segmentation for coord in point]  # Spłaszczenie punktów
+                x_coords = segmentation_flat[::2]  # Współrzędne X
+                y_coords = segmentation_flat[1::2]  # Współrzędne Y
+
+                # Bounding box (xmin, ymin, width, height)
+                xmin = min(x_coords)
+                ymin = min(y_coords)
+                width = max(x_coords) - xmin
+                height = max(y_coords) - ymin
+                bbox = [xmin, ymin, width, height]
+
+                # Pole obszaru (area)
+                area = width * height
+
+                # Tworzenie obiektu adnotacji
+                annotation = {
                     "id": an.annotation_id,
                     "category_id": an.class_id,
                     "image_id": img.image_id,  # Powiązanie adnotacji z obrazem
-                    "segmentation": [ [coord for point in an.segmentation for coord in point] ]  # Spłaszczenie punktów
-                } for an in img.list_of_annotations
-            ]
+                    "area": area,
+                    "segmentation": [segmentation_flat],  # Spłaszczona lista punktów
+                    "bbox": bbox
+
+                }
+
+                image_annotations.append(annotation)
 
             # Dodaj adnotacje do globalnej listy, jeśli istnieją
             if image_annotations:
@@ -116,6 +142,7 @@ class ExportToFile:
             print(f"Plik JSON został utworzony: {output_path}")
         except Exception as e:
             print(f"Błąd podczas tworzenia pliku JSON: {str(e)}")
+
 
 
 
