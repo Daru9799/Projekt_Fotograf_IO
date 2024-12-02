@@ -315,8 +315,9 @@ class Presenter:
 
         # 4. Utwórz i zapisz dane JSON
         self.export_to_file.create_json_file(json_file_path)
-
+        self.update_file_list_panel()
         self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {folder_path}")
+
 
 
 
