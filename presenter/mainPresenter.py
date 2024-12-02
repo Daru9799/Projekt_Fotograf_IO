@@ -106,7 +106,7 @@ class Presenter:
     #Aktualizacja sceny po zmianie obrazka w liście po prawej stronie
     def folder_list_on_click(self, item):
         self.rectangle_presenter.cancel_drawing_rectangle()     #Anulowanie rysowania prostokąta po kliknięciu w prawy panel
-        self.polygon_presenter.cancel_drawing_polygon()         #Anulowanie rysowania polygona --//--
+        self.polygon_presenter.prepare_to_change_current_img()         #Anulowanie rysowania polygona --//--
         self.drawing_tool = None
         self.view.set_no_active_tool_text()
         if self.image_item != item:

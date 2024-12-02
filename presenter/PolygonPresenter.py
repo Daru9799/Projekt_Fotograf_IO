@@ -12,7 +12,6 @@ class PolygonPresenter(QObject):
         self.view = view
         self.presenter = presenter
 
-
         self.current_polygon_points = []
         self.polygon_closed = False
         self.point_radius = 5  # Promień kółek dla wierzchołków
@@ -91,13 +90,24 @@ class PolygonPresenter(QObject):
 
     def cancel_drawing_polygon(self):
         self.view.scene.removeItem(self.temp_polygon_item)
+        self.prepare_to_change_current_img()
+        # self.temp_polygon_item = None
+        # self.polygon_closed = False
+        # self.current_polygon_points.clear()
+        # self.view.set_draw_polygon_button_text("Rysuj poligon")
+        # self.view.change_to_arrow_cursor()
+        #
+        # # Wczytanie na nowo adnotacji żeby żadna adnotacja nie była zaznaczona po wyjściu z rysowania
+        # self.presenter.annotation_presenter.updateItems()
+
+    def prepare_to_change_current_img(self):
         self.temp_polygon_item = None
         self.polygon_closed = False
         self.current_polygon_points.clear()
         self.view.set_draw_polygon_button_text("Rysuj poligon")
         self.view.change_to_arrow_cursor()
 
-        #Wczytanie na nowo adnotacji żeby żadna adnotacja nie była zaznaczona po wyjściu z rysowania
+        # Wczytanie na nowo adnotacji żeby żadna adnotacja nie była zaznaczona po wyjściu z rysowania
         self.presenter.annotation_presenter.updateItems()
 
     def update_color(self, color):

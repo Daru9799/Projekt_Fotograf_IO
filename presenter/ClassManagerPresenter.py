@@ -56,6 +56,8 @@ class ClassManagerPresenter:
                 self.project.deleteClass(cl.class_id)
                 self.presenter.annotation_presenter.delete_annotations_by_class(cl.class_id)
             self.updateItems() # odświeżenie listy
+            self.presenter.scene_presenter.get_annotations_from_project()   # Pobranie adnotacji
+            self.presenter.scene_presenter.draw_annotations()               # Narysowanie/Odświerzenie adnotacji
 
     # Metoda aktualizująca class_list_widget
     def updateItems(self):
@@ -74,6 +76,8 @@ class ClassManagerPresenter:
         updatedClass.color = (rgba[0],rgba[1],rgba[2])
         self.project.updateClass(updatedClass)
         self.presenter.annotation_presenter.updateItems()
+        self.presenter.scene_presenter.get_annotations_from_project()
+        self.presenter.scene_presenter.draw_annotations()
 
     # Metoda zwracająca listę obkietów Klass z zaznaczonym checkboxem hidden
     def getHiddenClass(self):

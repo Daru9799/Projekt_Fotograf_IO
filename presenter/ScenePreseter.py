@@ -18,10 +18,11 @@ class ScenePresenter:
         self.polygons = [] #przechowuje liste dwuelementową (punkty, kolor): [[(x,y), (x,y), ...], RGB]
         self.active_image_model = None
         self.point_radius = 4  # Promień kółek dla wierzchołków [px]
-        self.point_dst_multiplier = 1
-        self.expand_dst = 4 # [px]
+        self.point_dst_multiplier = 2 # musi być int
+        self.expand_dst = 5 # [px]
         self.polygons_pixmap_ref = None
         self.selected_polygon = [[],[]]
+        self.vertex_expand_dst = int((self.point_radius*self.point_dst_multiplier) + 5)
 
         self.is_dragging = False
         self.selected_vertex = None
@@ -53,6 +54,25 @@ class ScenePresenter:
             for poly in self.polygons:
                 np_points = np.array(poly[0], dtype=np.int32)
                 np_points = np_points.reshape((-1, 1, 2))
+
+                # do testy:
+                # <------------------------------
+                # centroid = np.mean(np_points, axis=0)
+                #
+                # # Obliczenie wektorów normalnych i przesunięcie wierzchołków
+                # expansion_distance = self.expand_dst  # Powiększenie o 10 piksele
+                # expanded_polygon = []
+                # for point in np_points:
+                #     # Wektor od środka ciężkości do wierzchołka
+                #     direction = point - centroid
+                #     # Normalizacja wektora kierunku i przesunięcie
+                #     normalized_direction = direction / (np.linalg.norm(direction) + 1e-6)
+                #     expanded_point = point + normalized_direction * expansion_distance
+                #     expanded_polygon.append(expanded_point)
+                #
+                # expanded_polygon = np.array(expanded_polygon, dtype=np.int32)
+                # -------------------------->
+
                 border_color = (poly[1][0], poly[1][1], poly[1][2], 255)
 
                 # Rysowanie kontóra
@@ -64,6 +84,7 @@ class ScenePresenter:
                     cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
                     for point in np_points:
                         cv2.circle(drawing_surface, tuple(point[0]), self.point_radius, border_color, -1)
+
                     # print("Wirzchołki były takie same jak w selected_polygon")
                     # print(poly[0])
                     # print(self.selected_polygon[0])
@@ -72,6 +93,13 @@ class ScenePresenter:
                     # Wypełnianie polygona kolorem:
                     fill_color = (poly[1][0], poly[1][1], poly[1][2], 160)
                     cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
+
+                    # testowo -------------
+                    # point_radius_tmp = self.vertex_expand_dst
+                    # for point in np_points:
+                    #     cv2.circle(drawing_surface, tuple(point[0]), point_radius_tmp, fill_color, -1)
+                    # cv2.polylines(drawing_surface, [np_points], isClosed=True, thickness=2, color=border_color)
+                    # ---------------------
 
         self.draw_item_on_scene(drawing_surface)
 
@@ -105,7 +133,7 @@ class ScenePresenter:
         near_active_polygon_point = False
         for point in self.selected_polygon[0]:
             distance = np.linalg.norm(np.array([x, y]) - np.array(point))
-            if distance <= self.point_radius:
+            if distance <= self.vertex_expand_dst:             # powiększenie point radius
                 near_active_polygon_point = True  # Punkt jest blisko wierzchołka
 
         if near_active_polygon_point:   # jeśli klikneliśmy obok wierzchołka zaznaczonego/aktywnego poligona
@@ -147,20 +175,28 @@ class ScenePresenter:
                     return i, tuple(projection_point)
         return None, None
 
-
-    def active_dragging(self,x,y):
+    def active_dragging(self, x, y):
         old_selection = self.selected_polygon
-        self.handle_select_polygon(x,y)
-        if self.selected_polygon != [[],[]]:        # Sprawdź czy jest zaznaczony jakiś polygon
-            if self.selected_polygon == old_selection:            #sprawdź czy to co klikneliśmy nie było już zaznaczone
+        self.handle_select_polygon(x, y)
+
+        if self.selected_polygon != [[], []]:  # Sprawdź czy jest zaznaczony jakiś poligon
+            if self.selected_polygon == old_selection:  # Sprawdź czy to co kliknęliśmy nie było już zaznaczone
                 polygon_points = self.selected_polygon
+                closest_distance = float('inf')
+                closest_vertex_idx = None
+
+                # Znalezienie najbliższego wierzchołka
                 for idx, polygon_point in enumerate(polygon_points[0]):
                     distance = np.linalg.norm(np.array([x, y]) - np.array(polygon_point))
-                    if distance < ((self.point_radius*self.point_dst_multiplier) + 5):                  # point_radius powiększone o 5
-                        self.selected_vertex = (polygon_points[0], idx)     # aby łatwiej było chwytać
-                        self.is_dragging = True
-                        #self.polygons.remove(polygon_points)
-                        break
+                    if distance < self.vertex_expand_dst and distance < closest_distance:  # point_radius powiększone o 5
+                        closest_distance = distance
+                        closest_vertex_idx = idx
+
+                if closest_vertex_idx is not None:
+                    self.selected_vertex = (polygon_points[0], closest_vertex_idx)
+                    self.is_dragging = True
+
+                # Jeśli żaden wierzchołek nie został wybrany, sprawdzamy krawędzie
                 if not self.is_dragging:
                     for polygon_points, color in self.polygons:
                         edge_index, new_vertex = self.is_near_edge(x, y, polygon_points)
@@ -172,7 +208,6 @@ class ScenePresenter:
                             self.draw_annotations()
                             break
             else:
-                #print("pass")
                 pass
 
         if self.is_dragging:
@@ -192,11 +227,11 @@ class ScenePresenter:
             self.draw_annotations()  # Aktualizacja obrazu po przesunięciu wierzchołka
 
     def release_dragging_click(self):
-        if self.selected_vertex is not None:
+        # if self.selected_vertex is not None:
             # print("aktualne poligony")
             # for i in self.polygons:
             #     print(i)
-            print("puszczenie LP myszy")
+            # print("puszczenie LP myszy")
 
         #print(self.selected_polygon)
         if self.is_dragging: # jeśli wierzchołek był przesuwany
@@ -277,9 +312,9 @@ class ScenePresenter:
             return True  # Punkt jest wewnątrz lub na krawędzi wielokąta
 
         # Sprawdzenie, czy punkt jest w pobliżu któregokolwiek wierzchołka
-        for point in expanded_polygon:
+        for point in np_points:
             distance = np.linalg.norm(np.array([x, y]) - np.array(point))
-            if distance <= ((self.point_radius*self.point_dst_multiplier) + 5):                               # point_radius powiększone
+            if distance <= self.vertex_expand_dst:            # point_radius powiększone
                 return True  # Punkt jest blisko wierzchołka
 
         return False
