@@ -362,6 +362,7 @@ class MainView(object):
         self.zoom_image_slider.setRange(10, 500)
         self.zoom_value_widget.setValidator(QIntValidator(self.zoom_value_widget))
         self.zoom_value_widget.setText(str(70))
+        self.zoom_value_widget.setStyleSheet("color: white;")
         # Ustawienie początkowej wartości suwaka na 70%
         self.zoom_image_slider.setValue(70)
 
