@@ -66,23 +66,31 @@ class Presenter:
         folder_path = "./!OBRAZKI DO TESTÓW"
         # !!!
         if folder_path:
-            self.update_view_after_loading_new_project(folder_path)
+            self.update_model_after_loading_new_project(folder_path)
+            self.update_file_list_panel()
+            self.update_annotations_on_image()
         else:
             self.view.set_notification_label("Nie wybrano folderu.")
 
-    def update_view_after_loading_new_project(self, folder_path):
+    #Ta funkcja ma za zadanie przypisać projektowi odnośnik do folderu ze zdjęciami, a także zaladować nowe zdjęcia do modelu
+    def update_model_after_loading_new_project(self, folder_path):
         self.new_project.folder_path = folder_path
         #print("Ścieżka do folderu: " + self.new_project.folder_path)
         self.new_project.load_images()  # Zaladowanie zdjec do modelu
 
-        # Lista plików aktualizacja w podprezenterze
-        self.file_list_presenter.update_project(self.new_project)
-        self.file_list_presenter.load_files_to_widget()
         # Przypisanie pierwszego pokazanego zdjęcia do image_item
         #self.image_item = self.new_project.get_img_by_filename(self.new_project.list_of_images_model[0].filename)
 
+    def update_annotations_on_image(self):
+        self.annotation_presenter.updateItems()
+        self.scene_presenter.reset_to_default()
         self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
-        self.scene_presenter.draw_annotations()              # Rysowanie wczytanych adnotacji
+        self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
+
+    def update_file_list_panel(self):
+        # Lista plików aktualizacja w podprezenterze
+        self.file_list_presenter.update_project(self.new_project)
+        self.file_list_presenter.load_files_to_widget()
 
     #Aktualizacja sceny po zmianie obrazka w liście po prawej stronie
     def folder_list_on_click(self, item):
@@ -268,19 +276,27 @@ class Presenter:
         if self.new_project.list_of_images_model:
             confirmation = self.view.show_message_Yes_No("Uwaga!", "Import anuluje wszystkie niezapisane dane. Czy chcesz kontynuować?")
             if confirmation:
-                img_list, class_list, annot_list, json_path = self.import_from_file.import_from_COCO()
+                img_list, class_list, json_folder = self.import_from_file.import_from_COCO()
             else:
                 return 0
         else:
-            img_list, class_list, annot_list, json_path = self.import_from_file.import_from_COCO()
+            img_list, class_list, json_folder = self.import_from_file.import_from_COCO()
+
+        #Anulowanie importu poprzez zamkniecie
+        if img_list is None or class_list is None or json_folder is None:
+            return 0
 
         ##Przypisywanie obrazków i klas do listy projektowej
         self.new_project.list_of_images_model = img_list
         self.new_project.list_of_classes_model = class_list
-        #Przypisanie adnotacji do obrazków
+        #Aktualizacja widoku
+        self.new_project.folder_path = os.path.join(json_folder, "images")
+        self.classManagerPresenter.updateItems() #aktualizuje panel z listą klas
+        self.update_file_list_panel()
+        self.update_annotations_on_image()
 
-        #Aktualizacja widoku (na razie jako folder z obrazkami przekazuje None, potem będzie to json_path/images/)
-        self.update_view_after_loading_new_project(None)
+        ##Czyszczenie prezentera importu po zakonczeniu dzialania
+        self.import_from_file.reset_imported_data()
 
     #Stąd przekazanie importów/eksportów do podprezenterów
     def export_to_coco(self):

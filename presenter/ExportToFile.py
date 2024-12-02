@@ -12,7 +12,7 @@ class ExportToFile:
     def select_save_location_and_create_folder(self):
         # Otwórz okno dialogowe do wyboru lokalizacji i nazwy pliku
         self.json_path, _ = QFileDialog.getSaveFileName(
-            self.view.centralwidget.parent(), "Wybierz plik JSON", "",
+            self.view.centralwidget.parent(), "Wybierz lokalizację do zapisu", "",
             "JSON Files (*.json);"
         )
         return self.json_path
@@ -70,10 +70,10 @@ class ExportToFile:
             # Pobierz listę adnotacji dla danego obrazu
             image_annotations = [
                 {
-                    "annotation_id": an.annotation_id,
-                    "class_id": an.class_id,
+                    "id": an.annotation_id,
+                    "category_id": an.class_id,
                     "image_id": img.image_id,  # Powiązanie adnotacji z obrazem
-                    "segmentation": [coord for point in an.segmentation for coord in point]  # Spłaszczenie punktów
+                    "segmentation": [ [coord for point in an.segmentation for coord in point] ]  # Spłaszczenie punktów
                 } for an in img.list_of_annotations
             ]
 
