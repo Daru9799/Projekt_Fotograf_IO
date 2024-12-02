@@ -65,12 +65,23 @@ class Presenter:
         # linie poniżej też usunąć
         folder_path = "./!OBRAZKI DO TESTÓW"
         # !!!
-        if folder_path:
-            self.update_model_after_loading_new_project(folder_path)
-            self.update_file_list_panel()
-            self.update_annotations_on_image()
+        if self.new_project.list_of_images_model:
+            confirmation = self.view.show_message_Yes_No("Uwaga!", "Wczytanie nowego folderu spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")
+            if confirmation:
+                if folder_path:
+                    self.update_model_after_loading_new_project(folder_path)
+                    self.update_file_list_panel()
+                    self.update_annotations_on_image()
+                else:
+                    self.view.set_notification_label("Nie wybrano folderu.")
         else:
-            self.view.set_notification_label("Nie wybrano folderu.")
+            ###########To nizej oprócz returna do skasowania potem (teraz wczytuje folder ./OBRAZKI DO TESTÓW)
+            if folder_path:
+                self.update_model_after_loading_new_project(folder_path)
+                self.update_file_list_panel()
+                self.update_annotations_on_image()
+            #######################################################
+            return 0
 
     #Ta funkcja ma za zadanie przypisać projektowi odnośnik do folderu ze zdjęciami, a także zaladować nowe zdjęcia do modelu
     def update_model_after_loading_new_project(self, folder_path):
@@ -274,7 +285,7 @@ class Presenter:
 
     def import_from_coco(self):
         if self.new_project.list_of_images_model:
-            confirmation = self.view.show_message_Yes_No("Uwaga!", "Import anuluje wszystkie niezapisane dane. Czy chcesz kontynuować?")
+            confirmation = self.view.show_message_Yes_No("Uwaga!", "Import spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")
             if confirmation:
                 img_list, class_list, json_folder = self.import_from_file.import_from_COCO()
             else:
