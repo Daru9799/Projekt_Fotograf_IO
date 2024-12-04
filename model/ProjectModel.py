@@ -18,8 +18,8 @@ class ProjectModel:
         self.list_of_classes_model = []
 
         # Seedowanie klas do testów:
-        self.addNewClass("test")
-        self.list_of_classes_model[0].color = (20,44,255)
+        #self.addNewClass("test")
+        #self.list_of_classes_model[0].color = (20,44,255)
 
     #Wczytanie zdjec z folderu, utworzenie obiektow i zapisanie ich na liscie
     def load_images(self):

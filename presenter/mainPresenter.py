@@ -54,16 +54,16 @@ class Presenter:
 
         # !!!
         # Linia poniżej finalnie do usunięcia
-        self.create_new_project()
+        #self.create_new_project()
         # !!!
 
     #Utworzenie nowego projektu, wczytanie danych do modelu
     def create_new_project(self):
         # !!!
         # linie poniżej odkomentować
-        # folder_path = QFileDialog.getExistingDirectory(self.view.centralwidget.parent(), "Wybierz folder ze zdjęciami")
+        folder_path = QFileDialog.getExistingDirectory(self.view.centralwidget.parent(), "Wybierz folder ze zdjęciami")
         # linie poniżej też usunąć
-        folder_path = "./!OBRAZKI DO TESTÓW"
+        #folder_path = "./!OBRAZKI DO TESTÓW"
         # !!!
         if self.new_project.list_of_images_model:
             confirmation = self.view.show_message_Yes_No("Uwaga!", "Wczytanie nowego folderu spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")
@@ -75,13 +75,10 @@ class Presenter:
                 else:
                     self.view.set_notification_label("Nie wybrano folderu.")
         else:
-            ###########To nizej oprócz returna do skasowania potem (teraz wczytuje folder ./OBRAZKI DO TESTÓW)
             if folder_path:
                 self.update_model_after_loading_new_project(folder_path)
                 self.update_file_list_panel()
                 self.update_annotations_on_image()
-            #######################################################
-            return 0
 
     #Ta funkcja ma za zadanie przypisać projektowi odnośnik do folderu ze zdjęciami, a także zaladować nowe zdjęcia do modelu
     def update_model_after_loading_new_project(self, folder_path):
