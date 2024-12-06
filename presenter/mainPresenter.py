@@ -18,6 +18,7 @@ from presenter.PolygonPresenter import PolygonPresenter
 from presenter.ScenePreseter import ScenePresenter
 from presenter.ImportFromFile import ImportFromFile
 from presenter.ExportToFile import ExportToFile
+from presenter.LocalAutoSegmentationPresenter import LocalAutoSegmentationPresenter
 from view.ExifWindowView import ExifWindow
 
 
@@ -36,6 +37,7 @@ class Presenter:
         self.annotation_presenter = AnnotationPreseter(None, self, self.new_project)
        # self.annotation_list_presenter = AnnotationListPresenter(None, self.new_project)
         self.scene_presenter = ScenePresenter(None,self,self.new_project)
+        self.local_auto_segm_presenter = LocalAutoSegmentationPresenter(None,self)
         self.import_from_file = ImportFromFile(None)
         self.export_to_file = ExportToFile(None,self.new_project)
 
@@ -49,6 +51,7 @@ class Presenter:
         self.polygon_presenter.view = view
         self.annotation_presenter.view = view
         self.scene_presenter.view = view
+        self.local_auto_segm_presenter.view = view
         self.import_from_file.view = view
         self.export_to_file.view=view
         self.classManagerPresenter.updateItems()

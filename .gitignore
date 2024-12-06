@@ -184,3 +184,5 @@ fabric.properties
 # idea folder, uncomment if you don't need it
 .idea
 demo-3.py
+sam2.1_b.pt
+torch test.py
