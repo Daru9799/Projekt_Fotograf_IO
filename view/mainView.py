@@ -540,6 +540,12 @@ class MainView(object):
     def set_no_active_tool_text(self):
         self.set_notification_label("Brak aktywnego narzędzia do rysowania.")
 
+    def toggle_all_buttons(self, enabled: bool):
+        # Iteruj przez wszystkie dzieci centralwidget
+        for child in self.centralwidget.findChildren(QtWidgets.QPushButton):
+            child.setEnabled(enabled)
+
+
         # Obsługa przesuwania obrazu, jeśli kursor jest blisko krawędzi
         # self.handle_edge_scrolling(event.pos())
 

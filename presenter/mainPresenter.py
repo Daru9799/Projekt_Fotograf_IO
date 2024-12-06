@@ -1,5 +1,6 @@
 import os
 
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 
 #Modele
@@ -7,6 +8,7 @@ from model.ProjectModel import ProjectModel
 from model.AnnotationModel import AnnotationModel
 from model.ImageModel import ImageModel
 from model.ClassModel import ClassModel
+
 #Podprezentery
 from presenter.FileListPresenter import FileListPresenter
 from presenter.ClassManagerPresenter import ClassManagerPresenter
@@ -50,6 +52,7 @@ class Presenter:
         self.import_from_file.view = view
         self.export_to_file.view=view
         self.classManagerPresenter.updateItems()
+        self.view.toggle_all_buttons(False)
 
 
         # !!!
@@ -72,6 +75,7 @@ class Presenter:
                     self.update_model_after_loading_new_project(folder_path)
                     self.update_file_list_panel()
                     self.update_annotations_on_image()
+                    self.view.toggle_all_buttons(True)
                 else:
                     self.view.set_notification_label("Nie wybrano folderu.")
         else:
@@ -79,6 +83,7 @@ class Presenter:
                 self.update_model_after_loading_new_project(folder_path)
                 self.update_file_list_panel()
                 self.update_annotations_on_image()
+                self.view.toggle_all_buttons(True) # "Włączenie" przycisków
 
     #Ta funkcja ma za zadanie przypisać projektowi odnośnik do folderu ze zdjęciami, a także zaladować nowe zdjęcia do modelu
     def update_model_after_loading_new_project(self, folder_path):
@@ -326,7 +331,6 @@ class Presenter:
         self.update_file_list_panel()
         self.update_annotations_on_image()
         self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {folder_path}")
-
 
 
 
