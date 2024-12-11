@@ -60,16 +60,16 @@ class Presenter:
 
         # !!!
         # Linia poniżej finalnie do usunięcia
-        #self.create_new_project()
+        self.create_new_project()
         # !!!
 
     #Utworzenie nowego projektu, wczytanie danych do modelu
     def create_new_project(self):
         # !!!
         # linie poniżej odkomentować
-        folder_path = QFileDialog.getExistingDirectory(self.view.centralwidget.parent(), "Wybierz folder ze zdjęciami")
+        # folder_path = QFileDialog.getExistingDirectory(self.view.centralwidget.parent(), "Wybierz folder ze zdjęciami")
         # linie poniżej też usunąć
-        #folder_path = "./!OBRAZKI DO TESTÓW"
+        folder_path = "./!OBRAZKI DO TESTÓW"
         # !!!
         if self.new_project.list_of_images_model:
             confirmation = self.view.show_message_Yes_No("Uwaga!", "Wczytanie nowego folderu spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")
@@ -151,7 +151,10 @@ class Presenter:
             self.view.set_no_active_tool_text()
             self.polygon_presenter.cancel_drawing_polygon()
 
-            #Aktualizacja zooma
+    def activate_auto_selection_tool(self):
+        pass
+
+    #Aktualizacja zooma
     def zoom_slider(self):
         if self.new_project.list_of_images_model: #Jeśli nie ma obrazka to nic nie rób
             self.file_list_presenter.on_zoom_slider_changed()
@@ -165,6 +168,7 @@ class Presenter:
     def handle_mouse_click(self, x, y):
         print(f"Współrzędne kliknięcia: x={x}, y={y}")
         selected_class = self.view.get_selected_class()
+
         #Logika rysowania prostokąta
         if self.drawing_tool == "rectangle":
             if self.rectangle_presenter.rectangle_start_point == (None, None):
@@ -179,7 +183,21 @@ class Presenter:
                 print(f"Pomyślnie narysowano prostokąt! Jego współrzędne to: " + str(points))
                 self.view.set_notification_label(f"Pomyślnie utworzono nową adnotację! Tryb rysowania prostokąta aktywny. Wybierz punkt początkowy LPM.")
                 self.rectangle_presenter.delete_temp_rectangle() #Usunięcie tymczasowego obiektu
-                self.annotation_presenter.add_annotation(points)
+
+                # Tymczasowo wyłączone dodawanie nowych adnotacji typu prostokąt
+                # self.annotation_presenter.add_annotation(points)
+
+                # TESTY {
+                image_path = self.new_project.folder_path+"/"+self.image_item.text()
+                print("Folder path:", image_path)
+                self.local_auto_segm_presenter.image_path = image_path
+                auto_segment_polyg = self.local_auto_segm_presenter.calculate_vertexes(image_path,points)
+                if auto_segment_polyg == [] or auto_segment_polyg is None:
+                    pass
+                else:
+                    self.annotation_presenter.add_annotation(auto_segment_polyg)
+                # }
+
                 self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
                 self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
 
