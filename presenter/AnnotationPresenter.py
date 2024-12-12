@@ -31,9 +31,9 @@ class AnnotationPreseter:
         img_obj.list_of_annotations.append(new_annotation)
         img_obj.list_of_annotations.sort(key=lambda annotation: (annotation.class_id, annotation.annotation_id))
         # Aktualizacja widoku
-        self.updateItems()
+        self.update_items()
 
-    def updateItems(self):
+    def update_items(self):
         # Pobranie listy adnotacji z obiektu obrazka
         annotations_list = self.get_selected_image_obj().list_of_annotations
 
@@ -54,14 +54,14 @@ class AnnotationPreseter:
             self.view.annotation_list_widget.setItemWidget(item, row)  # Ustawienie widgetu dla danego elementu
 
         # connection przy zmianie elem. listy
-        self.view.annotation_list_widget.itemSelectionChanged.connect(self.onItemSelectionChanged)
-        self.view.annotation_list_widget.itemClicked.connect(self.onItemSelectionChanged)
+        self.view.annotation_list_widget.itemSelectionChanged.connect(self.on_item_selection_changed)
+        self.view.annotation_list_widget.itemClicked.connect(self.on_item_selection_changed)
 
         # Odblokowanie sygnałów
         self.view.annotation_list_widget.blockSignals(False)
 
 
-    def onItemSelectionChanged(self):
+    def on_item_selection_changed(self):
         selected_items = self.view.annotation_list_widget.selectedItems()
         for item in selected_items:
             # Pobierz widget powiązany z elementem
@@ -115,7 +115,7 @@ class AnnotationPreseter:
                 if annotation not in checked_annotations
             ]
             # Zaktualizowanie widoku po usunięciu
-            self.updateItems()
+            self.update_items()
             self.presenter.scene_presenter.refresh()
 
 
@@ -146,7 +146,7 @@ class AnnotationPreseter:
         ]
 
         # Zaktualizowanie widoku
-        self.updateItems()
+        self.update_items()
 
     def get_selected_image_obj(self):
         selected_image_name = self.view.get_selected_image()

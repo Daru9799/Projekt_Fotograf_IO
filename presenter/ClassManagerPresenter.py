@@ -75,7 +75,7 @@ class ClassManagerPresenter:
         updatedClass = Class
         updatedClass.color = (rgba[0],rgba[1],rgba[2])
         self.project.updateClass(updatedClass)
-        self.presenter.annotation_presenter.updateItems()
+        self.presenter.annotation_presenter.update_items()
         self.presenter.scene_presenter.get_annotations_from_project()
         self.presenter.scene_presenter.draw_annotations()
 
