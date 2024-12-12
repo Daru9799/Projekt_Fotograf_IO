@@ -191,7 +191,9 @@ class Presenter:
                 image_path = self.new_project.folder_path+"/"+self.image_item.text()
                 print("Folder path:", image_path)
                 self.local_auto_segm_presenter.image_path = image_path
-                auto_segment_polyg = self.local_auto_segm_presenter.calculate_vertexes(image_path,points)
+                img_object= self.new_project.get_img_by_filename(self.image_item.text())
+                auto_segment_polyg = self.local_auto_segm_presenter.calculate_vertexes(image_path,points,img_object)
+                print("auto_segment_polyg",auto_segment_polyg)
                 if auto_segment_polyg == [] or auto_segment_polyg is None:
                     pass
                 else:
