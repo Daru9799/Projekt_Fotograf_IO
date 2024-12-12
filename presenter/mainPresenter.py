@@ -17,10 +17,12 @@ from presenter.AnnotationPresenter import AnnotationPreseter
 from presenter.PolygonPresenter import PolygonPresenter
 from presenter.ScenePreseter import ScenePresenter
 from presenter.ImportFromFile import ImportFromFile
-from presenter.ExportToFile import ExportToFile
+from presenter.ExportToCoco import ExportToCoco
 from presenter.LocalAutoSegmentationPresenter import LocalAutoSegmentationPresenter
 from view.ExifWindowView import ExifWindow
 from presenter.ExportProject import ExportProject
+from presenter.ExportToYolo import ExportToYolo
+
 
 
 #Głowny prezenter który jest przekazywany widokowi
@@ -39,8 +41,9 @@ class Presenter:
         self.scene_presenter = ScenePresenter(None,self,self.new_project)
         self.local_auto_segm_presenter = LocalAutoSegmentationPresenter(None,self)
         self.import_from_file = ImportFromFile(None)
-        self.export_to_file = ExportToFile(None,self.new_project)
+        self.export_to_file = ExportToCoco(None, self.new_project)
         self.export_project=ExportProject(None,self.new_project)
+        self.export_to_yolo=ExportToYolo(None,self.new_project)
 
 
     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
@@ -56,6 +59,7 @@ class Presenter:
         self.import_from_file.view = view
         self.export_to_file.view= view
         self.export_project.view = view
+        self.export_to_yolo.view=view
         self.classManagerPresenter.updateItems()
         self.view.toggle_all_buttons(False)
 
@@ -354,9 +358,9 @@ class Presenter:
         except Exception as e:
             self.view.show_message_OK("Błąd", f"Wystąpił problem podczas eksportu: {str(e)}")
 
-    def export_to_coco(self):
+    def export_to_coco_fun(self):
         # 1. Wybierz lokalizację zapisu
-        save_path = self.export_to_file.select_save_location_and_create_folder()
+        save_path = self.export_to_file.select_save_location()
         if not save_path:
             # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
             return
@@ -373,6 +377,22 @@ class Presenter:
         self.update_file_list_panel()
         self.update_annotations_on_image()
         self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {folder_path}")
+
+    def export_to_yolo_fun(self):
+        save_path= self.export_to_yolo.select_save_location()
+        if not save_path:
+            # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
+            return
+
+        self.export_to_yolo.create_folder_structure(save_path)
+        self.export_to_yolo.export_images(save_path)
+        self.export_to_yolo.create_yaml_file(save_path)
+
+        self.update_file_list_panel()
+        self.update_annotations_on_image()
+        self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {save_path}")
+
+
 
 
 

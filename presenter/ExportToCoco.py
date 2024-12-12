@@ -3,13 +3,13 @@ import json
 import shutil
 from PyQt5.QtWidgets import QFileDialog
 
-class ExportToFile:
+class ExportToCoco:
     def __init__(self, view, project):
         self.view = view
         self.json_path = None
         self.project = project
 
-    def select_save_location_and_create_folder(self):
+    def select_save_location(self):
         # Otwórz okno dialogowe do wyboru lokalizacji i nazwy pliku
         self.json_path, _ = QFileDialog.getSaveFileName(
             self.view.centralwidget.parent(), "Wybierz lokalizację do zapisu", "",
