@@ -236,7 +236,7 @@ class ScenePresenter:
         #print(self.selected_polygon)
         if self.is_dragging: # jeśli wierzchołek był przesuwany
             self.save_edited_annotations()
-            self.presenter.annotation_presenter.updateItems() # Odświeżenie listy adnotacji
+            self.presenter.annotation_presenter.update_items() # Odświeżenie listy adnotacji
             self.draw_annotations()
         self.is_dragging = False
         self.selected_vertex = None

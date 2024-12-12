@@ -20,6 +20,7 @@ from presenter.ImportFromFile import ImportFromFile
 from presenter.ExportToFile import ExportToFile
 from presenter.LocalAutoSegmentationPresenter import LocalAutoSegmentationPresenter
 from view.ExifWindowView import ExifWindow
+from presenter.ExportProject import ExportProject
 
 
 #Głowny prezenter który jest przekazywany widokowi
@@ -35,11 +36,11 @@ class Presenter:
         self.rectangle_presenter = RectanglePresenter(None, self)
         self.polygon_presenter = PolygonPresenter(None, self)
         self.annotation_presenter = AnnotationPreseter(None, self, self.new_project)
-       # self.annotation_list_presenter = AnnotationListPresenter(None, self.new_project)
         self.scene_presenter = ScenePresenter(None,self,self.new_project)
         self.local_auto_segm_presenter = LocalAutoSegmentationPresenter(None,self)
         self.import_from_file = ImportFromFile(None)
         self.export_to_file = ExportToFile(None,self.new_project)
+        self.export_project=ExportProject(None,self.new_project)
 
 
     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
@@ -53,7 +54,8 @@ class Presenter:
         self.scene_presenter.view = view
         self.local_auto_segm_presenter.view = view
         self.import_from_file.view = view
-        self.export_to_file.view=view
+        self.export_to_file.view= view
+        self.export_project.view = view
         self.classManagerPresenter.updateItems()
         self.view.toggle_all_buttons(False)
 
@@ -98,7 +100,7 @@ class Presenter:
         #self.image_item = self.new_project.get_img_by_filename(self.new_project.list_of_images_model[0].filename)
 
     def update_annotations_on_image(self):
-        self.annotation_presenter.updateItems()
+        self.annotation_presenter.update_items()
         self.scene_presenter.reset_to_default()
         self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
         self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
@@ -116,7 +118,7 @@ class Presenter:
         self.view.set_no_active_tool_text()
         if self.image_item != item:
             self.file_list_presenter.show_image(item)
-            self.annotation_presenter.updateItems()
+            self.annotation_presenter.update_items()
             self.image_item = item
 
             self.scene_presenter.reset_to_default()
@@ -333,6 +335,25 @@ class Presenter:
         self.import_from_file.reset_imported_data()
 
     #Stąd przekazanie importów/eksportów do podprezenterów
+    def export_project_fun(self):
+        # 1. Wybierz lokalizację zapisu
+        save_path = self.export_project.select_save_location()
+        if not save_path:
+            #self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
+            return
+
+        if not save_path.endswith(".pro"):
+            save_path += ".pro"
+
+        # 3. Utwórz i zapisz dane do pliku .pro (JSON)
+        try:
+            self.export_project.create_file(save_path)
+            self.update_file_list_panel()
+            self.update_annotations_on_image()
+            self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {save_path}")
+        except Exception as e:
+            self.view.show_message_OK("Błąd", f"Wystąpił problem podczas eksportu: {str(e)}")
+
     def export_to_coco(self):
         # 1. Wybierz lokalizację zapisu
         save_path = self.export_to_file.select_save_location_and_create_folder()

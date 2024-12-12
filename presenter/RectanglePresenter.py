@@ -68,7 +68,7 @@ class RectanglePresenter(QObject):
         self.view.change_to_arrow_cursor()
 
         # Wczytanie na nowo adnotacji żeby żadna adnotacja nie była zaznaczona po wyjściu z rysowania
-        self.presenter.annotation_presenter.updateItems()
+        self.presenter.annotation_presenter.update_items()
 
     def update_color(self, color):
         self.color = color
