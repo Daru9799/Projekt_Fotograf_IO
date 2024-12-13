@@ -49,14 +49,12 @@ class ExportProject:
         categories = [
             {
                 "id": cl.class_id,
-                "name": cl.name
+                "name": cl.name,
+                "color":cl.color
             } for cl in self.project.list_of_classes_model
         ]
 
-        image_path = {
-            img.filename: self.project.get_full_path_by_filename(img.filename)
-            for img in self.project.list_of_images_model
-        }
+        image_path = os.path.dirname(self.project.get_full_path_by_filename(self.project.list_of_images_model[0].filename))
 
         data = {
             "images": images,
