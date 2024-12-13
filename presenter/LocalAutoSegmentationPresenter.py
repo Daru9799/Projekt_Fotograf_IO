@@ -111,18 +111,9 @@ class LocalAutoSegmentationPresenter:
         new_bbox = self.rectangle_to_bbox(points_list)
         print("new_bbox: ", new_bbox)
 
-        # Wyliczenie granic bbox
-        x_min, y_min, width, height = new_bbox
-        x_max = x_min + width
-        y_max = y_min + height
-
-        # Konwersja obrazu:
-        img = Image.open(path)
-        img.load()
-        numpydata = np.asarray(img, dtype="uint8")
-
         # Wywołanie modelu
-        results = self.active_model(source=numpydata, bboxes=[new_bbox], retina_masks=True, conf=0.6)
+        # visualize=True,show=True
+        results = self.active_model(source=path, bboxes=[new_bbox], conf=0.6)
 
         # Pobranie maski
         mask = results[0].masks.data[0].cpu().numpy()
@@ -138,10 +129,10 @@ class LocalAutoSegmentationPresenter:
         # Wygładź kontury
         smoothed_contours = self.smooth_polygon(simplified_contours, size=3)
 
-        print("Smoothed Polygon Points: ", smoothed_contours)
+        # print("Smoothed Polygon Points: ", smoothed_contours)
 
         return smoothed_contours
-
+        # return contours[0]
     # funkcja która m ograniczyć punkty do obszaru zaznaczonego bboxa
     def clamp_to_bbox(self, point, x_min, y_min, x_max, y_max):
         """Ogranicz punkt (x, y) do granic bbox."""
@@ -156,9 +147,10 @@ class LocalAutoSegmentationPresenter:
             if cv2.contourArea(contour) > 10:
                 # Konwersja konturu na listę krotek (x, y)
                 polygon = [tuple(point[0]) for point in contour]
-                if len(polygon) >= 3:  # Minimalna liczba punktów to 3 (żeby utworzyć wielokąt)
+                if len(polygon) >= 6:  # Minimalna liczba punktów to 3 (żeby utworzyć wielokąt)
                     polygons.append(polygon)
         print(f"Generated {len(polygons)} valid polygons")
+        polygons.sort(key=len, reverse=True)
         return polygons
 
     def smooth_polygon(self, polygon, size=3):
