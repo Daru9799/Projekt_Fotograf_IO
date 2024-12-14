@@ -340,6 +340,32 @@ class Presenter:
         ##Czyszczenie prezentera importu po zakonczeniu dzialania
         self.import_from_file.reset_imported_data()
 
+    def import_project(self):
+        if self.new_project.list_of_images_model:
+            confirmation = self.view.show_message_Yes_No("Uwaga!", "Import spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")
+            if confirmation:
+                img_list, class_list, image_folder = self.import_from_file.import_from_project_file()
+            else:
+                return 0
+        else:
+            img_list, class_list, image_folder = self.import_from_file.import_from_project_file()
+
+        # Anulowanie importu poprzez zamkniecie
+        if img_list is None or class_list is None or image_folder is None:
+            return 0
+
+        ##Przypisywanie obrazków i klas do listy projektowej
+        self.new_project.list_of_images_model = img_list
+        self.new_project.list_of_classes_model = class_list
+        # Aktualizacja widoku
+        self.new_project.folder_path = image_folder #Przypisanie sciezki
+        self.classManagerPresenter.updateItems()  # aktualizuje panel z listą klas
+        self.update_file_list_panel()
+        self.update_annotations_on_image()
+
+        ##Czyszczenie prezentera importu po zakonczeniu dzialania
+        self.import_from_file.reset_imported_data()
+
     #Stąd przekazanie importów/eksportów do podprezenterów
     def export_project_fun(self):
         # 1. Wybierz lokalizację zapisu

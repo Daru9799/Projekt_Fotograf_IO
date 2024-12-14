@@ -350,7 +350,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu">
@@ -358,6 +358,7 @@
      <string>Plik</string>
     </property>
     <addaction name="new_project_action"/>
+    <addaction name="load_project_action"/>
     <addaction name="save_project_action"/>
     <addaction name="save_as_new_project_action"/>
    </widget>
@@ -440,6 +441,11 @@
   <action name="show_statistics_action_2">
    <property name="text">
     <string>Statystyki</string>
+   </property>
+  </action>
+  <action name="load_project_action">
+   <property name="text">
+    <string>Wczytaj plik projektowy</string>
    </property>
   </action>
  </widget>
