@@ -32,23 +32,19 @@ class LocalAutoSegmentationPresenter:
         self.active_model = SAM("sam2_b.pt").to(self.device)
 
     def rectangle_to_bbox(self,points):
-        # Ekstrakcja współrzędnych x i y
+        # Rozdzielenie współrzędnych x i y
         x_coords = [point[0] for point in points]
         y_coords = [point[1] for point in points]
 
-        # Obliczenie współrzędnych bbox
-        x_min = min(x_coords)
-        y_min = min(y_coords)
-        x_max = max(x_coords)
-        y_max = max(y_coords)
+        # Wyznaczenie minimalnych i maksymalnych wartości
+        min_x = min(x_coords)
+        min_y = min(y_coords)
+        max_x = max(x_coords)
+        max_y = max(y_coords)
 
-        # Obliczenie szerokości i wysokości
-        width = x_max - x_min
-        height = y_max - y_min
+        return min_x, min_y, max_x, max_y
 
-        return [x_min, y_min, width, height]
-
-# Stary kod bez postprocsów, które wygładzają końcowego polygona
+    # Stary kod bez postprocsów, które wygładzają końcowego polygona
     # def calculate_vertexes(self, path, points_list,img_object):
     #     new_bbox = self.rectangle_to_bbox(points_list)
     #     print("new_bbox: ", new_bbox)
@@ -108,13 +104,13 @@ class LocalAutoSegmentationPresenter:
     #     return formatted_xy
 
     def calculate_vertexes(self, path, points_list):
-        new_bbox = self.rectangle_to_bbox(points_list)
-        print("new_bbox: ", new_bbox)
+        # new_bbox = self.rectangle_to_bbox(points_list)
+        # print("new_bbox: ", new_bbox)
 
         # Wywołanie modelu
         # visualize=True,show=True
-
-        results = self.active_model.predict(source=path, bboxes=[new_bbox], conf=0.6,visualize=True,show=True)
+        bbox = self.rectangle_to_bbox(points_list)
+        results = self.active_model.predict(source=path, bboxes=[bbox], conf=0.6)
 
         # Pobranie maski
         mask = results[0].masks.data[0].cpu().numpy()
