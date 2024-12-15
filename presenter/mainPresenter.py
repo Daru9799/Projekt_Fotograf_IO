@@ -414,7 +414,9 @@ class Presenter:
         self.export_to_file.create_json_file(json_file_path)
         self.update_file_list_panel()
         self.update_annotations_on_image()
-        self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {folder_path}")
+        normalized_path = os.path.normpath(folder_path).replace("\\", "/")
+        self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {normalized_path}")
+
 
     def export_to_yolo_fun(self):
         save_path= self.export_to_yolo.select_save_location()
