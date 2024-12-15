@@ -65,36 +65,70 @@ class ExportToYolo:
             except Exception as e:
                 self.view.show_message("Błąd", f"Nie udało się skopiować obrazu {img_obj.filename}: {str(e)}")
 
+
     def create_yaml_file(self, folder_path):
-        # Dodanie nazwy pliku data.yaml do podanej ścieżki folderu
-        output_path = os.path.join(folder_path, "data.yaml")
+        # Tworzenie pełnej ścieżki do pliku data.yaml
+        yaml_output_path = os.path.join(folder_path, "data.yaml")
 
         # Pobranie nazw klas z listy klas w projekcie
         class_names = [cl.name for cl in self.project.list_of_classes_model]
 
-        # Konfiguracja danych
-        data = {
-            "names": class_names,  # Nazwy klas
+        # Konfiguracja danych YAML
+        yaml_data = {
+            "names": class_names,
             "nc": len(class_names),  # Liczba klas
             "train": os.path.join(folder_path, 'train', 'images'),  # Ścieżka do folderu train/images
             "val": os.path.join(folder_path, 'valid', 'images'),  # Ścieżka do folderu valid/images
-            "test": "../test/images"  # Ścieżka do folderu test/images 
+            "test": "../test/images"  # Ścieżka do folderu test/images
         }
 
         try:
-            # Tworzymy foldery, jeśli nie istnieją
-            if not os.path.exists(folder_path):
-                os.makedirs(folder_path)
+            # Tworzenie wymaganych folderów
+            labels_folder = os.path.join(folder_path, "train", "labels")
+            os.makedirs(labels_folder, exist_ok=True)
 
-            # Zapisujemy dane do pliku YAML
-            with open(output_path, 'w', encoding='utf-8') as yaml_file:
-                yaml.dump(data, yaml_file, allow_unicode=True, default_flow_style=False)
+            # Tworzenie pliku YAML
+            with open(yaml_output_path, 'w', encoding='utf-8') as yaml_file:
+                yaml.dump(yaml_data, yaml_file, allow_unicode=True, default_flow_style=False)
+            print(f"Plik YAML został utworzony: {yaml_output_path}")
 
-            print(f"Plik YAML został utworzony: {output_path}")
+            # Tworzenie plików tekstowych dla YOLO
+            for img in self.project.list_of_images_model:
+                print(f"Przetwarzanie obrazu: {img.filename}")  # Debug: wydruk nazwy obrazu
+
+                # Ścieżka pliku tekstowego
+                label_file_path = os.path.join(labels_folder, f"{os.path.splitext(img.filename)[0]}.txt")
+
+                if not img.list_of_annotations:
+                    print(f"Brak adnotacji dla obrazu: {img.filename}")  # Debug: brak adnotacji
+                    continue
+
+                with open(label_file_path, 'w', encoding='utf-8') as label_file:
+                    for an in img.list_of_annotations:
+                        if hasattr(an, 'segmentation') and an.segmentation:  # Sprawdzanie, czy adnotacja ma segmentację
+                            # YOLO format: class_id x1 y1 x2 y2 ... (dla segmentacji)
+                            segmentation_flat = [coord for point in an.segmentation for coord in point]
+                            normalized_segmentation = [
+                                coord / img.width if i % 2 == 0 else coord / img.height
+                                for i, coord in enumerate(segmentation_flat)
+                            ]
+                            label_line = f"{an.class_id} " + " ".join(
+                                f"{value:.6f}" for value in normalized_segmentation) + "\n"
+                            label_file.write(label_line)
+                        elif hasattr(an, 'bbox') and an.bbox:  # Sprawdzanie, czy adnotacja ma bbox
+                            # YOLO format: class_id center_x center_y width height
+                            x, y, w, h = an.bbox
+                            center_x = (x + w / 2) / img.width
+                            center_y = (y + h / 2) / img.height
+                            width = w / img.width
+                            height = h / img.height
+                            label_line = f"{an.class_id} {center_x:.6f} {center_y:.6f} {width:.6f} {height:.6f}\n"
+                            label_file.write(label_line)
+
+                print(f"Plik etykiet został utworzony: {label_file_path}")
+
         except Exception as e:
-            print(f"Błąd podczas tworzenia pliku YAML: {str(e)}")
-
-
+            print(f"Błąd podczas tworzenia plików: {str(e)}")
 
 
 

@@ -16,6 +16,9 @@ class ImportFromFile:
         self.json_path = None #Ściezka do JSONA
         self.json_folder = None #Ściezka do samego folderu
         self.json_data = None #Zmienna przechowujaca zawartosc jsona
+        self.project_path = None #Ścieżka do pliku projektowego
+        self.project_images_folder = None #Ściezka do zdjec do ktorych odnosi sie plik projektowy
+        self.project_data = None #Zmienna przechowywujaca zawartosc pliku projektowego
 
     #Funkcja importu z COCO do projektu
     def import_from_COCO(self):
@@ -28,7 +31,7 @@ class ImportFromFile:
         #Zapis sciezki do folderu w osobnej zmiennej
         self.json_folder = os.path.dirname(self.json_path)
         #Zapisanie zawartości jsona do zmiennej
-        with open(self.json_path, 'r') as json_file:
+        with open(self.json_path, 'r', encoding='utf-8') as json_file:
             self.json_data = json.load(json_file)
         #Tutaj trzeba by sprawdzic czy istnieje self.json_path/images a potem sprawdzic czy nazwy plikow zgadzają sie z images w jsonie
 
@@ -49,8 +52,12 @@ class ImportFromFile:
         images = self.json_data.get("images")
         print(images)
         annotations = self.json_data.get("annotations")
+        merge_image_path = os.path.join(self.json_folder, "images")
+        self.load_images_to_objects(images, annotations, merge_image_path)
+
+    def load_images_to_objects(self, images, annotations, path_to_folder):
         for image in images:
-            file_path = os.path.join(self.json_folder, "images", image["file_name"])
+            file_path = os.path.join(path_to_folder, image["file_name"])
             #Exify
             exif_obj = ExifModel.create_exif_obj(file_path)
             #Adnotacje
@@ -75,3 +82,36 @@ class ImportFromFile:
         self.json_path = None
         self.json_folder = None
         self.json_data = None
+        self.project_images_folder = None
+        self.project_data = None
+
+    def import_from_project_file(self):
+        print("Importowanie z pliku projektowego")
+        self.project_path, _ = QFileDialog.getOpenFileName(self.view.centralwidget.parent(), "Wybierz plik projektowy", "", "Project Files (*.pro);")
+        # Jeśli nic sie nie wybierze:
+        if not self.project_path:
+            return None, None, None
+
+        # Zapisanie zawartości pliku projektowego do zmiennej
+        with open(self.project_path, 'r', encoding='utf-8') as json_file:
+            self.project_data = json.load(json_file)
+
+        #Zapis sciezki folderu z obrazkami w osobnej zmiennej (potem zwraca main_presenterowi)
+        self.project_images_folder = self.project_data.get("image_path")
+
+        # Import klas
+        self.load_classes_from_project_file()
+        # Import obrazków (wraz z adnotacjami)
+        self.load_images_from_project_file()
+        return self.images_list, self.classes_list, self.project_images_folder
+
+    def load_classes_from_project_file(self):
+        categories = self.project_data["categories"]
+        for category in categories:
+            class_obj = ClassModel(class_id=category["id"], name=category["name"], color=tuple(category["color"])) #Konwersja do koloru do krotki (z tablicy)
+            self.classes_list.append(class_obj)
+
+    def load_images_from_project_file(self):
+        images = self.project_data.get("images")
+        annotations = self.project_data.get("annotations")
+        self.load_images_to_objects(images, annotations, self.project_images_folder)

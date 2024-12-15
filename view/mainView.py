@@ -277,7 +277,10 @@ class MainView(object):
         self.save_as_new_project_action.setObjectName("save_as_new_project_action")
         self.show_statistics_action_2 = QtWidgets.QAction(MainWindow)
         self.show_statistics_action_2.setObjectName("show_statistics_action_2")
+        self.load_project_action = QtWidgets.QAction(MainWindow)
+        self.load_project_action.setObjectName("load_project_action")
         self.file_menu.addAction(self.new_project_action)
+        self.file_menu.addAction(self.load_project_action)
         self.file_menu.addAction(self.save_project_action)
         self.file_menu.addAction(self.save_as_new_project_action)
         self.export_menu.addAction(self.export_COCO_action)
@@ -332,6 +335,7 @@ class MainView(object):
         self.save_project_action.setText(_translate("MainWindow", "Zapisz"))
         self.save_as_new_project_action.setText(_translate("MainWindow", "Zapisz jako plik projektowy"))
         self.show_statistics_action_2.setText(_translate("MainWindow", "Statystyki"))
+        self.load_project_action.setText(_translate("MainWindow", "Wczytaj plik projektowy"))
 
 ######################################## Koniec generowania
         self.set_zoom_slider_visibility(False)
@@ -386,6 +390,7 @@ class MainView(object):
         self.import_COCO_action_2.triggered.connect(self.presenter.import_from_coco)
         self.save_project_action.triggered.connect(self.presenter.export_project_fun)
         self.export_YOLO_action.triggered.connect(self.presenter.export_to_yolo_fun)
+        self.load_project_action.triggered.connect(self.presenter.import_project)
 
 
 ###Wskazówki dla użytkownika
