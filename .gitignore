@@ -188,3 +188,8 @@ sam2.1_b.pt
 torch test.py
 *.pt
 \!OBRAZKI DO TESTÓW/zebry.jpg
+\!OBRAZKI DO TESTÓW/żuk_na_kwiatku.jpg
+\!OBRAZKI DO TESTÓW/żuk_macro.jpg
+\!OBRAZKI DO TESTÓW/wiele-kwiatow-na-lace.jpg
+\!OBRAZKI DO TESTÓW/jednoroczne-chwasty.jpg
+\!OBRAZKI DO TESTÓW/balss.jpg

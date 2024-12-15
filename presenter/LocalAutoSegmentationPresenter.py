@@ -107,13 +107,14 @@ class LocalAutoSegmentationPresenter:
     #
     #     return formatted_xy
 
-    def calculate_vertexes(self, path, points_list, img_object):
+    def calculate_vertexes(self, path, points_list):
         new_bbox = self.rectangle_to_bbox(points_list)
         print("new_bbox: ", new_bbox)
 
         # Wywołanie modelu
         # visualize=True,show=True
-        results = self.active_model(source=path, bboxes=[new_bbox], conf=0.6)
+
+        results = self.active_model.predict(source=path, bboxes=[new_bbox], conf=0.6,visualize=True,show=True)
 
         # Pobranie maski
         mask = results[0].masks.data[0].cpu().numpy()
@@ -133,6 +134,131 @@ class LocalAutoSegmentationPresenter:
 
         return smoothed_contours
         # return contours[0]
+
+    # def calculate_vertexes_cropped(self,path,points_list):
+    #     new_bbox = self.rectangle_to_bbox(points_list)
+    #     print("new_bbox: ", new_bbox)
+    #
+    #     # Wywołanie modelu
+    #     # visualize=True,show=True
+    #     img = Image.open(path)
+    #     img.load()
+    #     print(img.mode)
+    #     if img.mode != "RGB":
+    #         img = img.convert("RGB")
+    #     np_img = np.asarray( img, dtype="uint8" )
+    #     cropped_image = self.crop_image(np_img,new_bbox)
+    #     #cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_RGB2BGR)
+    #     results = self.active_model.predict(source=cropped_image, conf=0.6,visualize=True,show=True)
+    #
+    #     # Jeśli nic nie wykryje
+    #     if not results[0].masks:
+    #         return []
+    #     # Pobranie maski
+    #     mask = results[0].masks.data[0].cpu().numpy()
+    #     contours = self.mask_to_polygon(mask)
+    #
+    #     # Jeśli kontury są puste, zwróć pustą listę
+    #     if not contours:
+    #         return []
+    #
+    #     x_offset, y_offset = new_bbox[0], new_bbox[1]
+    #
+    #     scaled_contours = []
+    #     for contour in contours:
+    #         scaled_contour = [(x + x_offset, y + y_offset) for x, y in contour]
+    #         scaled_contours.append(scaled_contour)
+    #
+    #     # Zmniejsz liczbę punktów konturu (upraszczanie)
+    #     simplified_contours = [
+    #         self.simplify_polygon(scaled_contour, epsilon=2.0)
+    #         for scaled_contour in scaled_contours
+    #     ]
+    #
+    #     # Wygładź kontury
+    #     smoothed_contours = [
+    #         self.smooth_polygon(simplified_contour, size=3)
+    #         for simplified_contour in simplified_contours
+    #     ]
+    #
+    #     # # Posortuj kontury według obszaru w kolejności malejącej
+    #     # smoothed_contours_sorted = sorted(
+    #     #     smoothed_contours,
+    #     #     key=lambda contour: cv2.contourArea(np.array(contour, dtype=np.int32)),
+    #     #     reverse=True
+    #     # )
+    #
+    #     return smoothed_contours
+
+    def calculate_vertexes_cropped(self, path, points_list):
+        new_bbox = self.rectangle_to_bbox(points_list)
+        print("new_bbox: ", new_bbox)
+
+        # Wczytanie obrazu
+        img = Image.open(path)
+        img.load()
+        print(img.mode)
+        if img.mode != "RGB":
+            img = img.convert("RGB")
+        np_img = np.asarray(img, dtype="uint8")
+
+        # Przycięcie obrazu
+        cropped_image = self.crop_image(np_img, new_bbox)
+        cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_RGB2BGR)
+
+        # Wywołanie modelu
+        results = self.active_model.predict(source=cropped_image, conf=0.6, visualize=True, show=True)
+
+        # Jeśli nic nie wykryje
+        if not results[0].masks:
+            return []
+
+        # Pobranie masek
+        masks = results[0].masks.data.cpu().numpy()
+
+        # Znalezienie środka obrazu
+        center_x = cropped_image.shape[1] // 2
+        center_y = cropped_image.shape[0] // 2
+
+        # Zwracanie tylko maski obejmującej środek obrazu
+        selected_mask = None
+        for mask in masks:
+            if mask[center_y, center_x] > 0:  # Sprawdzenie, czy środek obrazu leży w masce
+                selected_mask = mask
+                break
+
+        # Jeśli żadna maska nie zawiera środka, zwróć pustą listę
+        if selected_mask is None:
+            return []
+
+        # Konwersja maski na kontur
+        contours = self.mask_to_polygon(selected_mask)
+
+        # Jeśli kontury są puste, zwróć pustą listę
+        if not contours:
+            return []
+
+        x_offset, y_offset = new_bbox[0], new_bbox[1]
+
+        scaled_contours = []
+        for contour in contours:
+            scaled_contour = [(x + x_offset, y + y_offset) for x, y in contour]
+            scaled_contours.append(scaled_contour)
+
+        # Zmniejsz liczbę punktów konturu (upraszczanie)
+        simplified_contours = [
+            self.simplify_polygon(scaled_contour, epsilon=2.0)
+            for scaled_contour in scaled_contours
+        ]
+
+        # Wygładź kontury
+        smoothed_contours = [
+            self.smooth_polygon(simplified_contour, size=3)
+            for simplified_contour in simplified_contours
+        ]
+
+        return smoothed_contours
+
     # funkcja która m ograniczyć punkty do obszaru zaznaczonego bboxa
     def clamp_to_bbox(self, point, x_min, y_min, x_max, y_max):
         """Ogranicz punkt (x, y) do granic bbox."""
@@ -194,3 +320,9 @@ class LocalAutoSegmentationPresenter:
         simplified_polygon = [tuple(point[0]) for point in simplified_polygon]
 
         return simplified_polygon
+
+    def crop_image(self,image, bbox):
+        x, y, width, height = bbox
+        x_min, x_max = x, x + width
+        y_min, y_max = y, y + height
+        return image[y_min:y_max, x_min:x_max]

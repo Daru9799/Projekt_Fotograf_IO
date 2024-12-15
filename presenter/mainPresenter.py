@@ -197,13 +197,23 @@ class Presenter:
                 image_path = self.new_project.folder_path+"/"+self.image_item.text()
                 print("Folder path:", image_path)
                 self.local_auto_segm_presenter.image_path = image_path
-                img_object= self.new_project.get_img_by_filename(self.image_item.text())
-                auto_segment_polyg = self.local_auto_segm_presenter.calculate_vertexes(image_path,points,img_object)
-                print("auto_segment_polyg",auto_segment_polyg)
-                if auto_segment_polyg == [] or auto_segment_polyg is None:
+
+                # auto_segment_polyg = self.local_auto_segm_presenter.calculate_vertexes(image_path, points)
+                # print("auto_segment_polyg",auto_segment_polyg)
+                # if auto_segment_polyg == [] or auto_segment_polyg is None:
+                #     pass
+                # else:
+                #     self.annotation_presenter.add_annotation(auto_segment_polyg)
+                #     pass
+
+                cropped_auto_seg_polyg = self.local_auto_segm_presenter.calculate_vertexes_cropped(image_path, points)
+                print("cropped_auto_seg_polyg", cropped_auto_seg_polyg)
+                if not cropped_auto_seg_polyg:
                     pass
                 else:
-                    self.annotation_presenter.add_annotation(auto_segment_polyg)
+                    self.annotation_presenter.add_annotation(cropped_auto_seg_polyg[0])
+
+
                 # }
 
                 self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
