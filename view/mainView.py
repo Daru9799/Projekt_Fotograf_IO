@@ -484,6 +484,9 @@ class MainView(object):
     def set_draw_polygon_button_text(self, text):
         self.draw_polygon_button.setText(text)
 
+    def set_auto_selection_button_text(self, text):
+        self.auto_selection_button.setText(text)
+
     def key_press_event(self, event):
         try:
             # Obsługa ESC

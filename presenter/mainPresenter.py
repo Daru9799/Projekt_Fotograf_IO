@@ -118,6 +118,7 @@ class Presenter:
     def folder_list_on_click(self, item):
         self.rectangle_presenter.cancel_drawing_rectangle()     #Anulowanie rysowania prostokąta po kliknięciu w prawy panel
         self.polygon_presenter.prepare_to_change_current_img()         #Anulowanie rysowania polygona --//--
+        self.local_auto_segm_presenter.cancel_auto_segmentation()
         self.drawing_tool = None
         self.view.set_no_active_tool_text()
         if self.image_item != item:
@@ -132,8 +133,11 @@ class Presenter:
     #Aktywacja bądź dezaktywacja narzędzia rectangle
     def activate_rectangle_tool(self):
         if self.drawing_tool != "rectangle":
-            self.polygon_presenter.cancel_drawing_polygon()
             self.scene_presenter.reset_selected_polygon()
+
+            self.rectangle_presenter.cancel_drawing_rectangle()
+            self.polygon_presenter.cancel_drawing_polygon()
+            self.local_auto_segm_presenter.cancel_auto_segmentation()
             self.drawing_tool = "rectangle"
             self.view.set_notification_label("Tryb rysowania prostokąta aktywny. Wybierz punkt początkowy LPM.")
             self.view.set_draw_rectangle_button_text("Anuluj rysowanie prostokąta")
@@ -146,8 +150,11 @@ class Presenter:
     # Aktywacja bądź dezaktywacja narzędzia polygon
     def activate_polygon_tool(self):
         if self.drawing_tool != "polygon":
-            self.rectangle_presenter.cancel_drawing_rectangle()
             self.scene_presenter.reset_selected_polygon()
+
+            self.rectangle_presenter.cancel_drawing_rectangle()
+            self.polygon_presenter.cancel_drawing_polygon()
+            self.local_auto_segm_presenter.cancel_auto_segmentation()
             self.drawing_tool = "polygon"
             self.view.set_notification_label("Tryb rysowania poligona aktywny")
             self.view.set_draw_polygon_button_text("Anuluj rysowanie poligona")
@@ -158,7 +165,23 @@ class Presenter:
             self.polygon_presenter.cancel_drawing_polygon()
 
     def activate_auto_selection_tool(self):
-        pass
+        if self.drawing_tool != "auto_segmentation":
+            self.scene_presenter.reset_selected_polygon()
+
+            self.rectangle_presenter.cancel_drawing_rectangle()
+            self.polygon_presenter.cancel_drawing_polygon()
+            self.local_auto_segm_presenter.cancel_auto_segmentation()
+
+            self.drawing_tool = "auto_segmentation"
+            self.view.set_notification_label("Tryb automatycznego zaznaczania aktywny")
+            self.view.set_auto_selection_button_text("Anuluj automatyczne zaznaczanie")
+            self.view.change_to_cross_cursor()
+        else:
+            self.drawing_tool = None
+            self.view.set_no_active_tool_text()
+            self.rectangle_presenter.cancel_drawing_rectangle()
+            self.local_auto_segm_presenter.cancel_auto_segmentation()
+
 
     #Aktualizacja zooma
     def zoom_slider(self):
@@ -190,21 +213,20 @@ class Presenter:
                 self.view.set_notification_label(f"Pomyślnie utworzono nową adnotację! Tryb rysowania prostokąta aktywny. Wybierz punkt początkowy LPM.")
                 self.rectangle_presenter.delete_temp_rectangle() #Usunięcie tymczasowego obiektu
 
-                # Tymczasowo wyłączone dodawanie nowych adnotacji typu prostokąt
-                # self.annotation_presenter.add_annotation(points)
+                self.annotation_presenter.add_annotation(points)
 
                 # TESTY {
-                image_path = self.new_project.folder_path+"/"+self.image_item.text()
-                print("Folder path:", image_path)
-                self.local_auto_segm_presenter.image_path = image_path
 
-                auto_segment_polyg = self.local_auto_segm_presenter.calculate_vertexes(image_path, points)
-                print("auto_segment_polyg",auto_segment_polyg)
-                if auto_segment_polyg == [] or auto_segment_polyg is None:
-                    pass
-                else:
-                    self.annotation_presenter.add_annotation(auto_segment_polyg)
-                    pass
+                # image_path = self.new_project.folder_path+"/"+self.image_item.text()
+                # print("Folder path:", image_path)
+                # self.local_auto_segm_presenter.image_path = image_path
+                #
+                # auto_segment_polyg = self.local_auto_segm_presenter.calculate_vertexes(image_path, points)
+                # print("auto_segment_polyg",auto_segment_polyg)
+                # if auto_segment_polyg == [] or auto_segment_polyg is None:
+                #     pass
+                # else:
+                #     self.annotation_presenter.add_annotation(auto_segment_polyg)
 
                 # cropped_auto_seg_polyg = self.local_auto_segm_presenter.calculate_vertexes_cropped(image_path, points)
                 # print("cropped_auto_seg_polyg", cropped_auto_seg_polyg)
@@ -212,7 +234,6 @@ class Presenter:
                 #     pass
                 # else:
                 #     self.annotation_presenter.add_annotation(cropped_auto_seg_polyg[0])
-
 
                 # }
 
@@ -224,12 +245,12 @@ class Presenter:
 
         #Logika rysowania poligona
         if self.drawing_tool == "polygon":
-            self.view.set_notification_label(f"Rysowanie poligona: ")
 
             if not selected_class: # sprawdzenie czy klasa jest wybrana
                 self.view.show_message_OK("Informacja", "Proszę o wybranie klasy")
                 return
 
+            self.view.set_notification_label(f"Rysowanie poligona: ")
             self.polygon_presenter.update_color(selected_class.Class.color) # update koloru
 
             # jeśli plolygon ma conajmniej 3 punkty i klikneliśmy obok współżendnych początkowych
@@ -248,6 +269,36 @@ class Presenter:
             else:
                 self.polygon_presenter.current_polygon_points.append((int(x),int(y)))
                 self.polygon_presenter.drawing_polygon()
+
+        if self.drawing_tool == "auto_segmentation":
+
+            if self.rectangle_presenter.rectangle_start_point == (None, None):
+                if selected_class:
+                    self.rectangle_presenter.update_start_point(x, y)
+                    self.rectangle_presenter.update_color(selected_class.Class.color)
+                    self.view.set_notification_label(f"Automatyczne zaznaczanie: Wybrano punkt początkowy. Proszę wybrać punkt końcowy LPM.")
+                else:
+                    self.view.show_message_OK("Informacja", "Proszę o wybranie klasy")
+            else:
+                points = self.rectangle_presenter.get_rectangle_points()
+                self.view.set_notification_label(f"Automatyczne zaznaczanie: Wybierz punkt początkowy LPM.")
+                self.rectangle_presenter.delete_temp_rectangle() #Usunięcie tymczasowego obiektu
+
+                image_path = self.new_project.folder_path+"/"+self.image_item.text()
+                self.local_auto_segm_presenter.image_path = image_path
+
+                auto_segment_polyg = self.local_auto_segm_presenter.calculate_vertexes(image_path, points)
+                if auto_segment_polyg == [] or auto_segment_polyg is None:
+                    pass
+                else:
+                    self.annotation_presenter.add_annotation(auto_segment_polyg)
+
+                self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
+                self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
+
+                ###Tutaj trzeba obsłużyć update sceny z nowym narysowanym obiektem (narysować go ponownie z innymi)
+                self.rectangle_presenter.update_start_point(None, None)
+
 
         if self.drawing_tool is None:
             # Sprawdza czy nie klikneliśmy na poligon
@@ -286,7 +337,6 @@ class Presenter:
 
     def handle_mouse_left_click_release(self):
         self.scene_presenter.release_dragging_click()
-
         items = [self.view.annotation_list_widget.item(i) for i in range(self.view.annotation_list_widget.count())]
         for i in items:
             i.setSelected(False)  # Na początku odznacz
@@ -297,6 +347,7 @@ class Presenter:
     def handle_escape_click(self):
         self.rectangle_presenter.cancel_drawing_rectangle()
         self.polygon_presenter.cancel_drawing_polygon()
+        self.local_auto_segm_presenter.cancel_auto_segmentation()
         self.drawing_tool = None
         self.view.set_no_active_tool_text()
 

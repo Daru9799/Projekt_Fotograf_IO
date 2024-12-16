@@ -22,8 +22,6 @@ class LocalAutoSegmentationPresenter:
         if torch.cuda.is_available():
             print("GPU:", torch.cuda.get_device_name(0))
 
-
-
         # Wybierz urządzenie: GPU lub CPU
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         #print("Using device:", self.device)
@@ -44,68 +42,7 @@ class LocalAutoSegmentationPresenter:
 
         return min_x, min_y, max_x, max_y
 
-    # Stary kod bez postprocsów, które wygładzają końcowego polygona
-    # def calculate_vertexes(self, path, points_list,img_object):
-    #     new_bbox = self.rectangle_to_bbox(points_list)
-    #     print("new_bbox: ", new_bbox)
-    #
-    #     # Wyliczenie granic bbox
-    #     x_min, y_min, width, height = new_bbox
-    #     x_max = x_min + width
-    #     y_max = y_min + height
-    #
-    #     #Pobranie rozmiarów obrazka
-    #     #img_size = (img_object.height, img_object.width)
-    #
-    #     #Konwersja obrazu:
-    #     img = Image.open(path)
-    #     img.load()
-    #     numpydata = np.asarray( img, dtype="uint8" )
-    #
-    #     # Wywołanie modelu
-    #     results = self.active_model(source= numpydata, bboxes=[new_bbox], retina_masks=True,conf=0.6)
-    #
-    #     # Kod jeśli chcemy korzystać z maski binarnej {
-    #     mask = results[0].masks.data[0].cpu().numpy()
-    #     suma_mask = mask.sum() # testowo
-    #     print(suma_mask)
-    #
-    #     countours = self.mask_to_polygon(mask)
-    #
-    #     # if countours == []:
-    #     #     return []
-    #     # return countours[]0
-    #
-    #     # }
-    #
-    #     xy_list = results[0].masks.xy[0]  # Zakładamy, że mamy jedno wykrycie
-    #
-    #     # Konwersja punktów na int i ograniczenie do bbox
-    #     # formatted_xy = [
-    #     #     self.clamp_to_bbox((int(point[0]), int(point[1])), x_min, y_min, x_max, y_max)
-    #     #     for point in xy_list
-    #     # ]
-    #
-    #     # zamiana punktów x,y na inty
-    #     formatted_xy = [
-    #         (int(point[0]), int(point[1]))
-    #         for point in xy_list
-    #     ]
-    #
-    #     #smoothed_points = median_filter(formatted_xy, size=3)
-    #     print("Clamped Polygon Points: ", formatted_xy)
-    #     # print("contur: ",countours[0])
-    #
-    #     # if countours == []:
-    #     #     return []
-    #
-    #     #smooth_points = self.smooth_polygon(smoothed_points)
-    #
-    #     return formatted_xy
-
     def calculate_vertexes(self, path, points_list):
-        # new_bbox = self.rectangle_to_bbox(points_list)
-        # print("new_bbox: ", new_bbox)
 
         # Wywołanie modelu
         # visualize=True,show=True
@@ -126,10 +63,7 @@ class LocalAutoSegmentationPresenter:
         # Wygładź kontury
         smoothed_contours = self.smooth_polygon(simplified_contours, size=3)
 
-        # print("Smoothed Polygon Points: ", smoothed_contours)
-
         return smoothed_contours
-        # return contours[0]
 
     # def calculate_vertexes_cropped(self,path,points_list):
     #     new_bbox = self.rectangle_to_bbox(points_list)
@@ -322,3 +256,6 @@ class LocalAutoSegmentationPresenter:
         x_min, x_max = x, x + width
         y_min, y_max = y, y + height
         return image[y_min:y_max, x_min:x_max]
+
+    def cancel_auto_segmentation(self):
+        self.view.set_auto_selection_button_text("Automatyczne zaznaczanie")
