@@ -388,7 +388,8 @@ class MainView(object):
         self.zoom_value_widget.editingFinished.connect(self.presenter.zoom_value)
         self.export_COCO_action.triggered.connect(self.presenter.export_to_coco_fun)
         self.import_COCO_action_2.triggered.connect(self.presenter.import_from_coco)
-        self.save_project_action.triggered.connect(self.presenter.export_project_fun)
+        self.save_project_action.triggered.connect(self.presenter.save_project_fun)
+        self.save_as_new_project_action.triggered.connect(self.presenter.save_as_project_fun)
         self.export_YOLO_action.triggered.connect(self.presenter.export_to_yolo_fun)
         self.load_project_action.triggered.connect(self.presenter.import_project)
 

@@ -428,11 +428,11 @@ class Presenter:
         self.import_from_file.reset_imported_data()
 
     #Stąd przekazanie importów/eksportów do podprezenterów
-    def export_project_fun(self):
+    def save_as_project_fun(self):
         # 1. Wybierz lokalizację zapisu
         save_path = self.export_project.select_save_location()
         if not save_path:
-            #self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
+            # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
             return
 
         if not save_path.endswith(".pro"):
@@ -446,6 +446,18 @@ class Presenter:
             self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {save_path}")
         except Exception as e:
             self.view.show_message_OK("Błąd", f"Wystąpił problem podczas eksportu: {str(e)}")
+
+    def save_project_fun(self):
+        # Zapisz zmiany w istniejącej lokalizacji lub otwórz okno wyboru, jeśli brak lokalizacji
+        try:
+            if self.export_project.save_project():
+                self.update_file_list_panel()
+                self.update_annotations_on_image()
+                self.view.show_message_OK("Sukces", f"Projekt został zapisany do {self.export_project.project_path}")
+            # else:
+            #     self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
+        except Exception as e:
+            self.view.show_message_OK("Błąd", f"Wystąpił problem podczas zapisu: {str(e)}")
 
     def export_to_coco_fun(self):
         # 1. Wybierz lokalizację zapisu

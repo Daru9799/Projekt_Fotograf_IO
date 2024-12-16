@@ -77,3 +77,19 @@ class ExportProject:
         except Exception as e:
             print(f"Błąd podczas tworzenia pliku .pro: {str(e)}")
 
+    def save_project(self):
+        # Jeśli nie ma zapisanej ścieżki, wywołaj select_save_location
+        if not self.project_path:
+            self.project_path = self.select_save_location()
+
+        if not self.project_path:
+            return False  # Użytkownik anulował wybór
+
+        # Dodaj rozszerzenie, jeśli go brak
+        if not self.project_path.endswith(".pro"):
+            self.project_path += ".pro"
+
+        # Zapisz plik
+        self.create_file(self.project_path)
+        return True
+
