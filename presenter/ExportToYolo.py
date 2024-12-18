@@ -71,15 +71,17 @@ class ExportToYolo:
         yaml_output_path = os.path.join(folder_path, "data.yaml")
 
         # Pobranie nazw klas z listy klas w projekcie
-        class_names = [cl.name for cl in self.project.list_of_classes_model]
+        class_names = {cl.class_id: cl.name.replace(" ", "") for cl in self.project.list_of_classes_model}
 
-        # Konfiguracja danych YAML
+        folder_path_normalized = os.path.normpath(folder_path)  # Normalizacja folderu głównego
+
         yaml_data = {
             "names": class_names,
-            "nc": len(class_names),  # Liczba klas
-            "train": os.path.join(folder_path, 'train', 'images'),  # Ścieżka do folderu train/images
-            "val": os.path.join(folder_path, 'valid', 'images'),  # Ścieżka do folderu valid/images
-            "test": "../test/images"  # Ścieżka do folderu test/images
+            # "nc": len(class_names),  # Liczba klas
+            "train": os.path.normpath(os.path.join(folder_path_normalized, 'train', 'images')),  # Normalizacja ścieżki
+            "val": os.path.normpath(os.path.join(folder_path_normalized, 'valid', 'images')),  # Normalizacja ścieżki
+            "test": os.path.normpath(os.path.join(folder_path_normalized, '..', 'test', 'images'))
+            # Normalizacja ścieżki
         }
 
         try:
