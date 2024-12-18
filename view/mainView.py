@@ -392,6 +392,7 @@ class MainView(object):
         self.save_as_new_project_action.triggered.connect(self.presenter.save_as_project_fun)
         self.export_YOLO_action.triggered.connect(self.presenter.export_to_yolo_fun)
         self.load_project_action.triggered.connect(self.presenter.import_project)
+        self.import_YOLO_action_2.triggered.connect(self.presenter.import_from_yolo)
 
 
 ###Wskazówki dla użytkownika
