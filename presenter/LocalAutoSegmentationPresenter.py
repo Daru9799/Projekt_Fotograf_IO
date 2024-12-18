@@ -1,3 +1,5 @@
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QGraphicsPixmapItem
 from ultralytics import SAM
 import torch
 import cv2
@@ -12,6 +14,13 @@ class LocalAutoSegmentationPresenter:
     def __init__(self, view, presenter):
         self.view = view
         self.presenter = presenter
+
+        self.temp_segment = []
+        self.temp_segment_ref = None
+        self.score = 0.0
+
+        self.color = (171, 127, 89, 255)
+
         #self.active_model = SAM("sam2_s.pt")
         #self.active_model = SAM("sam2.1_l.pt")
 
@@ -51,19 +60,65 @@ class LocalAutoSegmentationPresenter:
 
         # Pobranie maski
         mask = results[0].masks.data[0].cpu().numpy()
+        # Pobranie punktacji maski (0.0 - 1.0)
+        self.score = float(results[0].boxes.conf[0])
         contours = self.mask_to_polygon(mask)
 
         # Jeśli kontury są puste, zwróć pustą listę
         if not contours:
-            return []
+            self.temp_segment = []
+            self.view.set_notification_label(f"Automatyczne zaznaczanie: Wybierz punkt początkowy LPM.")
 
-        # Zmniejsz liczbę punktów konturu
-        simplified_contours = self.simplify_polygon(contours[0], epsilon=2.0)
+        else:
+            # Zmniejsz liczbę punktów konturu
+            simplified_contours = self.simplify_polygon(contours[0], epsilon=2.0)
 
-        # Wygładź kontury
-        smoothed_contours = self.smooth_polygon(simplified_contours, size=3)
+            # Wygładź kontury
+            smoothed_contours = self.smooth_polygon(simplified_contours, size=3)
 
-        return smoothed_contours
+            self.temp_segment = smoothed_contours
+
+            self.view.set_notification_label(f"Automatyczne zaznaczanie: Tmp zaznaczenie({self.score:.2f}). Potwierdź - 'Enter'")
+
+        self.draw_temp_segment()
+
+    def draw_temp_segment(self):
+        #print("--- Lista aktualnych punktów polygona: ---")
+        #print( self.current_polygon_points)
+        drawing_surface = np.zeros((self.view.pixmap_item.pixmap().height(), self.view.pixmap_item.pixmap().width(), 4),dtype=np.uint8)
+        #drawing_surface[:, :, 3] = 255
+        #border_color = (abs(self.color[0] - 50), abs(self.color[1] - 50), abs(self.color[2] - 50))
+        if len(self.temp_segment) != 0:
+
+            # konwersja listy punktów((x,y)) -> np.array, dla poprawnego rysowania cv2
+            np_points = np.array(self.temp_segment, dtype=np.int32)
+            np_points = np_points.reshape((-1, 1, 2))
+
+            cv2.polylines(drawing_surface, [np_points], isClosed=True, thickness=2, color=self.color )
+
+            # for point in np_points:
+            #     cv2.circle(drawing_surface, tuple(point[0]), self.point_radius, self.color, -1)
+
+            fill_color = (self.color[0], self.color[1], self.color[2], 220)
+            cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
+
+            #self.add_text_to_segment(drawing_surface, np_points, f"Temp({self.score:.2f})")
+
+
+        self.draw_item_on_scene(drawing_surface)
+
+    def draw_item_on_scene(self, drawing_surface):
+        # Utwórz QImage z obrazu numpy (z zachowaniem przezroczystości)
+        height, width, channel = drawing_surface.shape
+        bytes_per_line = 4 * width
+        # Tworzymy QImage z formatem BGRA
+        qimage = QImage(drawing_surface.data, width, height, bytes_per_line, QImage.Format_RGBA8888)
+        # Utwórz QPixmap z QImage
+        pixmap = QPixmap.fromImage(qimage)
+        # Dodanie nowego prostokąta do sceny
+        self.view.scene.removeItem(self.temp_segment_ref)
+        self.temp_segment_ref  = QGraphicsPixmapItem(pixmap)
+        self.view.scene.addItem(self.temp_segment_ref)
 
     # def calculate_vertexes_cropped(self,path,points_list):
     #     new_bbox = self.rectangle_to_bbox(points_list)
@@ -120,6 +175,8 @@ class LocalAutoSegmentationPresenter:
     #
     #     return smoothed_contours
 
+
+    # Kod/Metoda narazie nie wykorzystywana:
     def calculate_vertexes_cropped(self, path, points_list):
         new_bbox = self.rectangle_to_bbox(points_list)
         print("new_bbox: ", new_bbox)
@@ -189,13 +246,6 @@ class LocalAutoSegmentationPresenter:
 
         return smoothed_contours
 
-    # funkcja która m ograniczyć punkty do obszaru zaznaczonego bboxa
-    def clamp_to_bbox(self, point, x_min, y_min, x_max, y_max):
-        """Ogranicz punkt (x, y) do granic bbox."""
-        x = max(x_min, min(point[0], x_max))  # Ogranicz x do [x_min, x_max]
-        y = max(y_min, min(point[1], y_max))  # Ogranicz y do [y_min, y_max]
-        return (x, y)
-
     def mask_to_polygon(self, mask):
         contours, _ = cv2.findContours((mask > 0).astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         polygons = []
@@ -259,3 +309,51 @@ class LocalAutoSegmentationPresenter:
 
     def cancel_auto_segmentation(self):
         self.view.set_auto_selection_button_text("Automatyczne zaznaczanie")
+        self.remove_temp_segment()
+
+    def remove_temp_segment(self):
+        self.view.scene.removeItem(self.temp_segment_ref)
+        self.temp_segment_ref = None
+        self.temp_segment = []
+
+    def add_text_to_segment(self,drawing_surface, np_points, text):
+        # Obliczanie środka ciężkości polygona (centroid)
+        M = cv2.moments(np_points)
+        if M["m00"] != 0:
+            centroid_x = int(M["m10"] / M["m00"])
+            centroid_y = int(M["m01"] / M["m00"])
+        else:
+            # W przypadku gdy pole wynosi 0 (np. linia), użyj średniej punktów
+            centroid_x = int(np.mean(np_points[:, 0, 0]))
+            centroid_y = int(np.mean(np_points[:, 0, 1]))
+
+        # Obliczanie pola powierzchni polygona
+        area = cv2.contourArea(np_points)
+
+        # Dynamiczne skalowanie rozmiaru czcionki na podstawie pola powierzchni
+        # Ustal minimalny i maksymalny rozmiar czcionki
+        min_font_size = 0.5
+        max_font_size = 1.5
+        base_area = 2500  # Obszar bazowy dla czcionki minimalnej
+        font_scale = max(min_font_size, min(max_font_size, area / base_area))
+
+        print("Area:", (area/base_area))
+        print("Font scale:", font_scale)
+
+        # Dodawanie napisu na środku
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        #font_scale = 0.3
+        font_color = (69, 50, 34, 200)  # Biały kolor
+        thickness = 2
+
+        cv2.putText(
+            drawing_surface,
+            text,
+            (centroid_x - 60, centroid_y + 10),  # Ustawienie pozycji tekstu
+            font,
+            font_scale,
+            font_color,
+            thickness
+        )
+
+

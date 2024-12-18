@@ -494,6 +494,10 @@ class MainView(object):
             if event.key() == Qt.Key_Escape:
                 self.presenter.handle_escape_click()
 
+            # Obsługa klawisza Enter
+            elif event.key() in [Qt.Key_Return, Qt.Key_Enter]:
+                self.presenter.handle_enter_click()
+
             # Obsługa Ctrl + / Ctrl -
             elif event.modifiers() == Qt.ControlModifier:  # Check for Ctrl modifier first
                 if event.key() == Qt.Key_Minus or event.key() == Qt.Key_Underscore:

@@ -11,6 +11,8 @@ class ClassManagerPresenter:
         self.project = project
         self.presenter = presenter
 
+        self.checkboxes_state = [[],[]]
+
         #Tworzenie widoku
         self.window = QtWidgets.QDialog(self.view) # Użycie QDialog zamiast QMainWindow() pozwala na zlockowanie głównego widoku
         self.window.setModal(True)
@@ -61,6 +63,8 @@ class ClassManagerPresenter:
 
     # Metoda aktualizująca class_list_widget
     def updateItems(self):
+        if len(self.view.class_list_widget) != 0:
+            self.save_checkboxes_states()
         self.view.class_list_widget.clear()
         for cl in self.project.list_of_classes_model:
             #Kod służy do stworzenia customowego list itemu
@@ -69,7 +73,7 @@ class ClassManagerPresenter:
             row = CustomClassListItemView(cl,self) # tworzy nowy widok CustomClassListItemView
             item.setSizeHint(row.minimumSizeHint()) # ustawia rozmiar elementu item, aby pasował do minimalnego rozmiaru widoku row
             self.view.class_list_widget.setItemWidget(item, row) # ustawia widok row jako widok wewnętrzny dla item, co pozwala na dostosowany wygląd każdego elementu
-
+        self.load_checkboxes_states()
     # Updejtuje obiekt klasy w ProjectModel
     def updateColorClass(self, Class, rgba):
         updatedClass = Class
@@ -92,3 +96,35 @@ class ClassManagerPresenter:
 
         result = copy.deepcopy(checked_classes)
         return result
+
+    def save_checkboxes_states(self):
+        # Lista[[Clasy z Hidden Checked],[Clasy z ToDelete Checked]]
+        tmp_checkboxes_state = [[],[]]
+
+        for index in range(self.view.class_list_widget.count()):
+            item = self.view.class_list_widget.item(index)
+            row_widget = self.view.class_list_widget.itemWidget(item)
+
+            if row_widget.isHiddenChecked():
+                tmp_checkboxes_state[0].append(row_widget.Class)
+
+            if row_widget.isToDeleteChecked():
+                tmp_checkboxes_state[1].append(row_widget.Class)
+
+        print(tmp_checkboxes_state)
+        #self.checkboxes_state = copy.deepcopy(tmp_checkboxes_state)
+        self.checkboxes_state = tmp_checkboxes_state
+        print(self.checkboxes_state)
+
+    def load_checkboxes_states(self):
+        for index in range(self.view.class_list_widget.count()):
+            item = self.view.class_list_widget.item(index)
+            row_widget = self.view.class_list_widget.itemWidget(item)
+
+            # Sprawdzanie w całej liście
+            if row_widget.Class in self.checkboxes_state[0]:
+                row_widget.checkboxHidden.setChecked(True)
+                print("Hidden")
+            if row_widget.Class in self.checkboxes_state[1]:
+                row_widget.checkboxToDelete.setChecked(True)
+                print("ToDelete")
