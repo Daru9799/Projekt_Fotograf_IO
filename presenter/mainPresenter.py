@@ -386,6 +386,19 @@ class Presenter:
         ##Czyszczenie prezentera importu po zakonczeniu dzialania
         self.import_from_file.reset_imported_data()
 
+    def import_from_yolo(self):
+        ###WORK IN PROGRESS
+        if self.new_project.list_of_images_model:
+            confirmation = self.view.show_message_Yes_No("Uwaga!", "Import spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")
+            if confirmation:
+                print("Pobranie list")
+                img_list, class_list, json_folder = self.import_from_file.import_from_YOLO()
+            else:
+                return 0
+        else:
+            print("Pobranie list")
+            img_list, class_list, json_folder = self.import_from_file.import_from_YOLO()
+
     def import_project(self):
         if self.new_project.list_of_images_model:
             confirmation = self.view.show_message_Yes_No("Uwaga!", "Import spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")

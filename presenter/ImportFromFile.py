@@ -6,6 +6,7 @@ from model.AnnotationModel import AnnotationModel
 import random
 import json
 import os
+import yaml
 
 class ImportFromFile:
     def __init__(self, view):
@@ -13,12 +14,18 @@ class ImportFromFile:
         #Zmienne z listami do wczytania obiektów, potem są zwracane głównemu prezenterowi i na ich podstawie jest tworzony nowy projekt
         self.images_list = []
         self.classes_list = []
+        #COCO (JSON)
         self.json_path = None #Ściezka do JSONA
         self.json_folder = None #Ściezka do samego folderu
         self.json_data = None #Zmienna przechowujaca zawartosc jsona
+        #PROJEKTOWY (.PRO)
         self.project_path = None #Ścieżka do pliku projektowego
         self.project_images_folder = None #Ściezka do zdjec do ktorych odnosi sie plik projektowy
         self.project_data = None #Zmienna przechowywujaca zawartosc pliku projektowego
+        #YOLO (YAML)
+        self.yaml_path = None #Ściezka do YAML
+        self.yaml_folder = None #Ściezka do samego folderu
+        self.yaml_data = None #Zmienna przechowujaca zawartosc yamla
 
     #Funkcja importu z COCO do projektu
     def import_from_COCO(self):
@@ -115,3 +122,32 @@ class ImportFromFile:
         images = self.project_data.get("images")
         annotations = self.project_data.get("annotations")
         self.load_images_to_objects(images, annotations, self.project_images_folder)
+
+    def import_from_YOLO(self):
+        #Wybór pliku YAML
+        self.yaml_path, _ = QFileDialog.getOpenFileName(self.view.centralwidget.parent(), "Wybierz plik YAML", "","YOLO Config Files (*.yaml *.yml)")
+        #Jeśli nic nie wybrano
+        if not self.yaml_path:
+            return None, None, None
+
+        # Zapis sciezki do folderu w osobnej zmiennej
+        self.yaml_folder = os.path.dirname(self.yaml_path)
+        # Zapisanie zawartości yamla do zmiennej
+        with open(self.yaml_path, 'r', encoding='utf-8') as f:
+            self.yaml_data = yaml.safe_load(f)
+        print("DANE:")
+        print(self.yaml_data)
+        ###TRZEBA DOKONCZYC!
+        # Import klas
+        self.load_classes_from_yaml()
+        # Import obrazków (wraz z adnotacjami)
+        #self.load_images_from_yolo()
+
+        return self.images_list, self.classes_list, self.json_folder
+
+    def load_classes_from_yaml(self):
+        categories = self.yaml_data.get('names')
+        for category in categories:
+            print(category)
+            #class_obj = ClassModel(class_id=category["id"], name=category["name"], color=self.generate_random_color())
+            #self.classes_list.append(class_obj)
