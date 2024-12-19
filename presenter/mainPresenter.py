@@ -22,6 +22,7 @@ from presenter.LocalAutoSegmentationPresenter import LocalAutoSegmentationPresen
 from view.ExifWindowView import ExifWindow
 from presenter.ExportProject import ExportProject
 from presenter.ExportToYolo import ExportToYolo
+from presenter.StatisticsPresenter import StatisticsPresenter
 
 
 
@@ -44,6 +45,7 @@ class Presenter:
         self.export_to_file = ExportToCoco(None, self.new_project)
         self.export_project=ExportProject(None,self.new_project)
         self.export_to_yolo=ExportToYolo(None,self.new_project)
+        self.statistics_presenter = StatisticsPresenter(None, self.new_project, self)
 
 
     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
@@ -60,6 +62,7 @@ class Presenter:
         self.export_to_file.view= view
         self.export_project.view = view
         self.export_to_yolo.view=view
+        self.statistics_presenter.view = view
         self.classManagerPresenter.updateItems()
         self.view.toggle_all_buttons(False)
 
@@ -336,6 +339,13 @@ class Presenter:
             self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
             self.scene_presenter.draw_annotations()              # Rysowanie wczytanych adnotacji
 
+        # TESTY {
+
+        print("Ilość adnotacji",self.statistics_presenter.count_all_adnotations())
+        print("Ilość zdjec z adnotacjami", self.statistics_presenter.count_img_with_annotations())
+        print("Ilość zdjec bez adnotacjami", self.statistics_presenter.count_img_without_annotation())
+
+        # }
     def handle_crtl_minus(self):
         self.file_list_presenter.decrease_zoom()
 

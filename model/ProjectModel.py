@@ -111,3 +111,8 @@ class ProjectModel:
         return None  # Jeśli nie znaleziono pliku, zwraca None
 
 
+    def get_images_list(self):
+        return copy.deepcopy(self.list_of_images_model)
+
+    def get_classes_list(self):
+        return copy.deepcopy(self.list_of_classes_model)

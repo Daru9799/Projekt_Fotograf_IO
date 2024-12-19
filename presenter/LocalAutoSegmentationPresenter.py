@@ -78,7 +78,7 @@ class LocalAutoSegmentationPresenter:
 
             self.temp_segment = smoothed_contours
 
-            self.view.set_notification_label(f"Automatyczne zaznaczanie: Tmp zaznaczenie({self.score:.2f}). Potwierdź - 'Enter'")
+            self.view.set_notification_label(f"Automatyczne zaznaczanie: Potwierdź wygenerowane zaznaczenie - 'Enter'")
 
         self.draw_temp_segment()
 
