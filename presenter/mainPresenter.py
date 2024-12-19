@@ -387,17 +387,28 @@ class Presenter:
         self.import_from_file.reset_imported_data()
 
     def import_from_yolo(self):
-        ###WORK IN PROGRESS
         if self.new_project.list_of_images_model:
             confirmation = self.view.show_message_Yes_No("Uwaga!", "Import spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")
             if confirmation:
                 print("Pobranie list")
-                img_list, class_list, json_folder = self.import_from_file.import_from_YOLO()
+                img_list, class_list, yaml_folder = self.import_from_file.import_from_YOLO()
             else:
                 return 0
         else:
             print("Pobranie list")
-            img_list, class_list, json_folder = self.import_from_file.import_from_YOLO()
+            img_list, class_list, yaml_folder = self.import_from_file.import_from_YOLO()
+
+        ##Przypisywanie obrazków i klas do listy projektowej
+        self.new_project.list_of_images_model = img_list
+        self.new_project.list_of_classes_model = class_list
+        # Aktualizacja widoku
+        self.new_project.folder_path = os.path.join(yaml_folder, "train\images")
+        self.classManagerPresenter.updateItems()  # aktualizuje panel z listą klas
+        self.update_file_list_panel()
+        self.update_annotations_on_image()
+
+        ##Czyszczenie prezentera importu po zakonczeniu dzialania
+        self.import_from_file.reset_imported_data()
 
     def import_project(self):
         if self.new_project.list_of_images_model:
