@@ -3,6 +3,7 @@ from model.ClassModel import ClassModel
 from model.ImageModel import ImageModel
 from model.ExifModel import ExifModel
 from model.AnnotationModel import AnnotationModel
+from PIL import Image
 import random
 import json
 import os
@@ -91,6 +92,9 @@ class ImportFromFile:
         self.json_data = None
         self.project_images_folder = None
         self.project_data = None
+        self.yaml_path = None
+        self.yaml_folder = None
+        self.yaml_data = None
 
     def import_from_project_file(self):
         print("Importowanie z pliku projektowego")
@@ -137,17 +141,69 @@ class ImportFromFile:
             self.yaml_data = yaml.safe_load(f)
         print("DANE:")
         print(self.yaml_data)
-        ###TRZEBA DOKONCZYC!
         # Import klas
         self.load_classes_from_yaml()
         # Import obrazków (wraz z adnotacjami)
-        #self.load_images_from_yolo()
+        self.load_images_from_yolo()
 
-        return self.images_list, self.classes_list, self.json_folder
+        return self.images_list, self.classes_list, self.yaml_folder
 
     def load_classes_from_yaml(self):
-        categories = self.yaml_data.get('names')
-        for category in categories:
-            print(category)
-            #class_obj = ClassModel(class_id=category["id"], name=category["name"], color=self.generate_random_color())
-            #self.classes_list.append(class_obj)
+        categories = self.yaml_data.get('names', {})
+        for class_id, name in categories.items():
+            print(f"ID: {class_id}, Name: {name}")
+            class_obj = ClassModel(class_id=class_id, name=name, color=self.generate_random_color())
+            self.classes_list.append(class_obj)
+
+    def load_images_from_yolo(self):
+        yaml_images_folder = os.path.join(self.yaml_folder, "train", "images")
+        yaml_labels_folder = os.path.join(self.yaml_folder, "train", "labels")
+        image_id_counter = 1 #Do nadawania id obrazkom (YOLO w przeciwieńswie do COCO nie zapisuje tego nigdzie)
+        for image_file in os.listdir(yaml_images_folder):
+            if not image_file.lower().endswith(('.png', '.jpg', '.jpeg')):
+                continue
+
+            image_path = os.path.join(yaml_images_folder, image_file)
+            label_file = os.path.splitext(image_file)[0] + ".txt"
+            label_path = os.path.join(yaml_labels_folder, label_file)
+
+            #Pobranie wysokosci i szerokosci obrazka
+            with Image.open(image_path) as img:
+                width, height = img.size
+
+            #EXIFY
+            exif_obj = ExifModel.create_exif_obj(image_path)
+            #Adnotacje
+            list_of_annotations = []
+            annotation_id_counter = 1
+            with open(label_path, 'r') as label:
+                for line in label:
+                    parts = line.strip().split()
+                    class_id = int(parts[0]) #Id klasy danej adnotacji jest zawsze 1 wartością
+                    #Jeśli linia ma wiecej jak 5 wartosci to jest to segmentacja (zapis poligona)
+                    if len(parts) > 5:
+                        normalized_segmentation = list(map(float, parts[1:]))
+                        #Konwersja na współrzędne
+                        segmentation = [(normalized_segmentation[i] * width if i % 2 == 0 else normalized_segmentation[i] * height) for i in range(len(normalized_segmentation))]
+                        print(f"Skonwertowana segmentacja (współrzędne): {segmentation}")
+                        segmentation_points = [(segmentation[i], segmentation[i + 1]) for i in range(0, len(segmentation), 2)]
+                        annot_obj = AnnotationModel(annotation_id=annotation_id_counter, area=segmentation_points, class_id=class_id)
+                        list_of_annotations.append(annot_obj)
+                    #W innym wypadku odczytuje bounding box
+                    else:
+                        center_x, center_y, box_width, box_height = map(float, parts[1:])
+                        #Konwersja współrzędnych YOLO do punktów
+                        x_min = (center_x - box_width / 2) * width
+                        y_min = (center_y - box_height / 2) * height
+                        x_max = (center_x + box_width / 2) * width
+                        y_max = (center_y + box_height / 2) * height
+                        #Konwersja na współrzędne
+                        segmentation_points = [(x_min, y_min), (x_max, y_min), (x_max, y_max), (x_min, y_max)]
+                        annot_obj = AnnotationModel(annotation_id=annotation_id_counter, area=segmentation_points, class_id=class_id)
+                        list_of_annotations.append(annot_obj)
+                    annotation_id_counter += 1
+
+            #Obiekt obrazka
+            img_obj = ImageModel(image_id=image_id_counter, filename=image_file, width=width, height=height, exif_obj=exif_obj, list_of_annotations=list_of_annotations)
+            self.images_list.append(img_obj)
+            image_id_counter += 1
