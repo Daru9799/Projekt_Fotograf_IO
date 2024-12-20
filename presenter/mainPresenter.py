@@ -445,6 +445,7 @@ class Presenter:
 
         ##Czyszczenie prezentera importu po zakonczeniu dzialania
         self.import_from_file.reset_imported_data()
+        self.export_project.project_path=self.import_from_file.project_path
 
     #Stąd przekazanie importów/eksportów do podprezenterów
     def save_as_project_fun(self):
