@@ -31,7 +31,7 @@ class ExifModel:
         #Jeśli nic nie znalazł to zwraca None
         if not exif_info:
             print("No EXIF data found.")
-            return None
+            return ExifModel(producer="No data", model_of_camera="No data", lens="No data", orientation="No data", flash="No data", capture_data="No data", iso="No data", focal_length="No data", exposure_time="No data", aperture="No data", saturation="No data", contrast="No data", sharpness="No data", digital_zoom_ratio="No data", brightness_value="No data", exposure_bias="No data")
 
         producer = exif_info.get("Make", "No data")
         model_of_camera = exif_info.get("Model", "No data")
