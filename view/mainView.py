@@ -393,6 +393,7 @@ class MainView(object):
         self.export_YOLO_action.triggered.connect(self.presenter.export_to_yolo_fun)
         self.load_project_action.triggered.connect(self.presenter.import_project)
         self.import_YOLO_action_2.triggered.connect(self.presenter.import_from_yolo)
+        self.show_statistics_action_2.triggered.connect(self.presenter.statistics_presenter.open_statistics_window)
 
 
 ###Wskazówki dla użytkownika
