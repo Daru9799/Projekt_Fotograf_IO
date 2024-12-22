@@ -344,6 +344,9 @@ class Presenter:
         print("Ilość adnotacji",self.statistics_presenter.count_all_adnotations())
         print("Ilość zdjec z adnotacjami", self.statistics_presenter.count_img_with_annotations())
         print("Ilość zdjec bez adnotacjami", self.statistics_presenter.count_img_without_annotation())
+        print("Ilość zdjec z kilkoma adnotacjami tej samej klasy",self.statistics_presenter.count_img_mult_annotations_same_class())
+        print("Ilość adnotacji dla poszczegolnych klas",self.statistics_presenter.count_class_usage())
+        print("Ilość adnotacji dla poszczegolnych klas w procentach", self.statistics_presenter.calcualte_class_procentage_usage())
 
         # }
     def handle_crtl_minus(self):

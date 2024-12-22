@@ -27,3 +27,6 @@ class ImageModel:
     def set_annotation_list(self, list):
         self.list_of_annotations = list
 
+    def get_annotation_size(self) -> int:
+        return len(self.list_of_annotations)
+

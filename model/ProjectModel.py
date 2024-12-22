@@ -116,3 +116,6 @@ class ProjectModel:
 
     def get_classes_list(self):
         return copy.deepcopy(self.list_of_classes_model)
+
+    def get_list_of_images_size(self):
+        return len(self.list_of_images_model)
