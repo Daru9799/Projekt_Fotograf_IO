@@ -350,7 +350,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu">
@@ -376,16 +376,19 @@
     <addaction name="import_COCO_action_2"/>
     <addaction name="import_YOLO_action_2"/>
    </widget>
-   <widget class="QMenu" name="menuAdnotacje">
+   <widget class="QMenu" name="statistics_menu">
     <property name="title">
-     <string>Adnotacje</string>
+     <string>Statystyki</string>
     </property>
-    <addaction name="show_statistics_action_2"/>
+    <addaction name="annotation_statistics_action"/>
+    <addaction name="class_action"/>
+    <addaction name="img_action"/>
+    <addaction name="exif_action"/>
    </widget>
    <addaction name="file_menu"/>
    <addaction name="export_menu"/>
    <addaction name="import_menu"/>
-   <addaction name="menuAdnotacje"/>
+   <addaction name="statistics_menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="new_project_action">
@@ -438,14 +441,29 @@
     <string>Zapisz jako plik projektowy</string>
    </property>
   </action>
-  <action name="show_statistics_action_2">
+  <action name="annotation_statistics_action">
    <property name="text">
-    <string>Statystyki</string>
+    <string>Adnotacje</string>
    </property>
   </action>
   <action name="load_project_action">
    <property name="text">
     <string>Wczytaj plik projektowy</string>
+   </property>
+  </action>
+  <action name="class_action">
+   <property name="text">
+    <string>Klasy</string>
+   </property>
+  </action>
+  <action name="img_action">
+   <property name="text">
+    <string>Obrazy</string>
+   </property>
+  </action>
+  <action name="exif_action">
+   <property name="text">
+    <string>Metadane(EXIF)</string>
    </property>
   </action>
  </widget>

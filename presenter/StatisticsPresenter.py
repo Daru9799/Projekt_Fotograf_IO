@@ -22,7 +22,7 @@ class StatisticsPresenter:
         # self.windowUi.Class_name_line_edit.setText("")
         self.window.show()
 
-    # STATYSTYKI OGÓLNE:
+    # STATYSTYKI Adnotacji:
     # Zliczenie wszystkich adnotacji
     def count_all_adnotations(self) -> int:
         imgs_list = self.project.get_images_list()
@@ -79,6 +79,7 @@ class StatisticsPresenter:
     def calculate_avarage_class_usage_per_img(self):
         pass
 
+
     # STATYSTYKI OBRAZÓW W PROJEKCIE:
     # Rozdzielczość obrazów: Średnia, minimalna, maksymalna rozdzielczość obrazów.
     def determine_min_max_avarage_img_resolution(self):
@@ -87,6 +88,7 @@ class StatisticsPresenter:
     # Udział poszczególnych formatów obrazów w zbiorze(procentowy lub ilościowy)
     def count_img_format_usage(self):
         pass
+
 
     # STATYSTYKI EXIF:
     #(Trzeba uwzględnić brak danych na temat exif do każdego zliczania)
