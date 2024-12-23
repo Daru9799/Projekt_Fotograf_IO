@@ -409,6 +409,7 @@ class MainView(object):
         self.load_project_action.triggered.connect(self.presenter.import_project)
         self.import_YOLO_action_2.triggered.connect(self.presenter.import_from_yolo)
         self.annotation_statistics_action.triggered.connect(self.presenter.statistics_presenter.open_annotation_window)
+        self.class_action.triggered.connect(self.presenter.statistics_presenter.open_class_window)
         #self.show_statistics_action_2.triggered.connect(self.presenter.statistics_presenter.open_statistics_window)
 
 
