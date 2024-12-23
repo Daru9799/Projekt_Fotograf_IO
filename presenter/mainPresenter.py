@@ -411,6 +411,10 @@ class Presenter:
             print("Pobranie list")
             img_list, class_list, yaml_folder = self.import_from_file.import_from_YOLO()
 
+        # Anulowanie importu poprzez zamkniecie
+        if img_list is None or class_list is None or yaml_folder is None:
+            return 0
+
         ##Przypisywanie obrazków i klas do listy projektowej
         self.new_project.list_of_images_model = img_list
         self.new_project.list_of_classes_model = class_list
