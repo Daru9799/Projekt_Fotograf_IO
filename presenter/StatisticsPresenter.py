@@ -1,9 +1,11 @@
 from PyQt5 import QtWidgets
+import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QListWidgetItem
 
 #potem do wywalenia:
 from view.StatisticsAnnotationsView import StatisticsAnnotationsView
 from view.StatisticsClassView import StatisticsClassView
+from view.StatisticsImageView import StatisticsImageView
 
 class StatisticsPresenter:
     def __init__(self, view, project, presenter):
@@ -11,17 +13,27 @@ class StatisticsPresenter:
         self.project = project
         self.presenter = presenter
 
+        self.plt_img_res_htmap = None
+
         # Tworzenie widoku Annotation
         self.annotation_window = QtWidgets.QDialog(self.view)  # Użycie QDialog zamiast QMainWindow() pozwala na zlockowanie głównego widoku
         self.annotation_window.setModal(True)
         self.windowUiAnnotations = StatisticsAnnotationsView()
         self.windowUiAnnotations.setupUi(self.annotation_window, self)
 
-        self.class_window = QtWidgets.QDialog(
-            self.view)  # Użycie QDialog zamiast QMainWindow() pozwala na zlockowanie głównego widoku
+        # Tworzenie widoku Class
+        self.class_window = QtWidgets.QDialog(self.view)
         self.class_window.setModal(True)
         self.windowUiClass = StatisticsClassView()
         self.windowUiClass.setupUi(self.class_window , self)
+
+        # Tworzenie widoku Image
+        self.image_window = QtWidgets.QDialog(self.view)
+        self.image_window.setModal(True)
+
+        self.windowUiImage = StatisticsImageView()
+        self.windowUiImage.setupUi(self.image_window, self)
+
 
 
     def open_annotation_window(self):
@@ -33,6 +45,11 @@ class StatisticsPresenter:
         if len(self.project.get_classes_list())>0:
             self.refresh_class_window()
         self.class_window.show()
+
+    def open_image_window(self):
+        if self.project.get_list_of_images_size() > 0 :
+            self.refresh_image_window()
+        self.image_window.show()
 
     def refresh_annot_list(self):
         #item = QListWidgetItem(f"Ilość wszystkich adnotacji: {self.count_all_adnotations()}")
@@ -63,7 +80,48 @@ class StatisticsPresenter:
         self.windowUiClass.class_tableView.resizeColumnsToContents()
         self.windowUiClass.class_tableView.verticalHeader().setVisible(False)
 
+    def refresh_image_window(self):
+        imgs_sizes = self.determine_min_max_average_img_resolution()
+        self.windowUiImage.image_listWidget.clear()
+        self.windowUiImage.image_listWidget.addItem(f"Najmniejsza rozdzielczość obrazu: {imgs_sizes[0][0]}x{imgs_sizes[0][1]}")
+        self.windowUiImage.image_listWidget.addItem(f"Największa rozdzielczość obrazu: {imgs_sizes[1][0]}x{imgs_sizes[1][1]:.0f}")
+        self.windowUiImage.image_listWidget.addItem(f"Średnia rozdzielczość obrazu: {imgs_sizes[2][0]:.0f}x{imgs_sizes[2][1]:.0f}")
+
+        # Jeśli istnieje stary obiekt PlotCanvas, usuń go
+        if hasattr(self, 'plt_img_res_htmap') and self.plt_img_res_htmap is not None:
+            self.windowUiImage.verticalLayout.removeWidget(self.plt_img_res_htmap)
+            self.plt_img_res_htmap.deleteLater()  # Bezpieczne usunięcie
+        # Tworzenie nowego obiektu PlotCanvas
+        self.plt_img_res_htmap = PlotCanvas(self, width=24, height=8)
+        # Dodanie nowego obiektu PlotCanvas do layoutu
+        self.windowUiImage.verticalLayout.addWidget(self.plt_img_res_htmap)
+        # Rysowanie heatmapy
+        self.plt_img_res_htmap.plot_heatmap(self.get_imgs_resolutions())
+
+    # def plot_img_resolutions(resolutions: dict[int, list[int, int]]):
+    #     # Wyodrębnienie szerokości i wysokości
+    #     widths = [res[0] for res in resolutions.values()]
+    #     heights = [res[1] for res in resolutions.values()]
+    #
+    #     # Tworzenie wykresu
+    #     plt.figure(figsize=(10, 6))
+    #     plt.scatter(widths, heights, c='blue', alpha=0.7, edgecolors='black')
+    #
+    #     # Ustawienia wykresu
+    #     plt.title("Rozdzielczości obrazów", fontsize=16)
+    #     plt.xlabel("Szerokość (pixels)", fontsize=12)
+    #     plt.ylabel("Wysokość (pixels)", fontsize=12)
+    #     plt.grid(True, linestyle='--', alpha=0.6)
+    #
+    #     # Ograniczenie osi, jeśli to konieczne
+    #     plt.xlim(0, max(widths) + 100)
+    #     plt.ylim(0, max(heights) + 100)
+    #
+    #     # Wyświetlenie wykresu
+    #     plt.show()
+
     # STATYSTYKI Adnotacji:
+
     # Zliczenie wszystkich adnotacji
     def count_all_adnotations(self) -> int:
         imgs_list = self.project.get_images_list()
@@ -178,23 +236,28 @@ class StatisticsPresenter:
 
     # STATYSTYKI OBRAZÓW W PROJEKCIE:
     # Rozdzielczość obrazów: Średnia, minimalna, maksymalna rozdzielczość obrazów.
-    def determine_min_max_avarage_img_resolution(self):
+    def determine_min_max_average_img_resolution(self):
         imgs_list = self.project.get_images_list()
-        # Sprawdzenie, czy lista obrazów nie jest pusta
-        if not imgs_list:
-            return [0, 0, 0]  # Zwracamy 0 dla każdej wartości, gdy brak obrazów
 
-        resolutions = [img.width * img.height for img in imgs_list]
+        # Zbieramy wszystkie rozdzielczości w postaci krotek (width, height)
+        resolutions = [(img.width, img.height) for img in imgs_list]
 
-        # Wyznaczanie wartości minimalnej, maksymalnej oraz średniej
-        min_resolution = min(resolutions)
-        max_resolution = max(resolutions)
-        avg_resolution = sum(resolutions) / len(resolutions)
+        # Znajdowanie obrazu z najmniejszą rozdzielczością (szerokość + wysokość)
+        min_resolution = min(resolutions, key=lambda x: x[0] * x[1])  # Minimalna rozdzielczość (szerokość * wysokość)
 
+        # Znajdowanie obrazu z największą rozdzielczością
+        max_resolution = max(resolutions, key=lambda x: x[0] * x[1])  # Maksymalna rozdzielczość (szerokość * wysokość)
+
+        # Obliczanie średniej rozdzielczości
+        avg_width = sum(res[0] for res in resolutions) / len(resolutions)
+        avg_height = sum(res[1] for res in resolutions) / len(resolutions)
+        avg_resolution = (avg_width, avg_height)
+
+        # Zwracamy listę z wynikami
         return [min_resolution, max_resolution, avg_resolution]
 
     # Udział poszczególnych formatów obrazów w zbiorze(procentowy lub ilościowy)
-    def count_img_format_usage(self):
+    def count_img_format_usage(self) -> dict[str,int]:
         imgs_list = self.project.get_images_list()
 
         # Słownik do przechowywania liczby zdjęć dla każdego formatu
@@ -212,6 +275,12 @@ class StatisticsPresenter:
 
         return format_count
 
+    def get_imgs_resolutions(self) -> dict[int,list[int,int]]:
+        imgs_list = self.project.get_images_list()
+        data = {}
+        for img in imgs_list:
+            data[img.image_id] = [img.width, img.height]
+        return data
 
     # STATYSTYKI EXIF:
     #(Trzeba uwzględnić brak danych na temat exif do każdego zliczania)
@@ -230,7 +299,7 @@ class StatisticsPresenter:
     # ? Eksport statystyk:
     # - w formie json'a
     # - w formie raportu pdf?
-
+##########################################################################################################
 
 from PyQt5.QtCore import Qt, QAbstractTableModel
 
@@ -259,3 +328,71 @@ class CustomTableModel(QAbstractTableModel):
         self.layoutAboutToBeChanged.emit()
         self._data.sort(key=lambda x: x[column], reverse=(order == Qt.DescendingOrder))
         self.layoutChanged.emit()
+
+
+#######################################################################################################
+import sys
+import matplotlib.pyplot as plt
+import seaborn as sns
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import matplotlib.ticker as ticker
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+
+class PlotCanvas(FigureCanvas):
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        # Tworzenie obiektu Figure z Matplotlib
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = self.fig.add_subplot(111)  # Dodanie osi
+        super().__init__(self.fig)
+
+    def plot_resolutions(self, resolutions: dict[int, list[int, int]]):
+        # Wyodrębnienie szerokości i wysokości
+        widths = [res[0] for res in resolutions.values()]
+        heights = [res[1] for res in resolutions.values()]
+
+        # Rysowanie wykresu
+        self.axes.clear()  # Czyszczenie poprzedniego wykresu (jeśli istnieje)
+        self.axes.scatter(widths, heights, c='blue', alpha=0.7, edgecolors='black')
+        self.axes.set_title("Rozdzielczości obrazów", fontsize=16)
+        self.axes.set_xlabel("Szerokość (pixels)", fontsize=12)
+        self.axes.set_ylabel("Wysokość (pixels)", fontsize=12)
+        self.axes.grid(True, linestyle='--', alpha=0.6)
+
+        # Automatyczne skalowanie osi
+        self.axes.set_xlim(0, max(widths) + 100)
+        self.axes.set_ylim(0, max(heights) + 100)
+
+        # Rysowanie wykresu
+        self.draw()
+
+    def plot_heatmap(self, resolutions: dict[int, list[int, int]]):
+        # Wyodrębnienie szerokości i wysokości
+        widths = [res[0] for res in resolutions.values()]
+        heights = [res[1] for res in resolutions.values()]
+
+        # Tworzenie jednego wykresu (heatmapa)
+        self.fig.clear()
+        ax = self.fig.add_subplot(111)  # Prawy wykres: histogram 2D (heatmap)
+
+        # Histogram 2D (heatmap) z paletą "rocket"
+        heatmap = ax.hist2d(widths, heights, bins=20, cmap=sns.color_palette("rocket", as_cmap=True), alpha=0.8)
+        ax.set_title("Histogram 2D (Heatmap)", fontsize=14)  # Ustawienie mniejszego rozmiaru czcionki tytułu
+        ax.set_xlabel("Szerokość (pixels)", fontsize=10)  # Czcionka dla osi X
+        ax.set_ylabel("Wysokość (pixels)", fontsize=10)  # Czcionka dla osi Y
+
+        # Dodanie paska kolorów dla histogramu 2D
+        # Dodanie paska kolorów dla histogramu 2D
+        cbar = self.fig.colorbar(heatmap[3], ax=ax, label="Liczba obrazów")
+
+        # Ustawienie tylko wartości całkowitych na pasku kolorów
+        cbar.locator = ticker.MaxNLocator(integer=True)
+        cbar.update_ticks()
+
+        # Dodanie siatki (grid)
+        ax.grid(True, linestyle='--', alpha=0.6)
+
+        self.fig.subplots_adjust(left=0.2, right=0.9, top=0.9, bottom=0.2)
+
+        # Rysowanie wykresu
+        self.draw()

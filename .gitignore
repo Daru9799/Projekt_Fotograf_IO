@@ -197,3 +197,6 @@ statistics-annotation.py
 statistics-annotation.py
 statistics-class.py
 *.env
+\!OBRAZKI DO TESTÓW/kiwi.jpg
+\!OBRAZKI DO TESTÓW/tygrys.jpg
+statistics-image.py
