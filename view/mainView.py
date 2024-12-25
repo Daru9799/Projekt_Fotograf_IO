@@ -427,6 +427,7 @@ class MainView(object):
         self.annotation_statistics_action.triggered.connect(self.presenter.statistics_presenter.open_annotation_window)
         self.class_action.triggered.connect(self.presenter.statistics_presenter.open_class_window)
         self.img_action.triggered.connect(self.presenter.statistics_presenter.open_image_window)
+        self.exif_action.triggered.connect(self.presenter.statistics_presenter.open_exif_window)
         self.generate_classes.clicked.connect(self.presenter.generate_classes)
         #self.show_statistics_action_2.triggered.connect(self.presenter.statistics_presenter.open_statistics_window)
 

@@ -30,3 +30,6 @@ class ImageModel:
     def get_annotation_size(self) -> int:
         return len(self.list_of_annotations)
 
+    def get_exif_obj(self):
+        return self.exif_obj
+

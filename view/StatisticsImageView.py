@@ -7,8 +7,8 @@ class StatisticsImageView(object):
         self.presenter = presenter
 
         image_statistics_window.setObjectName("image_statistics_window")
-        image_statistics_window.setWindowModality(QtCore.Qt.NonModal)
-        image_statistics_window.resize(629, 479)
+        #image_statistics_window.resize(629, 479)
+        image_statistics_window.setFixedSize(800, 600)
         font = QtGui.QFont()
         font.setPointSize(9)
         image_statistics_window.setFont(font)

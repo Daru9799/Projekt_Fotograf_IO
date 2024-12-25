@@ -1,4 +1,5 @@
 from PyQt5 import QtWidgets
+import numpy as np
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QListWidgetItem
 
@@ -6,6 +7,7 @@ from PyQt5.QtWidgets import QListWidgetItem
 from view.StatisticsAnnotationsView import StatisticsAnnotationsView
 from view.StatisticsClassView import StatisticsClassView
 from view.StatisticsImageView import StatisticsImageView
+from view.StatisticsExifView import StatisticsExifView
 
 class StatisticsPresenter:
     def __init__(self, view, project, presenter):
@@ -30,9 +32,14 @@ class StatisticsPresenter:
         # Tworzenie widoku Image
         self.image_window = QtWidgets.QDialog(self.view)
         self.image_window.setModal(True)
-
         self.windowUiImage = StatisticsImageView()
         self.windowUiImage.setupUi(self.image_window, self)
+
+        # Tworzenie widoku Exif
+        self.exif_window = QtWidgets.QDialog(self.view)
+        self.exif_window.setModal(True)
+        self.windowUiExif = StatisticsExifView()
+        self.windowUiExif.setupUi(self.exif_window, self)
 
 
 
@@ -50,6 +57,10 @@ class StatisticsPresenter:
         if self.project.get_list_of_images_size() > 0 :
             self.refresh_image_window()
         self.image_window.show()
+
+    def open_exif_window(self):
+        self.refresh_exif_window()
+        self.exif_window.show()
 
     def refresh_annot_list(self):
         #item = QListWidgetItem(f"Ilość wszystkich adnotacji: {self.count_all_adnotations()}")
@@ -97,6 +108,10 @@ class StatisticsPresenter:
         self.windowUiImage.verticalLayout.addWidget(self.plt_img_res_htmap)
         # Rysowanie heatmapy
         self.plt_img_res_htmap.plot_heatmap(self.get_imgs_resolutions())
+
+    def refresh_exif_window(self):
+        self.clear_charts()
+        self.create_charts()
 
     # def plot_img_resolutions(resolutions: dict[int, list[int, int]]):
     #     # Wyodrębnienie szerokości i wysokości
@@ -283,22 +298,205 @@ class StatisticsPresenter:
         return data
 
     # STATYSTYKI EXIF:
-    #(Trzeba uwzględnić brak danych na temat exif do każdego zliczania)
 
-    # Zwraca nazwy producentów oraz ilość zdjęć wykoanych przez te aparaty
-    def count_camera_producer(self):
-        pass
+    def get_imgs_exifs(self):
+        imgs_list = self.project.get_images_list()
+        exifs = []
+        for img in imgs_list:
+            exifs.append(img.get_exif_obj())
+        return exifs
 
-    def count_camera_models(self):
-        pass
+    def create_charts(self):
+        # Pobieramy dane EXIF
+        exifs = self.get_imgs_exifs()
 
-    # Zwraca listę elementów typu: ("nazwa_obrazu.jpg", data)
-    def get_imgs_capture_data(self):
-        pass
+        # Dane kategoryczne
+        producers = {}
+        models = {}
 
-    # ? Eksport statystyk:
-    # - w formie json'a
-    # - w formie raportu pdf?
+        # Dane liczbowe
+        iso = []
+        iso_no_data = []
+        focal_length = []
+        focal_length_no_data = []
+        exposure_time = []
+        exposure_time_no_data = []
+        saturation = []
+        saturation_no_data = []
+        contrast = []
+        contrast_no_data = []
+        sharpness = []
+        sharpness_no_data = []
+        brightness_value = []
+        brightness_value_no_data = []
+        exposure_bias = []
+        exposure_bias_no_data = []
+
+        # Przetwarzanie danych
+        for exif in exifs:
+            producers[exif.producer] = producers.get(exif.producer, 0) + 1
+            models[exif.model_of_camera] = models.get(exif.model_of_camera, 0) + 1
+
+            # ISO
+            if exif.iso == "No data":
+                iso_no_data.append(0)
+            else:
+                iso.append(float(exif.iso))
+
+            # Ogniskowa
+            if exif.focal_length == "No data":
+                focal_length_no_data.append(0)
+            else:
+                focal_length.append(float(exif.focal_length))
+
+            if exif.exposure_time == "No data":
+                exposure_time_no_data.append(0)
+            else:
+                exposure_time.append(float(exif.exposure_time))
+
+            # Saturacja
+            if exif.saturation == "No data":
+                saturation_no_data.append(0)
+            else:
+                saturation.append(float(exif.saturation))
+
+            # Kontrast
+            if exif.contrast == "No data":
+                contrast_no_data.append(0)
+            else:
+                contrast.append(float(exif.contrast))
+
+            # Ostrość
+            if exif.sharpness == "No data":
+                sharpness_no_data.append(0)
+            else:
+                sharpness.append(float(exif.sharpness))
+
+            # Jasność
+            if exif.brightness_value == "No data":
+                brightness_value_no_data.append(0)
+            else:
+                brightness_value.append(float(exif.brightness_value))
+
+            # Korekta ekspozycji
+            if exif.exposure_bias == "No data":
+                exposure_bias_no_data.append(0)
+            else:
+                exposure_bias.append(float(exif.exposure_bias))
+
+        # Tworzymy wykresy
+        self.plot_bar_chart(producers, "Producenci", "Producer")
+        self.plot_bar_chart(models, "Modele Kamer", "Camera Model")
+
+        # Histogramy z wyróżnieniem "No data"
+        self.plot_histogram(iso, iso_no_data, "ISO", "Wartość ISO")
+        self.plot_histogram(focal_length, focal_length_no_data, "Ogniskowa", "Ogniskowa (mm)")
+        self.plot_histogram(exposure_time, exposure_time_no_data, "Czas naświetlania", "Czas naświetlania (1/x s)")
+        self.plot_histogram(brightness_value, brightness_value_no_data, "Jasność", "Wartość Jasności")
+        self.plot_histogram(exposure_bias, exposure_bias_no_data, "Korekta ekspozycji", "Korekta ekspozycji (EV)")
+
+        levels = {
+            0: "Normalny",
+            1: "Niski",
+            2: "Wysoki"
+        }
+
+        # Wykresy dla saturation, contrast, sharpness
+        self.plot_bar_chart_with_labels(saturation, saturation_no_data, "Saturacja", "Poziom", levels)
+        self.plot_bar_chart_with_labels(contrast, contrast_no_data, "Kontrast", "Poziom", levels)
+        self.plot_bar_chart_with_labels(sharpness, sharpness_no_data, "Ostrość", "Poziom", levels)
+
+    def plot_bar_chart(self, data, title, xlabel):
+        # Przygotowujemy dane wykresu
+        labels = list(data.keys())
+        values = list(data.values())
+
+        # Tworzymy wykres
+        fig, ax = plt.subplots(figsize=(6, 4))  # Większy rozmiar wykresu
+        ax.bar(labels, values)
+
+        # Ustawiamy tytuł i etykiety
+        ax.set_title(title)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel("Liczba wystąpień")
+
+        # Tworzymy widget do wyświetlania wykresu
+        canvas = FigureCanvas(fig)
+        canvas.setFixedSize(600, 400)  # Stały rozmiar
+        self.windowUiExif.scrollLayout.addWidget(canvas)
+        canvas.draw()
+
+    def plot_histogram(self, data, no_data, title, xlabel):
+        # Przygotowanie danych
+        all_data = data + no_data  # Wszystkie dane razem
+        bins = np.linspace(min(all_data), max(all_data), 15)  # 15 przedziałów dynamicznie dopasowanych do zakresu
+        data_counts, _ = np.histogram(data, bins=bins)
+        no_data_counts, _ = np.histogram(no_data, bins=bins)
+
+        # Tworzenie wykresu
+        fig, ax = plt.subplots(figsize=(6, 4))  # Stały rozmiar wykresu
+
+        # Dynamiczna szerokość kolumn
+        bin_width = bins[1] - bins[0]  # Szerokość jednego przedziału
+        bin_centers = bins[:-1] + bin_width / 2  # Środek każdego przedziału
+
+        # Skumulowane kolumny
+        ax.bar(bin_centers, data_counts, width=bin_width * 0.9, color='skyblue', edgecolor='black',
+               label="Naturalne dane")  # 90% szerokości dla estetyki
+        ax.bar(bin_centers, no_data_counts, width=bin_width * 0.9, bottom=data_counts, color='red', edgecolor='black',
+               alpha=0.7, label="Brak danych ('No data')")
+
+        # Ustawienia wykresu
+        ax.set_title(title)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel("Liczba wystąpień")
+        ax.legend()
+
+        # Tworzymy widget do wyświetlania wykresu
+        canvas = FigureCanvas(fig)
+        canvas.setFixedSize(600, 400)  # Stały rozmiar
+        self.windowUiExif.scrollLayout.addWidget(canvas)
+        canvas.draw()
+
+    def plot_bar_chart_with_labels(self, data, no_data, title, xlabel, levels):
+        # Przygotowanie danych
+        all_data = [levels.get(value, "Nieznane") for value in data]
+        unique_labels = list(levels.values())
+        unique_labels.append("No data")  # Dodajemy kolumnę dla "No data"
+
+        # Liczba wystąpień dla każdej kategorii
+        counts = [all_data.count(label) for label in unique_labels[:-1]]
+        counts.append(len(no_data))  # Liczba "No data"
+
+        # Tworzenie wykresu
+        fig, ax = plt.subplots(figsize=(6, 4))  # Stały rozmiar wykresu
+        x = np.arange(len(unique_labels))  # Pozycje kategorii
+
+        # Wykres słupkowy
+        bar_width = 0.6  # Szerokość słupków
+        ax.bar(x, counts, width=bar_width, color=['skyblue'] * len(unique_labels[:-1]) + ['red'], edgecolor='black')
+
+        # Ustawienia osi i etykiet
+        ax.set_title(title)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel("Liczba wystąpień")
+        ax.set_xticks(x)
+        ax.set_xticklabels(unique_labels)
+        ax.set_ylim(0, max(counts) + 1)  # Dodajemy trochę przestrzeni nad najwyższym słupkiem
+
+        # Tworzymy widget do wyświetlania wykresu
+        canvas = FigureCanvas(fig)
+        canvas.setFixedSize(600, 400)  # Stały rozmiar
+        self.windowUiExif.scrollLayout.addWidget(canvas)
+        canvas.draw()
+
+    def clear_charts(self):
+        # Iteracja przez wszystkie widgety w scrollLayout
+        for i in reversed(range(self.windowUiExif.scrollLayout.count())):
+            widget = self.windowUiExif.scrollLayout.itemAt(i).widget()
+            if widget:
+                widget.deleteLater()  # Usuwanie widgetu
+
 ##########################################################################################################
 
 from PyQt5.QtCore import Qt, QAbstractTableModel
