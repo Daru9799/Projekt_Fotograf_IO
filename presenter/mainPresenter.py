@@ -8,6 +8,7 @@ from model.ProjectModel import ProjectModel
 from model.AnnotationModel import AnnotationModel
 from model.ImageModel import ImageModel
 from model.ClassModel import ClassModel
+from presenter.ClassGeneratorPresenter import ClassGeneratorPresenter
 
 #Podprezentery
 from presenter.FileListPresenter import FileListPresenter
@@ -46,6 +47,7 @@ class Presenter:
         self.export_project=ExportProject(None,self.new_project)
         self.export_to_yolo=ExportToYolo(None,self.new_project)
         self.statistics_presenter = StatisticsPresenter(None, self.new_project, self)
+        self.class_generator_presenter = ClassGeneratorPresenter(None)
 
 
     #Aktualizacja widokow w podprezeterach (WAZNE! NALEZY ZAWSZE DODAC TUTAJ NOWY PODPREZENTER)
@@ -65,6 +67,7 @@ class Presenter:
         self.statistics_presenter.view = view
         self.classManagerPresenter.updateItems()
         self.view.toggle_all_buttons(False)
+        self.class_generator_presenter.view = view
 
 
         # !!!
@@ -521,6 +524,16 @@ class Presenter:
         self.update_file_list_panel()
         self.update_annotations_on_image()
         self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {save_path}")
+
+    #Generowanie klas dla zaznaczonego obrazka
+    def generate_classes(self):
+        self.class_generator_presenter.load_key_and_endpoint()
+        self.class_generator_presenter.create_client()
+        if self.class_generator_presenter.client is not None:
+            self.class_generator_presenter.print_tags("C://Users/Daru/Desktop/Fotograf_Projekt_IO/Projekt_Fotograf_IO/!OBRAZKI DO TESTÓW/8086455252_19a431ff0f_o.jpg")
+        else:
+            print("BRAK KLIENTA!")
+
 
 
 

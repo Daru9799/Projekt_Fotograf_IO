@@ -114,6 +114,31 @@
        </spacer>
       </item>
       <item>
+       <widget class="QLabel" name="label_generate_classes">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Generowanie klas:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="generate_classes">
+        <property name="text">
+         <string>Wygeneruj klasy automatycznie</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="label_exif_data">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -350,7 +375,7 @@
      <x>0</x>
      <y>0</y>
      <width>1054</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu">
