@@ -457,6 +457,8 @@ class Presenter:
         self.import_from_file.reset_imported_data()
         self.export_project.project_path=self.import_from_file.project_path
 
+        self.export_project.lock_file(self.export_project.project_path)
+
     #Stąd przekazanie importów/eksportów do podprezenterów
     def save_as_project_fun(self):
         # 1. Wybierz lokalizację zapisu
@@ -471,6 +473,9 @@ class Presenter:
         # 3. Utwórz i zapisz dane do pliku .pro (JSON)
         try:
             self.export_project.create_file(save_path)
+
+            self.export_project.lock_file(save_path)
+
             self.update_file_list_panel()
             self.update_annotations_on_image()
             self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {save_path}")
@@ -484,6 +489,8 @@ class Presenter:
                 self.update_file_list_panel()
                 self.update_annotations_on_image()
                 self.view.show_message_OK("Sukces", f"Projekt został zapisany do {self.export_project.project_path}")
+            self.export_project.lock_file(self.export_project.project_path)
+
             # else:
             #     self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
         except Exception as e:

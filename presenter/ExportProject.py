@@ -1,24 +1,32 @@
 import os
 import json
+import platform
+import threading
+import time
 from PyQt5.QtWidgets import QFileDialog
+
+if platform.system() == "Windows":
+    import msvcrt
+else:
+    import fcntl
 
 class ExportProject:
     def __init__(self, view, project):
         self.view = view
         self.project_path = None
         self.project = project
+        self.file_lock = None
+        self.watch_thread = None
+        self.stop_watching = False
 
     def select_save_location(self):
-        # Otwórz okno dialogowe do wyboru lokalizacji i nazwy pliku
         self.project_path, _ = QFileDialog.getSaveFileName(
             self.view.centralwidget.parent(), "Wybierz lokalizację do zapisu", "",
-            "Project files (*.pro);;"
+            "Pliki Project (*.pro);;"
         )
         return self.project_path
 
-
     def create_file(self, output_path):
-        # Przygotowanie danych JSON
         annotations = []
         images = []
 
@@ -50,7 +58,7 @@ class ExportProject:
             {
                 "id": cl.class_id,
                 "name": cl.name,
-                "color":cl.color
+                "color": cl.color
             } for cl in self.project.list_of_classes_model
         ]
 
@@ -64,12 +72,10 @@ class ExportProject:
         }
 
         try:
-            # Tworzymy foldery, jeśli nie istnieją
             folder_path = os.path.dirname(output_path)
             if not os.path.exists(folder_path):
                 os.makedirs(folder_path)
 
-            # Zapisujemy dane do pliku .pro
             with open(output_path, 'w', encoding='utf-8') as file:
                 json.dump(data, file, ensure_ascii=False, indent=4)
 
@@ -78,18 +84,39 @@ class ExportProject:
             print(f"Błąd podczas tworzenia pliku .pro: {str(e)}")
 
     def save_project(self):
-        # Jeśli nie ma zapisanej ścieżki, wywołaj select_save_location
         if not self.project_path:
             self.project_path = self.select_save_location()
 
         if not self.project_path:
             return False  # Użytkownik anulował wybór
 
-        # Dodaj rozszerzenie, jeśli go brak
         if not self.project_path.endswith(".pro"):
             self.project_path += ".pro"
 
-        # Zapisz plik
         self.create_file(self.project_path)
         return True
+
+    def lock_file(self, file_path):
+        try:
+            self.file_lock = open(file_path, 'r+')
+            if platform.system() == "Windows":
+                msvcrt.locking(self.file_lock.fileno(), msvcrt.LK_NBLCK, os.path.getsize(file_path))
+            else:
+                fcntl.flock(self.file_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            print(f"Plik {file_path} został zablokowany.")
+        except Exception as e:
+            print(f"Nie można zablokować pliku: {str(e)}")
+
+    def unlock_file(self):
+        if self.file_lock:
+            try:
+                if platform.system() == "Windows":
+                    msvcrt.locking(self.file_lock.fileno(), msvcrt.LK_UNLCK, os.path.getsize(self.file_lock.name))
+                else:
+                    fcntl.flock(self.file_lock, fcntl.LOCK_UN)
+                self.file_lock.close()
+                self.file_lock = None
+                print("Plik został odblokowany.")
+            except Exception as e:
+                print(f"Nie można odblokować pliku: {str(e)}")
 
