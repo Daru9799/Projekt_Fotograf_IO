@@ -12,6 +12,7 @@ class ClassGeneratorPresenter:
         self.azure_cv_key = None
         self.azure_cv_endpoint = None
         self.client = None
+        self.list_of_tags = [] #zmienna przechowujaca liste obiektów tagów
 
     def load_key_and_endpoint(self):
         load_dotenv(dotenv_path="config.env")
