@@ -75,6 +75,23 @@ class MainView(object):
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem)
+        self.label_sam_model = QtWidgets.QLabel(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_sam_model.sizePolicy().hasHeightForWidth())
+        self.label_sam_model.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.label_sam_model.setFont(font)
+        self.label_sam_model.setObjectName("label_sam_model")
+        self.verticalLayout_2.addWidget(self.label_sam_model)
+        self.comboBox_sam_model = QtWidgets.QComboBox(self.centralwidget)
+        self.comboBox_sam_model.setObjectName("comboBox_sam_model")
+        self.comboBox_sam_model.addItem("")
+        self.comboBox_sam_model.addItem("")
+        self.comboBox_sam_model.addItem("")
+        self.verticalLayout_2.addWidget(self.comboBox_sam_model)
         self.label_generate_classes = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -349,6 +366,10 @@ class MainView(object):
         self.label_file_list.setText(_translate("MainWindow", "Dostępne pliki graficzne:"))
         self.label_image_size.setText(_translate("MainWindow", "Brak aktywnego obrazu"))
         self.label_notification.setText(_translate("MainWindow", "Brak aktywnego narzędzia do rysowania."))
+        self.label_sam_model.setText(_translate("MainWindow", "Model SAM:"))
+        self.comboBox_sam_model.setItemText(0, _translate("MainWindow", "Low"))
+        self.comboBox_sam_model.setItemText(1, _translate("MainWindow", "Medium"))
+        self.comboBox_sam_model.setItemText(2, _translate("MainWindow", "High"))
         self.file_menu.setTitle(_translate("MainWindow", "Plik"))
         self.export_menu.setTitle(_translate("MainWindow", "Eksportuj"))
         self.import_menu.setTitle(_translate("MainWindow", "Importuj"))
@@ -372,6 +393,18 @@ class MainView(object):
         self.set_zoom_slider_visibility(False)
         #Ustawienie ikonek
         MainWindow.setWindowIcon(QIcon("img/cameraIcon.png"))
+
+        #Kolorowanie comboBoxa
+        self.comboBox_sam_model.setStyleSheet("""
+            QComboBox { 
+                color: white; 
+                background-color: #333333; 
+            }
+            QComboBox QAbstractItemView {
+                color: white; 
+                background-color: #444444; 
+            }
+        """)
 
         # Tworzenie sceny (pod obrazek zeby mozna bylo go wstawic)
         self.scene = QGraphicsScene()

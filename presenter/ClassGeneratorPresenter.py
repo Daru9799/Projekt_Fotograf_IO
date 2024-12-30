@@ -46,6 +46,7 @@ class ClassGeneratorPresenter:
                 print(f"Error: {e}")
                 return None
             finally:
+                await self.client.close()
                 print("Kończenie działania")
             return result
 
