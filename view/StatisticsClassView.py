@@ -8,7 +8,7 @@ class StatisticsClassView(object):
 
         class_statistics_window.setObjectName("class_statistics_window")
         #class_statistics_window.resize(629, 479)
-        class_statistics_window.setFixedSize(800, 600)
+        class_statistics_window.setFixedSize(510, 550)
         font = QtGui.QFont()
         font.setPointSize(9)
         class_statistics_window.setFont(font)

@@ -8,7 +8,7 @@ class StatisticsAnnotationsView(object):
 
         annotation_statistics_window.setObjectName("annotation_statistics_window")
         #annotation_statistics_window.resize(622, 479)
-        annotation_statistics_window.setFixedSize(800, 600)
+        annotation_statistics_window.setFixedSize(600, 455)
         font = QtGui.QFont()
         font.setPointSize(9)
         annotation_statistics_window.setFont(font)

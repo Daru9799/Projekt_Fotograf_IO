@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 import numpy as np
 import matplotlib.pyplot as plt
-from PyQt5.QtWidgets import QListWidgetItem
+from PyQt5.QtWidgets import QListWidgetItem, QHeaderView
 
 #potem do wywalenia:
 from view.StatisticsAnnotationsView import StatisticsAnnotationsView
@@ -70,7 +70,7 @@ class StatisticsPresenter:
         self.windowUiAnnotations.annotation_listWidget.addItem(f"Ilość obrazów bez adnotacjami: {self.count_img_without_annotation()}")
         self.windowUiAnnotations.annotation_listWidget.addItem(f"Ilość obrazów z wieloma adnotacjami: {self.count_img_with_mult_annotations()}")
         self.windowUiAnnotations.annotation_listWidget.addItem(f"Ilość obrazów z wieloma adnotacjami tej samej klasy: {self.count_img_mult_annotations_same_class()}")
-        self.windowUiAnnotations.annotation_listWidget.addItem(f"Średnia ilość adnotacji na obraz: {self.calculate_avarage_ammount_annotations_per_img()}")
+        self.windowUiAnnotations.annotation_listWidget.addItem(f"Średnia ilość adnotacji na obraz: {self.calculate_avarage_ammount_annotations_per_img():.2f}")
 
     def refresh_class_window(self):
         class_list = self.project.get_classes_list()
@@ -79,21 +79,30 @@ class StatisticsPresenter:
         avg_class = self.calculate_avarage_class_usage_per_img()
         iterat = 1
         header = ["LP", "Nazwa", "Ilość", "Procent", "Średnia"]
+        tooltips = ["Liczba począdkowa", "Nazwa klasy", "Ilość adnotacji", "Procent udziału w projekcie", "Średnia ilość na obraz"]
+
         data = []
         # if len(class_list)>0:
         for cl in class_list:
             tmp = [iterat, cl.name, cnt_class[cl.class_id], f"{int(proc_class[cl.class_id])}%",f"{avg_class[cl.class_id]:.2f}"]
             iterat += 1
             data.append(tmp)
-        model = CustomTableModel(data, header)
+
+
+        model = CustomTableModel(data, header,tooltips)
         self.windowUiClass.class_tableView.setModel(model)
         self.windowUiClass.class_tableView.setSortingEnabled(True)
         self.windowUiClass.class_tableView.resizeColumnsToContents()
         self.windowUiClass.class_tableView.verticalHeader().setVisible(False)
 
+        #self.windowUiClass.class_tableView.horizontalHeader().setWordWrap(True)
+        # header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        # header.
+
     def refresh_image_window(self):
         imgs_sizes = self.determine_min_max_average_img_resolution()
         self.windowUiImage.image_listWidget.clear()
+        self.windowUiImage.image_listWidget.addItem(f"Ilość obrazów w projekcie: {self.project.get_list_of_images_size()}")
         self.windowUiImage.image_listWidget.addItem(f"Najmniejsza rozdzielczość obrazu: {imgs_sizes[0][0]}x{imgs_sizes[0][1]}")
         self.windowUiImage.image_listWidget.addItem(f"Największa rozdzielczość obrazu: {imgs_sizes[1][0]}x{imgs_sizes[1][1]:.0f}")
         self.windowUiImage.image_listWidget.addItem(f"Średnia rozdzielczość obrazu: {imgs_sizes[2][0]:.0f}x{imgs_sizes[2][1]:.0f}")
@@ -292,6 +301,7 @@ class StatisticsPresenter:
 
     def get_imgs_resolutions(self) -> dict[int,list[int,int]]:
         imgs_list = self.project.get_images_list()
+        #imgs_list = imgs_list[0] <-- generuje błąd
         data = {}
         for img in imgs_list:
             data[img.image_id] = [img.width, img.height]
@@ -422,7 +432,7 @@ class StatisticsPresenter:
 
         # Tworzymy widget do wyświetlania wykresu
         canvas = FigureCanvas(fig)
-        canvas.setFixedSize(600, 400)  # Stały rozmiar
+        canvas.setFixedSize(740, 400)  # Stały rozmiar
         self.windowUiExif.scrollLayout.addWidget(canvas)
         canvas.draw()
 
@@ -454,7 +464,7 @@ class StatisticsPresenter:
 
         # Tworzymy widget do wyświetlania wykresu
         canvas = FigureCanvas(fig)
-        canvas.setFixedSize(600, 400)  # Stały rozmiar
+        canvas.setFixedSize(740, 400)  # Stały rozmiar
         self.windowUiExif.scrollLayout.addWidget(canvas)
         canvas.draw()
 
@@ -486,7 +496,7 @@ class StatisticsPresenter:
 
         # Tworzymy widget do wyświetlania wykresu
         canvas = FigureCanvas(fig)
-        canvas.setFixedSize(600, 400)  # Stały rozmiar
+        canvas.setFixedSize(740, 400)  # Stały rozmiar
         self.windowUiExif.scrollLayout.addWidget(canvas)
         canvas.draw()
 
@@ -502,10 +512,11 @@ class StatisticsPresenter:
 from PyQt5.QtCore import Qt, QAbstractTableModel
 
 class CustomTableModel(QAbstractTableModel):
-    def __init__(self, data, headers):
+    def __init__(self, data, headers, tooltips):
         super().__init__()
         self._data = data
         self._headers = headers
+        self._tooltips = tooltips
 
     def rowCount(self, parent=None):
         return len(self._data)
@@ -521,6 +532,9 @@ class CustomTableModel(QAbstractTableModel):
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
                 return self._headers[section]
+        elif role == Qt.ToolTipRole:  # Dodanie obsługi tooltipów
+            if orientation == Qt.Horizontal:
+                return self._tooltips[section]
 
     def sort(self, column, order):
         self.layoutAboutToBeChanged.emit()
