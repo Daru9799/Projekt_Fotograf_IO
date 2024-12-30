@@ -24,6 +24,7 @@ from view.ExifWindowView import ExifWindow
 from presenter.ExportProject import ExportProject
 from presenter.ExportToYolo import ExportToYolo
 from presenter.StatisticsPresenter import StatisticsPresenter
+from view.ClassGeneratorWindowView import ClassGeneratorWindowView
 
 
 
@@ -534,12 +535,15 @@ class Presenter:
 
     #Generowanie klas dla zaznaczonego obrazka
     def generate_classes(self):
-        self.class_generator_presenter.load_key_and_endpoint()
-        self.class_generator_presenter.create_client()
-        if self.class_generator_presenter.client is not None:
-            self.class_generator_presenter.print_tags("C://Users/Daru/Desktop/Fotograf_Projekt_IO/Projekt_Fotograf_IO/!OBRAZKI DO TESTÓW/8086455252_19a431ff0f_o.jpg")
-        else:
-            print("BRAK KLIENTA!")
+        class_generator_window = ClassGeneratorWindowView()
+        class_generator_window.exec_()
+
+        #self.class_generator_presenter.load_key_and_endpoint()
+        #self.class_generator_presenter.create_client()
+        #if self.class_generator_presenter.client is not None:
+        #    self.class_generator_presenter.print_tags("C://Users/Daru/Desktop/Fotograf_Projekt_IO/Projekt_Fotograf_IO/!OBRAZKI DO TESTÓW/class_generation_example.jpg")
+        #else:
+            #print("BRAK KLIENTA!")
 
 
 
