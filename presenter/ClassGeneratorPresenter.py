@@ -12,6 +12,7 @@ class ClassGeneratorPresenter:
         self.azure_cv_key = None
         self.azure_cv_endpoint = None
         self.client = None
+        self.img_path = None #Ścieżka do pliku do którego będa generowane tagi
         self.list_of_tags = [] #zmienna przechowujaca liste obiektów tagów
 
     def load_key_and_endpoint(self):
@@ -33,24 +34,41 @@ class ClassGeneratorPresenter:
                 print(f"Wystąpił problem: {e}")
 
     # Funkcja asynchroniczna do zwracania rezultatu z tagami (synchroniczna nie działała poprawnie)
-    async def async_get_tags(self, img_path):
-        with open(img_path, "rb") as f:
+    async def async_get_tags(self):
+        with open(self.img_path, "rb") as f:
             image_data = f.read()
             try:
                 result = await self.client.analyze(image_data=image_data, visual_features=[VisualFeatures.TAGS])
             except AzureError as e:
                 print(f"AzureError: {e}")
                 return None
+            except Exception as e:
+                print(f"Error: {e}")
+                return None
+            finally:
+                print("Kończenie działania")
             return result
 
     # Na razie testowo wypisywanie tagów w konsoli dla podanej ścieżki obrazka jako argument
-    def print_tags(self, img_path):
-        result = asyncio.run(self.async_get_tags(img_path))
-        if result is not None:
-            print("Tags:")
-            if result.tags is not None:
-                for tag in result.tags.list:
-                    if tag.confidence:
-                        print(f"'{tag.name}', Confidence {tag.confidence: .2f}")
+    def generate_tags(self, language, min_accuracy):
+        if self.img_path is not None:
+            min_accuracy_decimal = min_accuracy / 100.0
+            self.list_of_tags = []
+            print(language)
+            print(min_accuracy_decimal)
+            print(self.img_path)
+
+            result = asyncio.run(self.async_get_tags())
+            if result is not None:
+                print("Tags:")
+                if result.tags is not None:
+                    for tag in result.tags.list:
+                        if tag.confidence >= min_accuracy_decimal:
+                            confidence_percentage = round(tag.confidence * 100)
+                            tag_dict = {"name": tag.name, "certainty": confidence_percentage}
+                            self.list_of_tags.append(tag_dict)
+                    return self.list_of_tags
+                else:
+                    print("No data found.")
             else:
                 print("No data found.")

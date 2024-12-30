@@ -1,13 +1,15 @@
 from PyQt5.QtWidgets import (QHeaderView, QDesktopWidget, QColorDialog, QTableWidget, QTableWidgetItem, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QSlider, QPushButton, QCheckBox, QListWidget, QListWidgetItem, QStackedWidget, QWidget)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
+import random
 
 class ClassGeneratorWindowView(QDialog):
-    def __init__(self):
+    def __init__(self, presenter):
         super().__init__()
         self.setWindowTitle("Automatyczne tworzenie klas")
         self.setGeometry(100, 100, 450, 350)
         self.setFixedSize(450, 350)
+        self.presenter = presenter
 
         self.stacked_widget = QStackedWidget()
 
@@ -22,6 +24,7 @@ class ClassGeneratorWindowView(QDialog):
         self.lang_combo = None
         self.accuracy_slider = None
         self.accuracy_value_label = None
+        self.tags = [{"name": "Tag1", "certainty": 90}]
 
         #Strony okienka
         self.page1 = self.create_page1()
@@ -59,7 +62,7 @@ class ClassGeneratorWindowView(QDialog):
         lang_layout = QHBoxLayout()
         lang_label = QLabel("Język wygenerowanych tagów:")
         self.lang_combo = QComboBox()
-        self.lang_combo.addItems(["Polski", "Angielski", "Hiszpański"])
+        self.lang_combo.addItems(["Angielski", "Polski", "Hiszpański"])
         #Zmiana koloru combo boxa (domyślnie byl czarny)
         self.lang_combo.setStyleSheet("""
             QComboBox { 
@@ -110,7 +113,7 @@ class ClassGeneratorWindowView(QDialog):
         #Tabela tagów
         table = QTableWidget()
         table.setColumnCount(4)
-        table.setHorizontalHeaderLabels(["Nazwa", "Pewność (%)", " Kolor ", "Dodaj"])
+        table.setHorizontalHeaderLabels(["Nazwa", " Pewność ", " Kolor ", "Dodaj"])
 
         #Wyłączenie numeracji wierszy
         table.verticalHeader().setVisible(False)
@@ -125,16 +128,9 @@ class ClassGeneratorWindowView(QDialog):
         header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
 
-        #Przykładowe dane tagów
-        tags = [
-            {"name": "Tag1", "certainty": 90},
-            {"name": "Tag2", "certainty": 75},
-            {"name": "Tag3", "certainty": 10},
-        ]
+        table.setRowCount(len(self.tags))
 
-        table.setRowCount(len(tags))
-
-        for row, tag in enumerate(tags):
+        for row, tag in enumerate(self.tags):
             #Kolumna 1: Nazwa tagu
             name_item = QTableWidgetItem(tag["name"])
             name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
@@ -162,11 +158,8 @@ class ClassGeneratorWindowView(QDialog):
         #Przycisk "Utwórz klasy" i "Wróć"
         create_class_button = QPushButton("Utwórz klasy z zaznaczonych elementów")
         create_class_button.clicked.connect(lambda: self.create_new_classes(table))
-        back_button = QPushButton("Wróć")
-        back_button.clicked.connect(self.switch_to_page1)
 
         button_layout = QHBoxLayout()
-        button_layout.addWidget(back_button, 50)
         button_layout.addWidget(create_class_button, 50)
         button_layout.addStretch(1)
         layout.addWidget(table)
@@ -177,15 +170,19 @@ class ClassGeneratorWindowView(QDialog):
 
     #Przełączanie między stronami
     def switch_to_page2(self):
-        print(self.get_accuracy())
-        print(self.get_selected_language())
+        ac = self.get_accuracy()
+        lan = self.get_selected_language()
         self.setFixedSize(600, 400)
         self.stacked_widget.setCurrentIndex(1)
-        #TUTAJ TRZEBA TO DODATKOWO SKOJARZYC TO Z PRESENTEREM
+        #Przeslanie do prezentera
+        self.presenter.handle_create_tags_click(lan, ac)
+        table = self.page2.findChild(QTableWidget)
+        self.refresh_table(table)
 
     def switch_to_page1(self):
         self.setFixedSize(450, 350)
         self.stacked_widget.setCurrentIndex(0)
+        #CZYSZCZENIE LISTY TAGÓW
 
     #Wybór koloru
     def select_color(self, row, table):
@@ -221,5 +218,37 @@ class ClassGeneratorWindowView(QDialog):
 
     def create_new_classes(self, table):
         selected_items = self.get_selected_items(table)
-        for item in selected_items:
-            print(f"Nazwa: {item[0]}, Kolor: {item[1]}")
+        self.presenter.create_classes_from_tags(selected_items)
+        self.accept()
+
+    def refresh_table(self, table):
+        table.setRowCount(len(self.tags))
+        for row, tag in enumerate(self.tags):
+            # Kolumna 1: Nazwa tagu
+            name_item = QTableWidgetItem(tag["name"])
+            name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            name_item.setTextAlignment(Qt.AlignCenter)
+            table.setItem(row, 0, name_item)
+
+            # Kolumna 2: Pewność
+            certainty_item = QTableWidgetItem(f"{tag['certainty']}%")
+            certainty_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+            certainty_item.setTextAlignment(Qt.AlignCenter)
+            table.setItem(row, 1, certainty_item)
+
+            # Kolumna 3: Wybór koloru
+            color_button = QPushButton()
+            random_col = self.random_color()  # Losowanie koloru
+            color_button.setStyleSheet(f"background-color: {random_col};")
+            color_button.clicked.connect(lambda _, r=row: self.select_color(r, table))
+            color_button.setFixedSize(20, 20)
+            table.setCellWidget(row, 2, color_button)
+
+            # Kolumna 4: Checkbox
+            checkbox = QCheckBox()
+            checkbox.setChecked(True)
+            table.setCellWidget(row, 3, checkbox)
+
+    #Losowanie koloru
+    def random_color(self):
+        return f"#{random.randint(0, 0xFFFFFF):06x}"

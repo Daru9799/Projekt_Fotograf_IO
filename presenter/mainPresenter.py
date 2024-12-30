@@ -9,6 +9,7 @@ from model.AnnotationModel import AnnotationModel
 from model.ImageModel import ImageModel
 from model.ClassModel import ClassModel
 from presenter.ClassGeneratorPresenter import ClassGeneratorPresenter
+from random import randrange
 
 #Podprezentery
 from presenter.FileListPresenter import FileListPresenter
@@ -36,6 +37,7 @@ class Presenter:
         self.new_project = ProjectModel(None)
         self.drawing_tool = None  #Aktywne narzędzie rysowania (w przypadku braku ustawiamy na None) Dostępne opcje: "rectangle", "polygon"
         self.image_item = None #Aktywne zdjęcie w liście po prawej
+        self.class_generator_window = None
 
         #Podprezentery do obsługi poszczególnych modułów aplikacji
         self.file_list_presenter = FileListPresenter(None, self)
@@ -543,15 +545,38 @@ class Presenter:
 
     #Generowanie klas dla zaznaczonego obrazka
     def generate_classes(self):
-        class_generator_window = ClassGeneratorWindowView()
-        class_generator_window.exec_()
+        self.class_generator_presenter.load_key_and_endpoint()
+        self.class_generator_presenter.create_client()
+        if self.class_generator_presenter.client is None:
+            self.view.show_message_OK("Uwaga!", "Połączenie z chmurą jest niedostępne, sprawdź połączenie internetowe lub skontaktuj się z administratorem.")
+            return 0
+        self.class_generator_window = ClassGeneratorWindowView(self)
+        self.class_generator_window.exec_()
 
-        #self.class_generator_presenter.load_key_and_endpoint()
-        #self.class_generator_presenter.create_client()
-        #if self.class_generator_presenter.client is not None:
-        #    self.class_generator_presenter.print_tags("C://Users/Daru/Desktop/Fotograf_Projekt_IO/Projekt_Fotograf_IO/!OBRAZKI DO TESTÓW/class_generation_example.jpg")
-        #else:
-            #print("BRAK KLIENTA!")
+    def handle_create_tags_click(self, language, min_accuracy):
+        # Tutaj trzeba ustawic w class generator presenterze zmienną obrazka na aktualnei zaznaczony (jego ścieżke)
+        selected_img_name = self.view.get_selected_image()
+        self.class_generator_presenter.img_path = os.path.join(self.new_project.folder_path, selected_img_name)
+        tag_dict = self.class_generator_presenter.generate_tags(language, min_accuracy)
+        self.class_generator_window.tags = tag_dict
+
+    def create_classes_from_tags(self, selected_items):
+        for name, color in selected_items:
+            uniqueId = randrange(1000000, 9999999)
+            isUnique = False
+            # Generowanie unikatowego id
+            while not isUnique:
+                isUnique = True
+                for c in self.new_project.list_of_classes_model:
+                    if c.class_id == uniqueId:
+                        uniqueId = randrange(1000000, 9999999)
+                        isUnique = False
+
+            class_obj = ClassModel(class_id=uniqueId, name=name, color=color)
+            self.new_project.list_of_classes_model.append(class_obj)
+        self.classManagerPresenter.updateItems()
+
+
 
 
 
