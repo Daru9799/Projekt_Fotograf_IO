@@ -19,7 +19,7 @@ class ScenePresenter:
         self.active_image_model = None
         self.point_radius = 4  # Promień kółek dla wierzchołków [px]
         self.point_dst_multiplier = 2 # musi być int
-        self.expand_dst = 5 # [px]
+        self.expand_dst = 6 # [px]
         self.polygons_pixmap_ref = None
         self.selected_polygon = [[],[]]
         self.vertex_expand_dst = int((self.point_radius*self.point_dst_multiplier) + 5)
@@ -71,6 +71,8 @@ class ScenePresenter:
                 #     expanded_polygon.append(expanded_point)
                 #
                 # expanded_polygon = np.array(expanded_polygon, dtype=np.int32)
+                # border_color = (poly[1][0], poly[1][1], poly[1][2], 255)
+                # cv2.polylines(drawing_surface, [expanded_polygon], isClosed=True, thickness=2, color=border_color)
                 # -------------------------->
 
                 border_color = (poly[1][0], poly[1][1], poly[1][2], 255)
@@ -92,14 +94,14 @@ class ScenePresenter:
                 else:
                     # Wypełnianie polygona kolorem:
                     fill_color = (poly[1][0], poly[1][1], poly[1][2], 160)
-                    cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
+                    cv2.fillPoly(drawing_surface, [np_points], color=fill_color) ####### <----------------
 
-                    # testowo -------------
+                    # testowo wyświetalnie "powiększonych" wierzchołków polygona ---------
                     # point_radius_tmp = self.vertex_expand_dst
                     # for point in np_points:
                     #     cv2.circle(drawing_surface, tuple(point[0]), point_radius_tmp, fill_color, -1)
                     # cv2.polylines(drawing_surface, [np_points], isClosed=True, thickness=2, color=border_color)
-                    # ---------------------
+                    # ---------------------------------------------------------
 
         self.draw_item_on_scene(drawing_surface)
 
@@ -175,26 +177,62 @@ class ScenePresenter:
                     return i, tuple(projection_point)
         return None, None
 
+    # Kod który szukał najbliszego wierzchołka po kliknięciu w punkt (x,y)
+    # def active_dragging(self, x, y):
+    #     old_selection = self.selected_polygon
+    #     self.handle_select_polygon(x, y)
+    #
+    #     if self.selected_polygon != [[], []]:  # Sprawdź czy jest zaznaczony jakiś poligon
+    #         if self.selected_polygon == old_selection:  # Sprawdź czy to co kliknęliśmy nie było już zaznaczone
+    #             polygon_points = self.selected_polygon
+    #             closest_distance = float('inf')
+    #             closest_vertex_idx = None
+    #
+    #             # Znalezienie najbliższego wierzchołka
+    #             for idx, polygon_point in enumerate(polygon_points[0]):
+    #                 distance = np.linalg.norm(np.array([x, y]) - np.array(polygon_point))
+    #                 if distance < self.vertex_expand_dst and distance < closest_distance:  # point_radius powiększone o 5
+    #                     closest_distance = distance
+    #                     closest_vertex_idx = idx
+    #
+    #             if closest_vertex_idx is not None:
+    #                 self.selected_vertex = (polygon_points[0], closest_vertex_idx)
+    #                 self.is_dragging = True
+    #
+    #             # Jeśli żaden wierzchołek nie został wybrany, sprawdzamy krawędzie
+    #             if not self.is_dragging:
+    #                 for polygon_points, color in self.polygons:
+    #                     edge_index, new_vertex = self.is_near_edge(x, y, polygon_points)
+    #                     if edge_index is not None:
+    #                         polygon_points.insert(edge_index + 1, (int(new_vertex[0]), int(new_vertex[1])))
+    #                         self.selected_polygon[0] = polygon_points
+    #                         self.selected_vertex = (polygon_points, (edge_index + 1))
+    #                         self.is_dragging = True
+    #                         self.draw_annotations()
+    #                         break
+    #         else:
+    #             pass
+    #
+    #     if self.is_dragging:
+    #         self.draw_annotations()
+
+    # Kod który aktywuje przesuwanie wierzchołka,
+    # ale może to być wierzchołek który nie jest najbliżej punktu kliknięcia
     def active_dragging(self, x, y):
         old_selection = self.selected_polygon
         self.handle_select_polygon(x, y)
 
-        if self.selected_polygon != [[], []]:  # Sprawdź czy jest zaznaczony jakiś poligon
-            if self.selected_polygon == old_selection:  # Sprawdź czy to co kliknęliśmy nie było już zaznaczone
-                polygon_points = self.selected_polygon
-                closest_distance = float('inf')
-                closest_vertex_idx = None
+        if self.selected_polygon != [[], []]:  # Sprawdź, czy jest zaznaczony jakiś poligon
+            if self.selected_polygon == old_selection:  # Sprawdź, czy kliknięty poligon jest już zaznaczony
+                polygon_points = self.selected_polygon[0]  # Pobierz punkty zaznaczonego poligonu
 
-                # Znalezienie najbliższego wierzchołka
-                for idx, polygon_point in enumerate(polygon_points[0]):
-                    distance = np.linalg.norm(np.array([x, y]) - np.array(polygon_point))
-                    if distance < self.vertex_expand_dst and distance < closest_distance:  # point_radius powiększone o 5
-                        closest_distance = distance
-                        closest_vertex_idx = idx
-
-                if closest_vertex_idx is not None:
-                    self.selected_vertex = (polygon_points[0], closest_vertex_idx)
-                    self.is_dragging = True
+                # Sprawdzenie, czy kliknięto w obszar wierzchołka
+                for idx, polygon_point in enumerate(polygon_points):
+                    if abs(x - polygon_point[0]) <= self.vertex_expand_dst and abs(
+                            y - polygon_point[1]) <= self.vertex_expand_dst:
+                        self.selected_vertex = (polygon_points, idx)
+                        self.is_dragging = True
+                        break  # Przerywamy pętlę po znalezieniu wierzchołka
 
                 # Jeśli żaden wierzchołek nie został wybrany, sprawdzamy krawędzie
                 if not self.is_dragging:

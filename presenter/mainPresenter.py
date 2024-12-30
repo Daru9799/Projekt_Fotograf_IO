@@ -26,7 +26,8 @@ from presenter.ExportToYolo import ExportToYolo
 from presenter.StatisticsPresenter import StatisticsPresenter
 from view.ClassGeneratorWindowView import ClassGeneratorWindowView
 
-
+# Mirzenie czasu działa kodu:
+import time
 
 #Głowny prezenter który jest przekazywany widokowi
 class Presenter:
@@ -35,6 +36,7 @@ class Presenter:
         self.new_project = ProjectModel(None)
         self.drawing_tool = None  #Aktywne narzędzie rysowania (w przypadku braku ustawiamy na None) Dostępne opcje: "rectangle", "polygon"
         self.image_item = None #Aktywne zdjęcie w liście po prawej
+
         #Podprezentery do obsługi poszczególnych modułów aplikacji
         self.file_list_presenter = FileListPresenter(None, self)
         self.classManagerPresenter = ClassManagerPresenter(None,self.new_project,self)
@@ -42,12 +44,24 @@ class Presenter:
         self.polygon_presenter = PolygonPresenter(None, self)
         self.annotation_presenter = AnnotationPreseter(None, self, self.new_project)
         self.scene_presenter = ScenePresenter(None,self,self.new_project)
+
+        start_time = time.time()
         self.local_auto_segm_presenter = LocalAutoSegmentationPresenter(None,self)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"Czas inicjalizacji LocalAutoSegmentationPresenter: {execution_time:.5f} sekund")
+
         self.import_from_file = ImportFromFile(None)
         self.export_to_file = ExportToCoco(None, self.new_project)
         self.export_project=ExportProject(None,self.new_project)
         self.export_to_yolo=ExportToYolo(None,self.new_project)
+
+        start_time = time.time()
         self.statistics_presenter = StatisticsPresenter(None, self.new_project, self)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"Czas inicjalizacji StatisticsPresenter: {execution_time:.5f} sekund")
+
         self.class_generator_presenter = ClassGeneratorPresenter(None)
 
 
@@ -287,7 +301,12 @@ class Presenter:
         if self.drawing_tool is None:
             # Sprawdza czy nie klikneliśmy na poligon
             #self.scene_presenter.handle_select_polygon(int(x),int(y))
+
+            # start_time = time.time()  # Start pomiaru
             self.scene_presenter.active_dragging(int(x), int(y))
+            # end_time = time.time()  # Koniec pomiaru
+            # execution_time = end_time - start_time
+            # print(f"Czas działania active_dragging: {execution_time:.5f} sekund")
 
             # Poniższy kod służy do zaznaczenia adnotacji(setSelect(True)) w liście adnotacji
             # items = [self.view.annotation_list_widget.item(i) for i in range(self.view.annotation_list_widget.count())]
@@ -299,9 +318,8 @@ class Presenter:
 
             self.scene_presenter.draw_annotations()  # Odświerzenie widoku
 
-            # Edycja punktów zaznaczonego polygona:
-            print("Aktywny poligon :")
-            print(self.scene_presenter.selected_polygon)
+            # print("Aktywny poligon :")
+            # print(self.scene_presenter.selected_polygon)
 
         # self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
         # self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
@@ -343,16 +361,6 @@ class Presenter:
             self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
             self.scene_presenter.draw_annotations()              # Rysowanie wczytanych adnotacji
 
-        # TESTY {
-
-        print("Ilość adnotacji",self.statistics_presenter.count_all_adnotations())
-        print("Ilość zdjec z adnotacjami", self.statistics_presenter.count_img_with_annotations())
-        print("Ilość zdjec bez adnotacjami", self.statistics_presenter.count_img_without_annotation())
-        print("Ilość zdjec z kilkoma adnotacjami tej samej klasy",self.statistics_presenter.count_img_mult_annotations_same_class())
-        print("Ilość adnotacji dla poszczegolnych klas",self.statistics_presenter.count_class_usage())
-        print("Ilość adnotacji dla poszczegolnych klas w procentach", self.statistics_presenter.calcualte_class_procentage_usage())
-
-        # }
     def handle_crtl_minus(self):
         self.file_list_presenter.decrease_zoom()
 
