@@ -323,7 +323,6 @@ class ScenePresenter:
     def reset_selected_polygon(self):
         self.selected_polygon = [[],[]]
 
-
     # Sorawdza czy punkt znajduje się w obrębie poligona
     # Wierzchołki jako większe punkty też się wliczają w obszar poligona
     def check_inclusion(self,polygon,x,y):
