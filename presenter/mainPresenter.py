@@ -547,7 +547,7 @@ class Presenter:
     def generate_classes(self):
         self.class_generator_presenter.load_key_and_endpoint()
         self.class_generator_presenter.create_client()
-        if self.class_generator_presenter.client is None:
+        if self.class_generator_presenter.vision_client is None:
             self.view.show_message_OK("Uwaga!", "Połączenie z chmurą jest niedostępne, sprawdź połączenie internetowe lub skontaktuj się z administratorem.")
             return 0
         self.class_generator_window = ClassGeneratorWindowView(self)

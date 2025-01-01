@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (QHeaderView, QDesktopWidget, QColorDialog, QTableWidget, QTableWidgetItem, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QSlider, QPushButton, QCheckBox, QListWidget, QListWidgetItem, QStackedWidget, QWidget)
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QIcon
 import random
 
 class ClassGeneratorWindowView(QDialog):
@@ -10,6 +10,7 @@ class ClassGeneratorWindowView(QDialog):
         self.setGeometry(100, 100, 450, 350)
         self.setFixedSize(450, 350)
         self.presenter = presenter
+        self.setWindowIcon(QIcon("img/classGeneratorIcon.png"))
 
         self.stacked_widget = QStackedWidget()
 
@@ -48,7 +49,7 @@ class ClassGeneratorWindowView(QDialog):
 
         #Informacja
         info_layout = QHBoxLayout()
-        info_label = QLabel("Uwaga! Dla aktualnie zaznaczonego obrazu zostaną wygenerowane tagi przy pomocy serwisu chmurowego. Prosimy o dostosowanie parametrów.")
+        info_label = QLabel("Uwaga! Dla aktualnie zaznaczonego obrazu zostaną wygenerowane tagi przy pomocy serwisu chmurowego. Prosimy o dostosowanie parametrów. Wybranie języka innego niż angielski poskutkuje dłuższym czasem oczekiwania na rezultat z powodu automatycznego tłumaczenia. Tłumaczenie może być nieprecyzyjne!")
         info_label.setWordWrap(True)
         info_label.setFixedWidth(420)
         font = QFont()
@@ -56,7 +57,7 @@ class ClassGeneratorWindowView(QDialog):
         info_label.setFont(font)
         info_layout.addWidget(info_label)
         central_layout.addLayout(info_layout)
-        central_layout.addSpacing(40)
+        central_layout.addSpacing(10)
 
         #Wybór języka
         lang_layout = QHBoxLayout()
@@ -172,10 +173,12 @@ class ClassGeneratorWindowView(QDialog):
     def switch_to_page2(self):
         ac = self.get_accuracy()
         lan = self.get_selected_language()
-        self.setFixedSize(600, 400)
         self.stacked_widget.setCurrentIndex(1)
         #Przeslanie do prezentera
         self.presenter.handle_create_tags_click(lan, ac)
+        #Zmiana okna
+        self.setFixedSize(600, 400)
+        #Refresh tabeli
         table = self.page2.findChild(QTableWidget)
         self.refresh_table(table)
 
