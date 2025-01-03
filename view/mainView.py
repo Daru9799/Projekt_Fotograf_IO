@@ -462,6 +462,7 @@ class MainView(object):
         self.img_action.triggered.connect(self.presenter.statistics_presenter.open_image_window)
         self.exif_action.triggered.connect(self.presenter.statistics_presenter.open_exif_window)
         self.generate_classes.clicked.connect(self.presenter.generate_classes)
+        self.comboBox_sam_model.currentIndexChanged.connect(self.presenter.local_auto_segm_presenter.comboBox_sam_model_change)
         #self.show_statistics_action_2.triggered.connect(self.presenter.statistics_presenter.open_statistics_window)
 
 

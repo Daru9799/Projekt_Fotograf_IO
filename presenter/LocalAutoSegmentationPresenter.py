@@ -36,7 +36,7 @@ class LocalAutoSegmentationPresenter:
         #print("Using device:", self.device)
 
         # Inicjalizacja modelu na wybranym urządzeniu
-        self.active_model = SAM("sam2_b.pt").to(self.device)
+        self.active_model = SAM("sam2_s.pt").to(self.device)
 
     def rectangle_to_bbox(self,points):
         # Rozdzielenie współrzędnych x i y
@@ -355,5 +355,16 @@ class LocalAutoSegmentationPresenter:
             font_color,
             thickness
         )
+
+    def comboBox_sam_model_change(self):
+        curent_idx = self.view.comboBox_sam_model.currentIndex()
+        if curent_idx == 0:
+            self.active_model = SAM("sam2_s.pt").to(self.device)
+        elif curent_idx == 1:
+            self.active_model = SAM("sam2_b.pt").to(self.device)
+        elif curent_idx == 2:
+            self.active_model = SAM("sam2_l.pt").to(self.device)
+        #print(self.active_model)
+
 
 
