@@ -458,6 +458,7 @@ class Presenter:
 
     def import_project(self):
         # Wyłączenie wszystkich narzędzi do adnotacji:
+        self.export_project.unlock_file()
         self.drawing_tool = None
         self.view.set_no_active_tool_text()
         self.rectangle_presenter.cancel_drawing_rectangle()

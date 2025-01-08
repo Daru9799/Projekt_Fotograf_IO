@@ -93,7 +93,9 @@ class ExportProject:
         if not self.project_path.endswith(".pro"):
             self.project_path += ".pro"
 
+        self.unlock_file()
         self.create_file(self.project_path)
+        self.lock_file(self.project_path)
         return True
 
     def lock_file(self, file_path):
