@@ -89,16 +89,16 @@ class Presenter:
 
         # !!!
         # Linia poniżej finalnie do usunięcia
-        self.create_new_project()
+        # self.create_new_project()
         # !!!
 
     #Utworzenie nowego projektu, wczytanie danych do modelu
     def create_new_project(self):
         # !!!
         # linie poniżej odkomentować
-        # folder_path = QFileDialog.getExistingDirectory(self.view.centralwidget.parent(), "Wybierz folder ze zdjęciami")
+        folder_path = QFileDialog.getExistingDirectory(self.view.centralwidget.parent(), "Wybierz folder ze zdjęciami")
         # linie poniżej też usunąć
-        folder_path = "./!OBRAZKI DO TESTÓW"
+        # folder_path = "./!OBRAZKI DO TESTÓW"
         # !!!
         if self.new_project.list_of_images_model:
             confirmation = self.view.show_message_Yes_No("Uwaga!", "Wczytanie nowego folderu spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")
@@ -107,6 +107,7 @@ class Presenter:
                     self.update_model_after_loading_new_project(folder_path)
                     self.update_file_list_panel()
                     self.update_annotations_on_image()
+                    self.view.statistics_menu.setEnabled(True)
                     self.view.toggle_all_buttons(True)
                 else:
                     self.view.set_notification_label("Nie wybrano folderu.")
@@ -115,6 +116,7 @@ class Presenter:
                 self.update_model_after_loading_new_project(folder_path)
                 self.update_file_list_panel()
                 self.update_annotations_on_image()
+                self.view.statistics_menu.setEnabled(True)
                 self.view.toggle_all_buttons(True) # "Włączenie" przycisków
 
     #Ta funkcja ma za zadanie przypisać projektowi odnośnik do folderu ze zdjęciami, a także zaladować nowe zdjęcia do modelu
@@ -388,6 +390,13 @@ class Presenter:
             self.view.show_message_OK("Informacja", "Proszę wybrać obraz z listy.")
 
     def import_from_coco(self):
+        # Wyłączenie wszystkich narzędzi do adnotacji:
+        self.drawing_tool = None
+        self.view.set_no_active_tool_text()
+        self.rectangle_presenter.cancel_drawing_rectangle()
+        self.polygon_presenter.cancel_drawing_polygon()
+        self.local_auto_segm_presenter.cancel_auto_segmentation()
+
         if self.new_project.list_of_images_model:
             confirmation = self.view.show_message_Yes_No("Uwaga!", "Import spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")
             if confirmation:
@@ -414,6 +423,12 @@ class Presenter:
         self.import_from_file.reset_imported_data()
 
     def import_from_yolo(self):
+        self.drawing_tool = None
+        self.view.set_no_active_tool_text()
+        self.rectangle_presenter.cancel_drawing_rectangle()
+        self.polygon_presenter.cancel_drawing_polygon()
+        self.local_auto_segm_presenter.cancel_auto_segmentation()
+
         if self.new_project.list_of_images_model:
             confirmation = self.view.show_message_Yes_No("Uwaga!", "Import spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")
             if confirmation:
@@ -442,6 +457,13 @@ class Presenter:
         self.import_from_file.reset_imported_data()
 
     def import_project(self):
+        # Wyłączenie wszystkich narzędzi do adnotacji:
+        self.drawing_tool = None
+        self.view.set_no_active_tool_text()
+        self.rectangle_presenter.cancel_drawing_rectangle()
+        self.polygon_presenter.cancel_drawing_polygon()
+        self.local_auto_segm_presenter.cancel_auto_segmentation()
+
         if self.new_project.list_of_images_model:
             confirmation = self.view.show_message_Yes_No("Uwaga!", "Import spowoduje utratę wszystkich niezapisanych danych. Czy chcesz kontynuować?")
             if confirmation:
@@ -472,6 +494,13 @@ class Presenter:
 
     #Stąd przekazanie importów/eksportów do podprezenterów
     def save_as_project_fun(self):
+        # Wyłączenie wszystkich narzędzi do adnotacji:
+        self.drawing_tool = None
+        self.view.set_no_active_tool_text()
+        self.rectangle_presenter.cancel_drawing_rectangle()
+        self.polygon_presenter.cancel_drawing_polygon()
+        self.local_auto_segm_presenter.cancel_auto_segmentation()
+
         # 1. Wybierz lokalizację zapisu
         save_path = self.export_project.select_save_location()
         if not save_path:
@@ -494,6 +523,8 @@ class Presenter:
             self.view.show_message_OK("Błąd", f"Wystąpił problem podczas eksportu: {str(e)}")
 
     def save_project_fun(self):
+        # Wyłączenie wszystkich narzędzi do adnotacji:
+
         # Zapisz zmiany w istniejącej lokalizacji lub otwórz okno wyboru, jeśli brak lokalizacji
         try:
             if self.export_project.save_project():
@@ -508,6 +539,13 @@ class Presenter:
             self.view.show_message_OK("Błąd", f"Wystąpił problem podczas zapisu: {str(e)}")
 
     def export_to_coco_fun(self):
+        # Wyłączenie wszystkich narzędzi do adnotacji:
+        self.drawing_tool = None
+        self.view.set_no_active_tool_text()
+        self.rectangle_presenter.cancel_drawing_rectangle()
+        self.polygon_presenter.cancel_drawing_polygon()
+        self.local_auto_segm_presenter.cancel_auto_segmentation()
+
         # 1. Wybierz lokalizację zapisu
         save_path = self.export_to_file.select_save_location()
         if not save_path:
@@ -530,6 +568,13 @@ class Presenter:
 
 
     def export_to_yolo_fun(self):
+        # Wyłączenie wszystkich narzędzi do adnotacji:
+        self.drawing_tool = None
+        self.view.set_no_active_tool_text()
+        self.rectangle_presenter.cancel_drawing_rectangle()
+        self.polygon_presenter.cancel_drawing_polygon()
+        self.local_auto_segm_presenter.cancel_auto_segmentation()
+
         save_path= self.export_to_yolo.select_save_location()
         if not save_path:
             # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")

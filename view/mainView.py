@@ -391,6 +391,7 @@ class MainView(object):
 
 ######################################## Koniec generowania
         self.set_zoom_slider_visibility(False)
+        self.statistics_menu.setEnabled(False)
         #Ustawienie ikonek
         MainWindow.setWindowIcon(QIcon("img/cameraIcon.png"))
 

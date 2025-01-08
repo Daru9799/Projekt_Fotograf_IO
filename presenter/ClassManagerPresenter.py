@@ -33,6 +33,10 @@ class ClassManagerPresenter:
         self.window.close()
 
     def deleteClass(self):
+        if self.presenter.drawing_tool is not None:
+            self.view.show_message_OK("Informacja", "Nie można usunąć klas, gdy narzędzia do adnotacji są aktywne!")
+            return
+
         checked_classes = []
 
         for index in range(self.view.class_list_widget.count()):
