@@ -78,7 +78,8 @@ class ClassManagerPresenter:
             item.setSizeHint(row.minimumSizeHint()) # ustawia rozmiar elementu item, aby pasował do minimalnego rozmiaru widoku row
             self.view.class_list_widget.setItemWidget(item, row) # ustawia widok row jako widok wewnętrzny dla item, co pozwala na dostosowany wygląd każdego elementu
         self.load_checkboxes_states()
-    # Updejtuje obiekt klasy w ProjectModel
+
+    # Metoda która updejtuje obiekt klasy w ProjectModel
     def updateColorClass(self, Class, rgba):
         updatedClass = Class
         updatedClass.color = (rgba[0],rgba[1],rgba[2])
@@ -90,11 +91,9 @@ class ClassManagerPresenter:
     # Metoda zwracająca listę obkietów Klass z zaznaczonym checkboxem hidden
     def getHiddenClass(self):
         checked_classes = []
-
         for index in range(self.view.class_list_widget.count()):
             item = self.view.class_list_widget.item(index)
             row_widget = self.view.class_list_widget.itemWidget(item)
-
             if row_widget.isHiddenChecked():
                 checked_classes.append(row_widget.Class)
 
@@ -116,7 +115,6 @@ class ClassManagerPresenter:
                 tmp_checkboxes_state[1].append(row_widget.Class)
 
         print(tmp_checkboxes_state)
-        #self.checkboxes_state = copy.deepcopy(tmp_checkboxes_state)
         self.checkboxes_state = tmp_checkboxes_state
         print(self.checkboxes_state)
 

@@ -86,11 +86,6 @@ class ScenePresenter:
                     cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
                     for point in np_points:
                         cv2.circle(drawing_surface, tuple(point[0]), self.point_radius, border_color, -1)
-
-                    # print("Wirzchołki były takie same jak w selected_polygon")
-                    # print(poly[0])
-                    # print(self.selected_polygon[0])
-
                 else:
                     # Wypełnianie polygona kolorem:
                     fill_color = (poly[1][0], poly[1][1], poly[1][2], 160)
@@ -114,16 +109,9 @@ class ScenePresenter:
         qimage = QImage(draw_surf.data, width, height, bytes_per_line, QImage.Format_RGBA8888)
         # Utwórz QPixmap z QImage
         pixmap = QPixmap.fromImage(qimage)
-
-        # Dodanie wszystkich adnotacji na obrazek
-        # if self.polygons_pixmap_ref is not None:  # Sprawdź, czy obiekt wciąż istnieje w scenie
-        #    self.view.scene.removeItem(self.polygons_pixmap_ref)
-        # self.polygons_pixmap_ref = None
         self.view.scene.removeItem(self.polygons_pixmap_ref)
         self.polygons_pixmap_ref = QGraphicsPixmapItem(pixmap)
         self.view.scene.addItem(self.polygons_pixmap_ref)
-        #print("Rysowanie na scenie")
-
 
     def handle_select_polygon(self,x,y):
         if self.selected_polygon == [[],[]]:
@@ -157,10 +145,8 @@ class ScenePresenter:
             selected_polygon = [[],[]]
         return selected_polygon
 
-        #print("Wybrany polygon to:",self.selected_polygon)
-
+    #Sprawdza, czy punkt (x, y) jest blisko krawędzi wielokąta.
     def is_near_edge(self, x, y, polygon):
-        """Sprawdza, czy punkt (x, y) jest blisko krawędzi wielokąta."""
         for i in range(len(polygon)):
             p1 = np.array(polygon[i])
             p2 = np.array(polygon[(i + 1) % len(polygon)])  # Następny wierzchołek (zamknięcie pętli)
@@ -256,29 +242,15 @@ class ScenePresenter:
             # Przesuwanie wybranego wierzchołka
             polygon_points, idx = self.selected_vertex[0] ,self.selected_vertex[1]
             polygon_points[idx] = (x, y)
-            # print("*" * 20)
-            # print("polygon_points")
-            # print(polygon_points)
-            # print("selected_polygon")
-            # print(self.selected_polygon[0])
-            # print("*"*20)
             self.draw_annotations()  # Aktualizacja obrazu po przesunięciu wierzchołka
 
     def release_dragging_click(self):
-        # if self.selected_vertex is not None:
-            # print("aktualne poligony")
-            # for i in self.polygons:
-            #     print(i)
-            # print("puszczenie LP myszy")
-
-        #print(self.selected_polygon)
         if self.is_dragging: # jeśli wierzchołek był przesuwany
             self.save_edited_annotations()
             self.presenter.annotation_presenter.update_items() # Odświeżenie listy adnotacji
             self.draw_annotations()
         self.is_dragging = False
         self.selected_vertex = None
-
 
     def save_edited_annotations(self):
         for polygon in self.polygons:

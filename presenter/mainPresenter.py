@@ -246,7 +246,7 @@ class Presenter:
                 self.rectangle_presenter.update_start_point(None, None)
 
         #Logika rysowania poligona
-        if self.drawing_tool == "polygon":
+        elif self.drawing_tool == "polygon":
 
             if not selected_class: # sprawdzenie czy klasa jest wybrana
                 self.view.show_message_OK("Informacja", "Proszę o wybranie klasy")
@@ -259,20 +259,19 @@ class Presenter:
             if len(self.polygon_presenter.current_polygon_points) > 2 and self.polygon_presenter.is_near_starting_point(x, y):
                 self.polygon_presenter.polygon_closed = True
                 self.polygon_presenter.drawing_polygon()
-
                 points = self.polygon_presenter.current_polygon_points
                 self.annotation_presenter.add_annotation(points) # dodajemy wielokąt do listy adnotacji
-
-                self.polygon_presenter.current_polygon_points.clear()     # do odkomentowania potem
-                self.polygon_presenter.polygon_closed = False             # do odkomentowania potem
+                self.polygon_presenter.current_polygon_points.clear()
+                self.polygon_presenter.polygon_closed = False
                 self.polygon_presenter.drawing_polygon()                  # usuwa narysowany, zamknięty poligon
+
                 self.scene_presenter.get_annotations_from_project()       # Pobranie adnotacji do rysowania
                 self.scene_presenter.draw_annotations()                   # Rysowanie wczytanych adnotacji
             else:
                 self.polygon_presenter.current_polygon_points.append((int(x),int(y)))
                 self.polygon_presenter.drawing_polygon()
 
-        if self.drawing_tool == "auto_segmentation":
+        elif self.drawing_tool == "auto_segmentation":
 
             if self.rectangle_presenter.rectangle_start_point == (None, None):
                 if selected_class:
@@ -288,12 +287,7 @@ class Presenter:
 
                 image_path = self.new_project.folder_path+"/"+self.image_item.text()
                 self.local_auto_segm_presenter.image_path = image_path
-
                 self.local_auto_segm_presenter.calculate_vertexes(image_path, points)
-                # if auto_segment_polyg == [] or auto_segment_polyg is None:
-                #     pass
-                # else:
-                #     self.annotation_presenter.add_annotation(auto_segment_polyg)
 
                 self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
                 self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
@@ -302,31 +296,9 @@ class Presenter:
                 self.rectangle_presenter.update_start_point(None, None)
 
 
-        if self.drawing_tool is None:
-            # Sprawdza czy nie klikneliśmy na poligon
-            #self.scene_presenter.handle_select_polygon(int(x),int(y))
-
-            # start_time = time.time()  # Start pomiaru
+        elif self.drawing_tool is None:
             self.scene_presenter.active_dragging(int(x), int(y))
-            # end_time = time.time()  # Koniec pomiaru
-            # execution_time = end_time - start_time
-            # print(f"Czas działania active_dragging: {execution_time:.5f} sekund")
-
-            # Poniższy kod służy do zaznaczenia adnotacji(setSelect(True)) w liście adnotacji
-            # items = [self.view.annotation_list_widget.item(i) for i in range(self.view.annotation_list_widget.count())]
-            # for i in items:
-            #     i.setSelected(False) # Na początku odznacz
-            #     custom_i = self.view.annotation_list_widget.itemWidget(i)
-            #     if custom_i.getAnnotation().get_segmentation() == self.scene_presenter.get_seleted_polygon():
-            #         i.setSelected(True)
-
             self.scene_presenter.draw_annotations()  # Odświerzenie widoku
-
-            # print("Aktywny poligon :")
-            # print(self.scene_presenter.selected_polygon)
-
-        # self.scene_presenter.get_annotations_from_project()  # Pobranie adnotacji do rysowania
-        # self.scene_presenter.draw_annotations()  # Rysowanie wczytanych adnotacji
 
 
     #Obsluga przesuwania myszy w obrębie obszaru obrazka (współrzędne zawsze odnoszą się do obrazka nie całego graphic_view)

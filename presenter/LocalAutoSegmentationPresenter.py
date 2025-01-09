@@ -21,13 +21,9 @@ class LocalAutoSegmentationPresenter:
 
         self.color = (171, 127, 89, 255)
 
-        #self.active_model = SAM("sam2_s.pt")
-        #self.active_model = SAM("sam2.1_l.pt")
-
         print("PyTorch version:", torch.__version__)
         print("CUDA version:", torch.version.cuda)
         print("CUDA available:", torch.cuda.is_available())
-        print("Devices:", torch.cuda.device_count())
         if torch.cuda.is_available():
             print("GPU:", torch.cuda.get_device_name(0))
 
@@ -77,33 +73,21 @@ class LocalAutoSegmentationPresenter:
             smoothed_contours = self.smooth_polygon(simplified_contours, size=3)
 
             self.temp_segment = smoothed_contours
-
             self.view.set_notification_label(f"Automatyczne zaznaczanie: Potwierdź wygenerowane zaznaczenie - 'Enter'")
 
         self.draw_temp_segment()
 
     def draw_temp_segment(self):
-        #print("--- Lista aktualnych punktów polygona: ---")
-        #print( self.current_polygon_points)
         drawing_surface = np.zeros((self.view.pixmap_item.pixmap().height(), self.view.pixmap_item.pixmap().width(), 4),dtype=np.uint8)
-        #drawing_surface[:, :, 3] = 255
-        #border_color = (abs(self.color[0] - 50), abs(self.color[1] - 50), abs(self.color[2] - 50))
         if len(self.temp_segment) != 0:
-
             # konwersja listy punktów((x,y)) -> np.array, dla poprawnego rysowania cv2
             np_points = np.array(self.temp_segment, dtype=np.int32)
             np_points = np_points.reshape((-1, 1, 2))
 
             cv2.polylines(drawing_surface, [np_points], isClosed=True, thickness=2, color=self.color )
 
-            # for point in np_points:
-            #     cv2.circle(drawing_surface, tuple(point[0]), self.point_radius, self.color, -1)
-
             fill_color = (self.color[0], self.color[1], self.color[2], 220)
             cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
-
-            #self.add_text_to_segment(drawing_surface, np_points, f"Temp({self.score:.2f})")
-
 
         self.draw_item_on_scene(drawing_surface)
 
@@ -259,14 +243,9 @@ class LocalAutoSegmentationPresenter:
         polygons.sort(key=len, reverse=True)
         return polygons
 
+    # Aplikuje na wirzchołki poligon median_filter aby zminimalizować szumy
     def smooth_polygon(self, polygon, size=3):
-        """
-        Apply median filter to smooth the polygon points and reduce noise.
 
-        :param polygon: List of points [(x1, y1), (x2, y2), ...]
-        :param size: Size of the median filter.
-        :return: Smoothed polygon.
-        """
         # Rozdzielenie na współrzędne X i Y
         x_coords = [point[0] for point in polygon]
         y_coords = [point[1] for point in polygon]
@@ -280,23 +259,16 @@ class LocalAutoSegmentationPresenter:
 
         return smoothed_polygon
 
+    # Upraszcza poligon wykorzystując algorytm  Douglas-Peucker
     def simplify_polygon(self, polygon, epsilon=2.0):
-        """
-        Simplifies the polygon using the Douglas-Peucker algorithm.
-
-        :param polygon: List of points [(x1, y1), (x2, y2), ...]
-        :param epsilon: The distance threshold to simplify the polygon.
-                        Larger values result in fewer points.
-        :return: Simplified polygon.
-        """
-        # Convert polygon to NumPy array
+        # Konwersja na np.array
         polygon_np = np.array(polygon, dtype=np.int32)
 
-        # Apply the Douglas-Peucker algorithm (cv2.approxPolyDP)
+        # Użycie algorytmu Douglas-Peucker
         epsilon = epsilon  # Adjust epsilon to control simplification
         simplified_polygon = cv2.approxPolyDP(polygon_np, epsilon, True)
 
-        # Convert back to list of tuples
+        # Konwersja wsteczna na listę tupli (punktów)
         simplified_polygon = [tuple(point[0]) for point in simplified_polygon]
 
         return simplified_polygon
@@ -316,46 +288,6 @@ class LocalAutoSegmentationPresenter:
         self.temp_segment_ref = None
         self.temp_segment = []
 
-    def add_text_to_segment(self,drawing_surface, np_points, text):
-        # Obliczanie środka ciężkości polygona (centroid)
-        M = cv2.moments(np_points)
-        if M["m00"] != 0:
-            centroid_x = int(M["m10"] / M["m00"])
-            centroid_y = int(M["m01"] / M["m00"])
-        else:
-            # W przypadku gdy pole wynosi 0 (np. linia), użyj średniej punktów
-            centroid_x = int(np.mean(np_points[:, 0, 0]))
-            centroid_y = int(np.mean(np_points[:, 0, 1]))
-
-        # Obliczanie pola powierzchni polygona
-        area = cv2.contourArea(np_points)
-
-        # Dynamiczne skalowanie rozmiaru czcionki na podstawie pola powierzchni
-        # Ustal minimalny i maksymalny rozmiar czcionki
-        min_font_size = 0.5
-        max_font_size = 1.5
-        base_area = 2500  # Obszar bazowy dla czcionki minimalnej
-        font_scale = max(min_font_size, min(max_font_size, area / base_area))
-
-        print("Area:", (area/base_area))
-        print("Font scale:", font_scale)
-
-        # Dodawanie napisu na środku
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        #font_scale = 0.3
-        font_color = (69, 50, 34, 200)  # Biały kolor
-        thickness = 2
-
-        cv2.putText(
-            drawing_surface,
-            text,
-            (centroid_x - 60, centroid_y + 10),  # Ustawienie pozycji tekstu
-            font,
-            font_scale,
-            font_color,
-            thickness
-        )
-
     def comboBox_sam_model_change(self):
         curent_idx = self.view.comboBox_sam_model.currentIndex()
         if curent_idx == 0:
@@ -364,7 +296,6 @@ class LocalAutoSegmentationPresenter:
             self.active_model = SAM("sam2_b.pt").to(self.device)
         elif curent_idx == 2:
             self.active_model = SAM("sam2_l.pt").to(self.device)
-        #print(self.active_model)
 
 
 

@@ -20,10 +20,8 @@ class PolygonPresenter(QObject):
         self.cursor_pos = [0,0]
         self.color = (0, 0, 0, 255)  # RGB
 
-        # self.allow_drawing = False
-
+    # Sprawdza, czy punkt (x, y) jest blisko pierwszego punktu bieżącego wielokąta.
     def is_near_starting_point(self, x, y):
-        """Sprawdza, czy punkt (x, y) jest blisko pierwszego punktu bieżącego wielokąta."""
         if not self.current_polygon_points:
             return False
         start_point = self.current_polygon_points[0]
@@ -32,11 +30,7 @@ class PolygonPresenter(QObject):
 
     # Funkcja odpowiedzialna za narysowanie wszystkich wirzchołków polygona na nowej powierzchni rysunkowej
     def drawing_polygon(self):
-        #print("--- Lista aktualnych punktów polygona: ---")
-        #print( self.current_polygon_points)
         drawing_surface = np.zeros((self.view.pixmap_item.pixmap().height(), self.view.pixmap_item.pixmap().width(), 4),dtype=np.uint8)
-        #drawing_surface[:, :, 3] = 255
-        #border_color = (abs(self.color[0] - 50), abs(self.color[1] - 50), abs(self.color[2] - 50))
         if len(self.current_polygon_points) != 0:
 
             # konwersja listy punktów((x,y)) -> np.array, dla poprawnego rysowania cv2
@@ -47,13 +41,8 @@ class PolygonPresenter(QObject):
                 cv2.polylines(drawing_surface, [np_points], isClosed=False, thickness=2, color=self.color )
                 for point in np_points:
                     cv2.circle(drawing_surface, tuple(point[0]), self.point_radius, self.color, -1)
-
             else: # rysowanie pierszego wierzchołka
                 cv2.circle(drawing_surface, tuple(np_points[0][0]), self.point_radius, self.color, -1)
-
-            # if self.polygon_closed:
-            #     fill_color = (self.color[0], self.color[1], self.color[2], 120)
-            #     cv2.fillPoly(drawing_surface, [np_points], color=fill_color)
 
             # Rysowanie lini podążającej za kursorem:
             if len(np_points) > 0 and not self.polygon_closed:
@@ -84,21 +73,12 @@ class PolygonPresenter(QObject):
     # Sprawdza czy punkt (x,y) znajduje się w polu polygona
     def check_inclusion(self,x,y):
         np_points = np.array(self.current_polygon_points, dtype=np.int32)
-        #np_points = np_points.reshape((-1, 1, 2))
         result = cv2.pointPolygonTest(np_points, (x,y), False)
         return result
 
     def cancel_drawing_polygon(self):
         self.view.scene.removeItem(self.temp_polygon_item)
         self.prepare_to_change_current_img()
-        # self.temp_polygon_item = None
-        # self.polygon_closed = False
-        # self.current_polygon_points.clear()
-        # self.view.set_draw_polygon_button_text("Rysuj poligon")
-        # self.view.change_to_arrow_cursor()
-        #
-        # # Wczytanie na nowo adnotacji żeby żadna adnotacja nie była zaznaczona po wyjściu z rysowania
-        # self.presenter.annotation_presenter.updateItems()
 
     def prepare_to_change_current_img(self):
         self.temp_polygon_item = None

@@ -95,10 +95,6 @@ class StatisticsPresenter:
         self.windowUiClass.class_tableView.resizeColumnsToContents()
         self.windowUiClass.class_tableView.verticalHeader().setVisible(False)
 
-        #self.windowUiClass.class_tableView.horizontalHeader().setWordWrap(True)
-        # header.setSectionResizeMode(QHeaderView.ResizeToContents)
-        # header.
-
     def refresh_image_window(self):
         imgs_sizes = self.determine_min_max_average_img_resolution()
         self.windowUiImage.image_listWidget.clear()
@@ -121,28 +117,6 @@ class StatisticsPresenter:
     def refresh_exif_window(self):
         self.clear_charts()
         self.create_charts()
-
-    # def plot_img_resolutions(resolutions: dict[int, list[int, int]]):
-    #     # Wyodrębnienie szerokości i wysokości
-    #     widths = [res[0] for res in resolutions.values()]
-    #     heights = [res[1] for res in resolutions.values()]
-    #
-    #     # Tworzenie wykresu
-    #     plt.figure(figsize=(10, 6))
-    #     plt.scatter(widths, heights, c='blue', alpha=0.7, edgecolors='black')
-    #
-    #     # Ustawienia wykresu
-    #     plt.title("Rozdzielczości obrazów", fontsize=16)
-    #     plt.xlabel("Szerokość (pixels)", fontsize=12)
-    #     plt.ylabel("Wysokość (pixels)", fontsize=12)
-    #     plt.grid(True, linestyle='--', alpha=0.6)
-    #
-    #     # Ograniczenie osi, jeśli to konieczne
-    #     plt.xlim(0, max(widths) + 100)
-    #     plt.ylim(0, max(heights) + 100)
-    #
-    #     # Wyświetlenie wykresu
-    #     plt.show()
 
     # STATYSTYKI Adnotacji:
 
