@@ -1,7 +1,7 @@
 import os
-from PyQt5.QtGui import QPixmap, QIntValidator
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGraphicsPixmapItem
-from PyQt5.QtCore import QRectF, Qt
+from PyQt5.QtCore import QRectF
 
 
 # Prezenter zarządzający listą plików i interakcjami z nią
@@ -11,18 +11,16 @@ class FileListPresenter:
         self.project = None
         self.presenter = presenter
 
-
     def update_project(self, project):
         self.project = project
 
-
     def load_files_to_widget(self):
-        # Czyszczenie poprzedniej listy plików
+        #Czyszczenie poprzedniej listy plików
         self.view.file_list_widget.clear()
-        # Załadowanie plików z modelu do listy
+        #Załadowanie plików z modelu do listy
         for img_obj in self.project.list_of_images_model:
             self.view.file_list_widget.addItem(img_obj.filename)
-        # Zaznaczenie pierwszego pliku na liście, jeśli lista nie jest pusta
+        #Zaznaczenie pierwszego pliku na liście, jeśli lista nie jest pusta
         if self.view.file_list_widget.count() > 0:
             first_item = self.view.file_list_widget.item(0)
             self.view.file_list_widget.setCurrentItem(first_item)
@@ -30,7 +28,7 @@ class FileListPresenter:
             self.view.set_zoom_slider_visibility(True)
             self.presenter.image_item = first_item
         else:
-            # Aktualizacja etykiety informacyjnej na brak aktywnego obrazu
+            #Aktualizacja etykiety informacyjnej na brak aktywnego obrazu
             self.view.set_image_size_label("Brak aktywnego obrazu")
             self.view.pixmap_item = None #zmiana obrazka na None (żeby zniwelować problem z poruszaniem po scenie przy powtórnym załadowaniu pustego folderu)
             self.view.scene.clear()
@@ -42,25 +40,24 @@ class FileListPresenter:
         print(image_path)
         self.display_image(image_path)
 
-
-        # Wyszukiwanie obrazu w projekcie
+        #Wyszukiwanie obrazu w projekcie
         active_image = self.project.get_img_by_filename(file_name)
         if active_image is not None:
-            # Aktualizacja etykiety z informacjami o rozmiarze obrazu
+            #Aktualizacja etykiety z informacjami o rozmiarze obrazu
             self.view.set_image_size_label(f"{active_image.width}x{active_image.height}")
 
-            # Sprawdzenie, czy zoom został już ustawiony; jeśli nie, ustaw na 70%
+            #Sprawdzenie, czy zoom został już ustawiony; jeśli nie, ustaw na 70%
             if not hasattr(active_image, 'zoom') or active_image.zoom is None:
                 active_image.zoom = 0.7
 
-            # Użycie aktualnej wartości zoomu (czy to nowej, czy już istniejącej)
+            #Użycie aktualnej wartości zoomu (czy to nowej, czy już istniejącej)
             initial_zoom_value = active_image.zoom
         else:
-            # W przypadku problemów z obrazem ustawienie wartości domyślnej zoomu
+            #W przypadku problemów z obrazem ustawienie wartości domyślnej zoomu
             self.view.set_image_size_label("Wystąpiły problemy")
             initial_zoom_value = 0.7
 
-        # Aktualizacja wartości suwaka, aby odzwierciedlić aktualny poziom zoomu w procentach
+        #Aktualizacja wartości suwaka, aby odzwierciedlić aktualny poziom zoomu w procentach
         self.view.zoom_image_slider.setValue(int(initial_zoom_value * 100))
         self.view.apply_zooming(initial_zoom_value)
 
@@ -73,16 +70,11 @@ class FileListPresenter:
                 print(f"Failed to load image: {image_path}")
                 return
 
-            print("Image loaded successfully!")
-
             # Czyszczenie sceny przed dodaniem nowego obrazu
             self.view.scene.clear()
-
             # Utworzenie elementu graficznego obrazu
             self.view.pixmap_item = QGraphicsPixmapItem(pixmap)
             self.view.scene.addItem(self.view.pixmap_item)
-
-
             # Ustawienie rozmiaru sceny na rozmiar obrazka
             scene_rect = QRectF(pixmap.rect())
             print(f"Setting scene rect: {scene_rect}")
@@ -103,19 +95,13 @@ class FileListPresenter:
 
     def on_zoom_value_changed(self):
         try:
-            # Retrieve input and current zoom
-            text = self.view.zoom_value_widget.text().strip()  # Remove leading/trailing spaces
-            current_zoom = int(self.view.zoom_image_slider.value())  # Current zoom as integer
+            text = self.view.zoom_value_widget.text().strip()
+            current_zoom = int(self.view.zoom_image_slider.value())
             validator = self.view.zoom_value_widget.validator()
-
-            # Validate and parse zoom value
             zoom_value = int(text)
-            zoom_value = max(10, min(zoom_value,500))  # Clamp value
-
-            # Update the text field with clamped value
+            zoom_value = max(10, min(zoom_value,500))
             self.view.zoom_value_widget.setText(str(zoom_value))
 
-            # Apply the zoom
             zoom_fraction = zoom_value / 100.0
             active_item = self.view.file_list_widget.currentItem()
             if active_item is not None:
@@ -126,7 +112,6 @@ class FileListPresenter:
             self.view.apply_zooming(zoom_fraction)
 
         except ValueError:
-            # Handle non-numeric input by resetting to current zoom
             self.view.zoom_value_widget.setText(str(current_zoom))
 
     def increase_zoom(self):
