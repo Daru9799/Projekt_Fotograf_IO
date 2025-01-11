@@ -29,40 +29,47 @@ class ExportProject:
     def create_file(self, output_path):
         annotations = []
         images = []
+        categories = []
 
-        for img in self.project.list_of_images_model:
-            image_annotations = []
+        # Populate data if present
+        if self.project.list_of_images_model:
+            for img in self.project.list_of_images_model:
+                image_annotations = []
 
-            for an in img.list_of_annotations:
-                segmentation_flat = [coord for point in an.segmentation for coord in point]
+                for an in getattr(img, 'list_of_annotations', []):
+                    segmentation_flat = [coord for point in an.segmentation for coord in point]
 
-                annotation = {
-                    "id": an.annotation_id,
-                    "category_id": an.class_id,
-                    "image_id": img.image_id,
-                    "segmentation": [segmentation_flat]
-                }
+                    annotation = {
+                        "id": an.annotation_id,
+                        "category_id": an.class_id,
+                        "image_id": img.image_id,
+                        "segmentation": [segmentation_flat]
+                    }
 
-                image_annotations.append(annotation)
+                    image_annotations.append(annotation)
 
-            annotations.extend(image_annotations)
+                annotations.extend(image_annotations)
 
-            images.append({
-                "file_name": img.filename,
-                "height": img.height,
-                "width": img.width,
-                "id": img.image_id
-            })
+                images.append({
+                    "file_name": img.filename,
+                    "height": img.height,
+                    "width": img.width,
+                    "id": img.image_id
+                })
 
-        categories = [
-            {
-                "id": cl.class_id,
-                "name": cl.name,
-                "color": cl.color
-            } for cl in self.project.list_of_classes_model
-        ]
+        if self.project.list_of_classes_model:
+            categories = [
+                {
+                    "id": cl.class_id,
+                    "name": cl.name,
+                    "color": cl.color
+                } for cl in self.project.list_of_classes_model
+            ]
 
-        image_path = os.path.dirname(self.project.get_full_path_by_filename(self.project.list_of_images_model[0].filename))
+        image_path = ""
+        if self.project.list_of_images_model:
+            image_path = os.path.dirname(self.project.get_full_path_by_filename(self.project.list_of_images_model[0].filename))
+        print("ok")
 
         data = {
             "images": images,
@@ -121,4 +128,3 @@ class ExportProject:
                 print("Plik został odblokowany.")
             except Exception as e:
                 print(f"Nie można odblokować pliku: {str(e)}")
-

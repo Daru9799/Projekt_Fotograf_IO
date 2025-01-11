@@ -577,6 +577,13 @@ class MainView(object):
                     self.presenter.handle_crtl_minus()
                 elif event.key() == Qt.Key_Plus or event.key() == Qt.Key_Equal:  # "+" or "="
                     self.presenter.handle_crtl_plus()
+                elif event.key() == Qt.Key_S:  # Ctrl + S
+                    self.presenter.save_project_fun()
+
+            # Obsługa Ctrl + Shift + S
+            elif event.modifiers() == (Qt.ControlModifier | Qt.ShiftModifier):
+                if event.key() == Qt.Key_S:  # Ctrl + Shift + S
+                    self.presenter.save_as_project_fun()
         except Exception as e:
             print(f"Error in key_press_event: {e}")
 

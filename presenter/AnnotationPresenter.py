@@ -35,6 +35,9 @@ class AnnotationPreseter:
 
     def update_items(self):
         # Pobranie listy adnotacji z obiektu obrazka
+        if self.view.get_selected_image() is None:
+            return
+
         annotations_list = self.get_selected_image_obj().list_of_annotations
 
         # Zablokowanie sygnałów, aby uniknąć nadmiarowego odświeżania

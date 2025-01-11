@@ -449,7 +449,6 @@ class Presenter:
         # Anulowanie importu poprzez zamkniecie
         if img_list is None or class_list is None or image_folder is None:
             return 0
-
         ##Przypisywanie obrazków i klas do listy projektowej
         self.new_project.list_of_images_model = img_list
         self.new_project.list_of_classes_model = class_list
@@ -468,48 +467,51 @@ class Presenter:
     #Stąd przekazanie importów/eksportów do podprezenterów
     def save_as_project_fun(self):
         # Wyłączenie wszystkich narzędzi do adnotacji:
-        self.drawing_tool = None
-        self.view.set_no_active_tool_text()
-        self.rectangle_presenter.cancel_drawing_rectangle()
-        self.polygon_presenter.cancel_drawing_polygon()
-        self.local_auto_segm_presenter.cancel_auto_segmentation()
+        if self.new_project.list_of_images_model or self.new_project.list_of_classes_model:
+            self.drawing_tool = None
+            self.view.set_no_active_tool_text()
+            self.rectangle_presenter.cancel_drawing_rectangle() #crashuje
+            self.polygon_presenter.cancel_drawing_polygon()
+            self.local_auto_segm_presenter.cancel_auto_segmentation()
 
-        # 1. Wybierz lokalizację zapisu
-        save_path = self.export_project.select_save_location()
-        if not save_path:
-            # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
-            return
+            # 1. Wybierz lokalizację zapisu
+            save_path = self.export_project.select_save_location()
+            if not save_path:
+                # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
+                return
 
-        if not save_path.endswith(".pro"):
-            save_path += ".pro"
+            if not save_path.endswith(".pro"):
+                save_path += ".pro"
 
-        # 3. Utwórz i zapisz dane do pliku .pro (JSON)
-        try:
-            self.export_project.create_file(save_path)
-
-            self.export_project.lock_file(save_path)
-
-            self.update_file_list_panel()
-            self.update_annotations_on_image()
-            self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {save_path}")
-        except Exception as e:
-            self.view.show_message_OK("Błąd", f"Wystąpił problem podczas eksportu: {str(e)}")
-
-    def save_project_fun(self):
-        # Wyłączenie wszystkich narzędzi do adnotacji:
-
-        # Zapisz zmiany w istniejącej lokalizacji lub otwórz okno wyboru, jeśli brak lokalizacji
-        try:
-            if self.export_project.save_project():
+            # 3. Utwórz i zapisz dane do pliku .pro (JSON)
+            try:
+                self.export_project.create_file(save_path)
+                self.export_project.lock_file(save_path)
                 self.update_file_list_panel()
                 self.update_annotations_on_image()
-                self.view.show_message_OK("Sukces", f"Projekt został zapisany do {self.export_project.project_path}")
-            self.export_project.lock_file(self.export_project.project_path)
+                self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {save_path}")
+            except Exception as e:
+                self.view.show_message_OK("Błąd", f"Wystąpił problem podczas eksportu: {str(e)}")
+        else:
+            self.view.show_message_OK("Błąd", "Brak danych do eksportu")
 
-            # else:
-            #     self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
-        except Exception as e:
-            self.view.show_message_OK("Błąd", f"Wystąpił problem podczas zapisu: {str(e)}")
+    def save_project_fun(self):
+        if self.new_project.list_of_images_model and self.new_project.list_of_classes_model:
+            # Zapisz zmiany w istniejącej lokalizacji lub otwórz okno wyboru, jeśli brak lokalizacji
+            try:
+                if self.export_project.save_project():
+                    self.update_file_list_panel()
+                    self.update_annotations_on_image()
+                    self.view.show_message_OK("Sukces", f"Projekt został zapisany do {self.export_project.project_path}")
+                self.export_project.lock_file(self.export_project.project_path)
+
+                # else:
+                #     self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
+            except Exception as e:
+                self.view.show_message_OK("Błąd", f"Wystąpił problem podczas zapisu: {str(e)}")
+        else:
+            self.view.show_message_OK("Błąd", "Brak danych do eksportu")
+
 
     def export_to_coco_fun(self):
         # Wyłączenie wszystkich narzędzi do adnotacji:
@@ -519,25 +521,29 @@ class Presenter:
         self.polygon_presenter.cancel_drawing_polygon()
         self.local_auto_segm_presenter.cancel_auto_segmentation()
 
-        # 1. Wybierz lokalizację zapisu
-        save_path = self.export_to_file.select_save_location()
-        if not save_path:
-            # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
-            return
+        if self.new_project.list_of_images_model:
+            # 1. Wybierz lokalizację zapisu
+            save_path = self.export_to_file.select_save_location()
+            if not save_path:
+                # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
+                return
 
-        # 2. Utwórz strukturę folderów i pobierz ścieżkę do pliku JSON
-        json_file_path = self.export_to_file.create_folder_structure(save_path)
+            # 2. Utwórz strukturę folderów i pobierz ścieżkę do pliku JSON
+            json_file_path = self.export_to_file.create_folder_structure(save_path)
 
-        # 3. Eksportuj obrazy
-        folder_path = os.path.dirname(json_file_path)
-        self.export_to_file.export_images(folder_path)
+            # 3. Eksportuj obrazy
+            folder_path = os.path.dirname(json_file_path)
 
-        # 4. Utwórz i zapisz dane JSON
-        self.export_to_file.create_json_file(json_file_path)
-        self.update_file_list_panel()
-        self.update_annotations_on_image()
-        normalized_path = os.path.normpath(folder_path).replace("\\", "/")
-        self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {normalized_path}")
+            self.export_to_file.export_images(folder_path)
+
+            # 4. Utwórz i zapisz dane JSON
+            self.export_to_file.create_json_file(json_file_path)
+            self.update_file_list_panel()
+            self.update_annotations_on_image()
+            normalized_path = os.path.normpath(folder_path).replace("\\", "/")
+            self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {normalized_path}")
+        else:
+            self.view.show_message_OK("Błąd", "Brak danych do eksportu")
 
 
     def export_to_yolo_fun(self):
@@ -548,18 +554,19 @@ class Presenter:
         self.polygon_presenter.cancel_drawing_polygon()
         self.local_auto_segm_presenter.cancel_auto_segmentation()
 
-        save_path= self.export_to_yolo.select_save_location()
-        if not save_path:
-            # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
-            return
+        if self.new_project.list_of_images_model:
+            save_path= self.export_to_yolo.select_save_location()
+            if not save_path:
+                # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
+                return
 
-        self.export_to_yolo.create_folder_structure(save_path)
-        self.export_to_yolo.export_images(save_path)
-        self.export_to_yolo.create_yaml_file(save_path)
-
-        self.update_file_list_panel()
-        self.update_annotations_on_image()
-        self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {save_path}")
+            self.export_to_yolo.create_folder_structure(save_path)
+            self.export_to_yolo.export_images(save_path)
+            self.update_file_list_panel()
+            self.update_annotations_on_image()
+            self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {save_path}")
+        else:
+            self.view.show_message_OK("Błąd", "Brak danych do eksportu")
 
     #Generowanie klas dla zaznaczonego obrazka
     def generate_classes(self):
