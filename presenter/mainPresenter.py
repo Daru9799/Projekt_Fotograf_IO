@@ -476,7 +476,7 @@ class Presenter:
     #Stąd przekazanie importów/eksportów do podprezenterów
     def save_as_project_fun(self):
         # Wyłączenie wszystkich narzędzi do adnotacji:
-        if self.new_project.list_of_images_model or self.new_project.list_of_classes_model:
+        if self.new_project.list_of_images_model:
             self.drawing_tool = None
             self.view.set_no_active_tool_text()
             self.rectangle_presenter.cancel_drawing_rectangle() #crashuje
@@ -502,10 +502,10 @@ class Presenter:
             except Exception as e:
                 self.view.show_message_OK("Błąd", f"Wystąpił problem podczas eksportu: {str(e)}")
         else:
-            self.view.show_message_OK("Błąd", "Brak danych do eksportu")
+            self.view.show_message_OK("Błąd", "Brak danych do zapisu")
 
     def save_project_fun(self):
-        if self.new_project.list_of_images_model and self.new_project.list_of_classes_model:
+        if self.new_project.list_of_images_model:
             # Zapisz zmiany w istniejącej lokalizacji lub otwórz okno wyboru, jeśli brak lokalizacji
             try:
                 if self.export_project.save_project():
@@ -519,8 +519,7 @@ class Presenter:
             except Exception as e:
                 self.view.show_message_OK("Błąd", f"Wystąpił problem podczas zapisu: {str(e)}")
         else:
-            self.view.show_message_OK("Błąd", "Brak danych do eksportu")
-
+            self.view.show_message_OK("Błąd", "Brak danych do zapisu")
 
     def export_to_coco_fun(self):
         # Wyłączenie wszystkich narzędzi do adnotacji:
@@ -530,11 +529,18 @@ class Presenter:
         self.polygon_presenter.cancel_drawing_polygon()
         self.local_auto_segm_presenter.cancel_auto_segmentation()
 
+        # Sprawdzenie, czy istnieją adnotacje w projekcie
+        annotations_exist = any(
+            img.list_of_annotations for img in self.new_project.list_of_images_model
+        )
+        if not annotations_exist:
+            self.view.show_message_OK("Błąd", "Brak adnotacji do eksportu.")
+            return
+
         if self.new_project.list_of_images_model:
             # 1. Wybierz lokalizację zapisu
             save_path = self.export_to_file.select_save_location()
             if not save_path:
-                # self.view.show_message_OK("Błąd", "Nie wybrano lokalizacji zapisu.")
                 return
 
             # 2. Utwórz strukturę folderów i pobierz ścieżkę do pliku JSON
@@ -542,7 +548,6 @@ class Presenter:
 
             # 3. Eksportuj obrazy
             folder_path = os.path.dirname(json_file_path)
-
             self.export_to_file.export_images(folder_path)
 
             # 4. Utwórz i zapisz dane JSON
@@ -552,8 +557,7 @@ class Presenter:
             normalized_path = os.path.normpath(folder_path).replace("\\", "/")
             self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {normalized_path}")
         else:
-            self.view.show_message_OK("Błąd", "Brak danych do eksportu")
-
+            self.view.show_message_OK("Błąd", "Brak danych do eksportu.")
 
     def export_to_yolo_fun(self):
         # Wyłączenie wszystkich narzędzi do adnotacji:
@@ -563,6 +567,13 @@ class Presenter:
         self.polygon_presenter.cancel_drawing_polygon()
         self.local_auto_segm_presenter.cancel_auto_segmentation()
 
+        annotations_exist = any(
+            img.list_of_annotations for img in self.new_project.list_of_images_model
+        )
+        if not annotations_exist:
+            self.view.show_message_OK("Błąd", "Brak adnotacji do eksportu.")
+            return
+
         if self.new_project.list_of_images_model:
             save_path= self.export_to_yolo.select_save_location()
             if not save_path:
@@ -571,6 +582,7 @@ class Presenter:
 
             self.export_to_yolo.create_folder_structure(save_path)
             self.export_to_yolo.export_images(save_path)
+            self.export_to_yolo.create_yaml_file(save_path)
             self.update_file_list_panel()
             self.update_annotations_on_image()
             self.view.show_message_OK("Sukces", f"Projekt został wyeksportowany do {save_path}")
