@@ -387,6 +387,8 @@ class Presenter:
         self.new_project.list_of_images_model = img_list
         self.new_project.list_of_classes_model = class_list
         #Aktualizacja widoku
+        self.view.statistics_menu.setEnabled(True)
+        self.view.toggle_all_buttons(True)
         self.new_project.folder_path = os.path.join(json_folder, "images")
         self.classManagerPresenter.updateItems() #aktualizuje panel z listą klas
         self.update_file_list_panel()
@@ -422,6 +424,8 @@ class Presenter:
         self.new_project.list_of_images_model = img_list
         self.new_project.list_of_classes_model = class_list
         # Aktualizacja widoku
+        self.view.statistics_menu.setEnabled(True)
+        self.view.toggle_all_buttons(True)
         self.new_project.folder_path = os.path.join(yaml_folder, "train\images")
         self.classManagerPresenter.updateItems()  # aktualizuje panel z listą klas
         self.update_file_list_panel()
@@ -456,6 +460,8 @@ class Presenter:
         self.new_project.list_of_images_model = img_list
         self.new_project.list_of_classes_model = class_list
         # Aktualizacja widoku
+        self.view.statistics_menu.setEnabled(True)
+        self.view.toggle_all_buttons(True)
         self.new_project.folder_path = image_folder #Przypisanie sciezki
         self.classManagerPresenter.updateItems()  # aktualizuje panel z listą klas
         self.update_file_list_panel()
