@@ -365,8 +365,9 @@ class Presenter:
         # Wyłączenie wszystkich narzędzi do adnotacji:
         self.drawing_tool = None
         self.view.set_no_active_tool_text()
-        self.rectangle_presenter.cancel_drawing_rectangle()
-        self.polygon_presenter.cancel_drawing_polygon()
+        if self.new_project.folder_path:
+            self.rectangle_presenter.cancel_drawing_rectangle()
+            self.polygon_presenter.cancel_drawing_polygon()
         self.local_auto_segm_presenter.cancel_auto_segmentation()
 
         if self.new_project.list_of_images_model:
@@ -397,8 +398,9 @@ class Presenter:
     def import_from_yolo(self):
         self.drawing_tool = None
         self.view.set_no_active_tool_text()
-        self.rectangle_presenter.cancel_drawing_rectangle()
-        self.polygon_presenter.cancel_drawing_polygon()
+        if self.new_project.folder_path:
+            self.rectangle_presenter.cancel_drawing_rectangle()
+            self.polygon_presenter.cancel_drawing_polygon()
         self.local_auto_segm_presenter.cancel_auto_segmentation()
 
         if self.new_project.list_of_images_model:
@@ -433,8 +435,9 @@ class Presenter:
         self.export_project.unlock_file()
         self.drawing_tool = None
         self.view.set_no_active_tool_text()
-        self.rectangle_presenter.cancel_drawing_rectangle()
-        self.polygon_presenter.cancel_drawing_polygon()
+        if self.new_project.folder_path:
+            self.rectangle_presenter.cancel_drawing_rectangle()
+            self.polygon_presenter.cancel_drawing_polygon()
         self.local_auto_segm_presenter.cancel_auto_segmentation()
 
         if self.new_project.list_of_images_model:
