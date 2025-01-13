@@ -67,6 +67,15 @@ class ImportFromFile:
             #Import obrazków (wraz z adnotacjami)
             self.load_images_from_json()
 
+            #Sprawdzenie, czy listy nie są puste
+            if not self.images_list:
+                self.view.show_message_OK("Błąd", "Lista obrazków jest pusta!")
+                return None, None, None
+
+            if not self.classes_list:
+                self.view.show_message_OK("Błąd", "Lista klas jest pusta!")
+                return None, None, None
+
             return self.images_list, self.classes_list, self.json_folder
 
         except Exception as e:
@@ -155,6 +164,16 @@ class ImportFromFile:
             self.load_classes_from_project_file()
             # Import obrazków (wraz z adnotacjami)
             self.load_images_from_project_file()
+
+            #Sprawdzenie, czy listy nie są puste
+            if not self.images_list:
+                self.view.show_message_OK("Błąd", "Lista obrazków jest pusta!")
+                return None, None, None
+
+            if not self.classes_list:
+                self.view.show_message_OK("Błąd", "Lista klas jest pusta!")
+                return None, None, None
+
             return self.images_list, self.classes_list, self.project_images_folder
 
         except Exception as e:
@@ -224,6 +243,15 @@ class ImportFromFile:
             self.load_classes_from_yaml()
             #Import obrazków (wraz z adnotacjami)
             self.load_images_from_yolo()
+
+            # Sprawdzenie, czy listy nie są puste
+            if not self.images_list:
+                self.view.show_message_OK("Błąd", "Lista obrazków jest pusta!")
+                return None, None, None
+
+            if not self.classes_list:
+                self.view.show_message_OK("Błąd", "Lista klas jest pusta!")
+                return None, None, None
 
             return self.images_list, self.classes_list, self.yaml_folder
 
