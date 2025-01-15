@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import (QHeaderView, QDesktopWidget, QColorDialog, QTableWi
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QIcon
 import random
+import threading
+from PyQt5.QtCore import QTimer
 
 class ClassGeneratorWindowView(QDialog):
     def __init__(self, presenter):
@@ -30,9 +32,11 @@ class ClassGeneratorWindowView(QDialog):
         #Strony okienka
         self.page1 = self.create_page1()
         self.page2 = self.create_page2()
+        self.loading_page = self.create_loading_page()
 
         self.stacked_widget.addWidget(self.page1)
         self.stacked_widget.addWidget(self.page2)
+        self.stacked_widget.addWidget(self.loading_page)
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.stacked_widget)
@@ -169,16 +173,54 @@ class ClassGeneratorWindowView(QDialog):
         page.setLayout(layout)
         return page
 
+    def create_loading_page(self):
+        page = QWidget()
+        layout = QVBoxLayout()
+        self.loading_label = QLabel("Pobieranie danych z chmury")
+        self.loading_label.setAlignment(Qt.AlignCenter)
+        font = QFont()
+        font.setPointSize(12)
+        self.loading_label.setFont(font)
+        layout.addWidget(self.loading_label)
+        self.dots = 0
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_loading_text)
+        self.timer.start(500)  # Co 500 ms (połówka sekundy)
+        page.setLayout(layout)
+        return page
+    #Aktualizacja kropke w tekście
+    def update_loading_text(self):
+        if self.dots < 3:
+            self.dots += 1
+        else:
+            self.dots = 0
+        self.loading_label.setText(f"Pobieranie danych z chmury{'.' * self.dots}")
+
     #Przełączanie między stronami
     def switch_to_page2(self):
+        self.stacked_widget.setCurrentWidget(self.loading_page)
+        self.load_data_in_background()
+
+    #Pobranie danych wejściowych i obsługa ładowania
+    def load_data_in_background(self):
         ac = self.get_accuracy()
         lan = self.get_selected_language()
-        self.stacked_widget.setCurrentIndex(1)
-        #Przeslanie do prezentera
+        thread = threading.Thread(target=self.run_data_loading, args=(lan, ac))
+        thread.start()
+
+    #Przekazanie danych prezenterowi do przetwarzania
+    def run_data_loading(self, lan, ac):
         self.presenter.handle_create_tags_click(lan, ac)
-        #Zmiana okna
+        self.update_ui_after_loading()
+
+    #Aktualizacja interfejsu użytkownika w głównym wątku
+    def update_ui_after_loading(self):
+        QTimer.singleShot(0, self._update_ui)
+
+    #Przełączenie na stronę wyników i odświeżenie tabeli
+    def _update_ui(self):
+        self.stacked_widget.setCurrentWidget(self.page2)
         self.setFixedSize(600, 400)
-        #Refresh tabeli
         table = self.page2.findChild(QTableWidget)
         self.refresh_table(table)
 
@@ -249,7 +291,7 @@ class ClassGeneratorWindowView(QDialog):
 
             # Kolumna 4: Checkbox
             checkbox = QCheckBox()
-            checkbox.setChecked(True)
+            checkbox.setChecked(False)
             table.setCellWidget(row, 3, checkbox)
 
     #Losowanie koloru
