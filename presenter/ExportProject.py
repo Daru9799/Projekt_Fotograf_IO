@@ -37,8 +37,7 @@ class ExportProject:
                 image_annotations = []
 
                 for an in getattr(img, 'list_of_annotations', []):
-                    segmentation_flat = [coord for point in an.segmentation for coord in point]
-
+                    segmentation_flat = [int(coord) for point in an.segmentation for coord in point]
                     annotation = {
                         "id": an.annotation_id,
                         "category_id": an.class_id,
@@ -69,7 +68,6 @@ class ExportProject:
         image_path = ""
         if self.project.list_of_images_model:
             image_path = os.path.dirname(self.project.get_full_path_by_filename(self.project.list_of_images_model[0].filename))
-        print("ok")
 
         data = {
             "images": images,

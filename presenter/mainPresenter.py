@@ -479,7 +479,7 @@ class Presenter:
         if self.new_project.list_of_images_model:
             self.drawing_tool = None
             self.view.set_no_active_tool_text()
-            self.rectangle_presenter.cancel_drawing_rectangle() #crashuje
+            self.rectangle_presenter.cancel_drawing_rectangle()
             self.polygon_presenter.cancel_drawing_polygon()
             self.local_auto_segm_presenter.cancel_auto_segmentation()
 
@@ -506,6 +506,11 @@ class Presenter:
 
     def save_project_fun(self):
         if self.new_project.list_of_images_model:
+            self.drawing_tool = None
+            self.view.set_no_active_tool_text()
+            self.rectangle_presenter.cancel_drawing_rectangle()
+            self.polygon_presenter.cancel_drawing_polygon()
+            self.local_auto_segm_presenter.cancel_auto_segmentation()
             # Zapisz zmiany w istniejącej lokalizacji lub otwórz okno wyboru, jeśli brak lokalizacji
             try:
                 if self.export_project.save_project():
