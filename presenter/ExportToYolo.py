@@ -109,7 +109,7 @@ class ExportToYolo:
                     for an in img.list_of_annotations:
                         if hasattr(an, 'segmentation') and an.segmentation:  # Sprawdzanie, czy adnotacja ma segmentację
                             # YOLO format: class_id x1 y1 x2 y2 ... (dla segmentacji)
-                            segmentation_flat = [coord for point in an.segmentation for coord in point]
+                            segmentation_flat = [int(coord) for point in an.segmentation for coord in point]
                             normalized_segmentation = [
                                 coord / img.width if i % 2 == 0 else coord / img.height
                                 for i, coord in enumerate(segmentation_flat)

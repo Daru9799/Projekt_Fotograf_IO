@@ -76,7 +76,7 @@ class ExportToCoco:
 
             for an in img.list_of_annotations:
                 # Obliczanie bounding box (bbox) i pola (area)
-                segmentation_flat = [coord for point in an.segmentation for coord in point]  # Spłaszczenie punktów
+                segmentation_flat = [int(coord) for point in an.segmentation for coord in point]  # Spłaszczenie punktów
                 x_coords = segmentation_flat[::2]  # Współrzędne X
                 y_coords = segmentation_flat[1::2]  # Współrzędne Y
 
