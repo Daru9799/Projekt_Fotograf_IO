@@ -1,7 +1,7 @@
 import os
 
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 #Modele
 from model.ProjectModel import ProjectModel
@@ -604,11 +604,16 @@ class Presenter:
         self.class_generator_window = ClassGeneratorWindowView(self)
         self.class_generator_window.exec_()
 
+    #Odpalanie faktycznego generowania klas po wybraniu języka i min pewności
     def handle_create_tags_click(self, language, min_accuracy):
-        # Tutaj trzeba ustawic w class generator presenterze zmienną obrazka na aktualnei zaznaczony (jego ścieżke)
         selected_img_name = self.view.get_selected_image()
         self.class_generator_presenter.img_path = os.path.join(self.new_project.folder_path, selected_img_name)
         tag_dict = self.class_generator_presenter.generate_tags(language, min_accuracy)
+        #Brak połączenia z internetem
+        if tag_dict is None:
+            QMessageBox.critical(self.class_generator_window, "Błąd","Wystąpił problem z połączeniem internetowym.")
+            self.class_generator_window.reject()
+            return
         self.class_generator_window.tags = tag_dict
 
     def create_classes_from_tags(self, selected_items):

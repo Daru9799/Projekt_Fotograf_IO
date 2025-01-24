@@ -28,6 +28,7 @@ class ClassGeneratorWindowView(QDialog):
         self.accuracy_slider = None
         self.accuracy_value_label = None
         self.tags = [{"name": "Tag1", "certainty": 90}]
+        self.loading_label = QLabel("Pobieranie danych z chmury")
 
         #Strony okienka
         self.page1 = self.create_page1()
@@ -176,7 +177,6 @@ class ClassGeneratorWindowView(QDialog):
     def create_loading_page(self):
         page = QWidget()
         layout = QVBoxLayout()
-        self.loading_label = QLabel("Pobieranie danych z chmury")
         self.loading_label.setAlignment(Qt.AlignCenter)
         font = QFont()
         font.setPointSize(12)

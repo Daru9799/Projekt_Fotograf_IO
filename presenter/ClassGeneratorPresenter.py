@@ -5,10 +5,8 @@ from azure.core.credentials import AzureKeyCredential
 from azure.core.exceptions import AzureError
 from dotenv import load_dotenv
 import asyncio
-import requests
 import uuid
-import json
-
+import requests
 
 class ClassGeneratorPresenter:
     def __init__(self, view):
@@ -18,9 +16,10 @@ class ClassGeneratorPresenter:
         self.azure_translate_key = None
         self.azure_translate_endpoint = None
         self.vision_client = None
-        self.img_path = None #Ścieżka do pliku do którego będa generowane tagi
-        self.list_of_tags = [] #zmienna przechowujaca liste obiektów tagów
+        self.img_path = None #Ścieżka do obrazka dla którego będa generowane tagi
+        self.list_of_tags = [] #Zmienna przechowujaca liste obiektów tagów
 
+    #Metoda która pobiera klucze z pliku .env
     def load_key_and_endpoint(self):
         load_dotenv(dotenv_path="config.env")
         #Pobranie klucza i endpointu z pliku .env
@@ -34,6 +33,7 @@ class ClassGeneratorPresenter:
         print(f"Klucz Translate: {self.azure_translate_key}")
         print(f"Endpoint Translate: {self.azure_translate_endpoint}")
 
+    #Metoda która tworzy klienta serwisu Vision na podstawie endpointa i klucza
     def create_client(self):
         if self.azure_cv_key is not None and self.azure_cv_endpoint is not None:
             try:
@@ -41,12 +41,9 @@ class ClassGeneratorPresenter:
             except AzureError as e:
                 print(f"AzureError: {e}")
             except Exception as e:
-                print(f"Wystąpił problem: {e}")
-        if self.azure_translate_key is not None and self.azure_translate_endpoint is not None:
-            #DODAC OBSLUGE BLEDOW
-            pass
+                print(f"Error: {e}")
 
-    #Funkcja asynchroniczna do zwracania rezultatu z tagami (synchroniczna nie działała poprawnie)
+    #Metoda asynchroniczna do zwracania rezultatu z tagami
     async def async_get_tags(self):
         with open(self.img_path, "rb") as f:
             image_data = f.read()
@@ -58,20 +55,19 @@ class ClassGeneratorPresenter:
             except Exception as e:
                 print(f"Error: {e}")
                 return None
+            #Kończenie działania klienta
             finally:
                 await self.vision_client.close()
-                print("Kończenie działania")
             return result
 
-    #Funkcja odpalana bezpośrednio z mainPresentera dostarczająca mu wygenerowane tagi
+    #Metoda odpalana bezpośrednio z mainPresentera dostarczająca mu wygenerowane tagi
+    #Jako argument przyjmuje język i minimalną wartość pewności
     def generate_tags(self, language, min_accuracy):
+        if not self.check_internet_connection():
+            return None
         if self.img_path is not None:
             min_accuracy_decimal = min_accuracy / 100.0
             self.list_of_tags = []
-            print(language)
-            print(min_accuracy_decimal)
-            print(self.img_path)
-
             result = asyncio.run(self.async_get_tags())
             if result is not None:
                 print("Tags:")
@@ -81,8 +77,9 @@ class ClassGeneratorPresenter:
                             confidence_percentage = round(tag.confidence * 100)
                             tag_dict = {"name": tag.name, "certainty": confidence_percentage}
                             self.list_of_tags.append(tag_dict)
-
+                    #Zamiana nazwy języka na odpowiadający mu kod
                     language_code = self.get_language_code(language)
+                    #Tłumaczenie odbywa się tylko gdy wybrany język nie jest angielskim
                     if language_code != "en":
                         self.list_of_tags = self.translate_tags(self.list_of_tags, language_code)
                     return self.list_of_tags
@@ -100,6 +97,20 @@ class ClassGeneratorPresenter:
         return language_map.get(language_name, "en")
 
     #Tłumaczenie tagów
+    def translate_tags(self, tags, target_language):
+        translated_tags = []
+        for tag in tags:
+            tag_name = tag['name']
+            print(tag_name)
+            translated_name = self.translate_text(tag_name, target_language)
+            print(translated_name)
+            translated_tags.append({
+                'name': translated_name,
+                'certainty': tag['certainty']
+            })
+        return translated_tags
+
+    #Łączenie się z serwisem translatora
     def translate_text(self, text, target_language):
         constructed_url = f"{self.azure_translate_endpoint}/translate?api-version=3.0&to={target_language}"
         headers = {
@@ -123,15 +134,12 @@ class ClassGeneratorPresenter:
             print(f"Error parsing response JSON: Missing key {e}")
             return None
 
-    def translate_tags(self, tags, target_language):
-        translated_tags = []
-        for tag in tags:
-            tag_name = tag['name']
-            print(tag_name)
-            translated_name = self.translate_text(tag_name, target_language)
-            print(translated_name)
-            translated_tags.append({
-                'name': translated_name,
-                'certainty': tag['certainty']
-            })
-        return translated_tags
+    #Sprawdzanie połączenia z internetem
+    def check_internet_connection(self):
+        try:
+            response = requests.get("https://www.google.com", timeout=5)
+            return response.status_code == 200
+        except requests.ConnectionError:
+            return False
+        except requests.Timeout:
+            return False
